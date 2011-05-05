@@ -1,0 +1,16 @@
+<package>
+  <description brief="detectors for objects using the sonar data">
+
+  </description>
+  <author>Sascha Arnold/sirius@tzi.de</author>
+  <license></license>
+  <url></url>
+  <logo></logo>
+
+  <depend package="base/types" />
+
+  <versioncontrol type="git" url="" />
+  <export>
+    <cpp cflags="" lflags="" />
+  </export>
+</package>
