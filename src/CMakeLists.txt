@@ -1,6 +1,17 @@
-rock_library(dummyproject
-    SOURCES dummy.cpp)
+set(SOURCES 
+        SonarBeamProcessing.cpp
+)
 
-rock_executable(dummyproject_bin main.cpp
-    DEPS dummyproject)
+set(HEADERS
+        SonarBeamProcessing.hpp
+)
+
+rock_library(sonar_detectors
+    SOURCES ${SOURCES}
+    HEADERS ${HEADERS}
+    DEPS_PKGCONFIG opencv base-types avalontools
+    )
+
+#rock_executable(dummyproject_bin main.cpp
+#    DEPS dummyproject)
 
