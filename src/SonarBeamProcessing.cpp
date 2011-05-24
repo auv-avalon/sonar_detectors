@@ -9,17 +9,9 @@ SonarBeamProcessing::SonarBeamProcessing(BeamMode beamMode, PersistMode displayM
     minThreshold = 0;
     maxThreshold = 100;
     enableThreshold = false;
-    estimateWalls = false;
-    newOrientationOrPosition = false;
     minResponseValue = 0;
     position.setZero();
     orientation = Eigen::Quaterniond::Identity();
-    
-    // create initial segment
-    scanSegment segment;
-    segments.push_back(segment);
-    
-    inputCount = 0;
 }
 
 SonarBeamProcessing::~SonarBeamProcessing()
@@ -37,21 +29,14 @@ void SonarBeamProcessing::selectPersistMode(PersistMode mode)
     persistMode = mode;
 }
 
-const std::vector<scanSegment>* SonarBeamProcessing::getPoints() const
-{
-    return &segments;
-}
-
 void SonarBeamProcessing::updateOrientation(base::Orientation& orientation)
 {
     this->orientation = orientation;
-    newOrientationOrPosition = true;
 }
 
 void SonarBeamProcessing::updatePosition(base::Position& position)
 {
     this->position = position;
-    newOrientationOrPosition = true;
 }
 
 void SonarBeamProcessing::enableBeamThreshold(bool b)
@@ -72,17 +57,37 @@ void SonarBeamProcessing::setBeamThreshold(double minThreshold, double maxThresh
     }
 }
 
-void SonarBeamProcessing::enableWallEstimation(bool b)
+void SonarBeamProcessing::setMinResponseValue(int minValue)
 {
-    this->estimateWalls = b;
+    if (minValue < 0)
+        this->minResponseValue = 0;
+    else if (minValue > 255)
+        this->minResponseValue = 255;
+    else
+        this->minResponseValue = minValue;
 }
 
-void SonarBeamProcessing::setMinResponseValue(unsigned int minValue)
+void SonarBeamProcessing::addSonarEstimation(SonarEstimation* estimation)
 {
-    this->minResponseValue = minValue;
+    estimation->setPose(&orientation, &position);
+    estimator est;
+    est.estimation = estimation;
+    est.settings = estimation->getSettings();
+    estimators.push_back(est);
 }
 
-void SonarBeamProcessing::persistPoints(const std::vector<obstaclePoint>& obstaclePoints, double& angle, scanSegment& segment)
+void SonarBeamProcessing::removeSonarEstimation(SonarEstimation* estimation)
+{
+    for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
+    {
+        if (it->estimation == estimation)
+        {
+            estimators.erase(it);
+        }
+    }
+}
+
+void SonarBeamProcessing::persistPoints(const std::vector<obstaclePoint>& obstaclePoints, const double& angle, scanSegment& segment)
 {
     std::list<obstaclePoint>& sortedPoints = segment.pointCloud;
     std::list<obstaclePoint>::iterator& listIterator = segment.latestBeam;
@@ -174,16 +179,16 @@ void SonarBeamProcessing::persistPoints(const std::vector<obstaclePoint>& obstac
     }
 }
 
-std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, const unsigned& minIndex, const unsigned& maxIndex, const unsigned& minValue)
+std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, const int& minIndex, const int& maxIndex, const int& minValue)
 {
     std::vector<int> indexList;
-    base::samples::SonarScan::uint8_t data = minValue;
-    int index = minIndex - 1;
+    base::samples::SonarScan::uint8_t data = (uint8_t)minValue;
+    int index = -1;
     int nextIndex = 0;
     switch (beamMode)
     {
         case globalMaximum:
-            for(unsigned i = minIndex; i < maxIndex && i < scan.size(); i++)
+            for(int i = minIndex; i < maxIndex && i < scan.size(); i++)
             {
                 if(scan[i] > data)
                 {
@@ -191,13 +196,15 @@ std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<ba
                     index = i;
                 }
             }
-            indexList.push_back(index);
+            if (index >= 0)
+                indexList.push_back(index);
             break;
         case firstLokalMaximum:
-            index = getNextMaximum(index + 1, maxIndex, minValue, scan);
+            index = getNextMaximum(minIndex, maxIndex, minValue, scan);
             indexList.push_back(index);
             break;
         case allLokalMaxima:
+            index = minIndex - 1;
             do 
             {
                 nextIndex = index + 1;
@@ -207,9 +214,9 @@ std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<ba
             while(nextIndex != index);
             break;
         case allEntries:
-            for(unsigned i = minIndex; i < maxIndex && i < scan.size(); i++)
+            for(int i = minIndex; i < maxIndex && i < scan.size(); i++)
             {
-                if(scan[i] > 0)
+                if(scan[i] > minValue)
                 {
                     indexList.push_back(i);
                 }
@@ -220,7 +227,7 @@ std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<ba
 }
 
 //NOTE: maximas actually have to be greater in each following step
-int SonarBeamProcessing::getNextMaximum(int startIndex, int endIndex, unsigned minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan) 
+int SonarBeamProcessing::getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan) 
 {
     base::samples::SonarScan::uint8_t data = scan[startIndex] < minValue ? minValue : scan[startIndex];
     int index = startIndex;
@@ -243,8 +250,8 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     double time_beetween_bins = sonarScan.time_beetween_bins;
     std::vector<base::samples::SonarScan::uint8_t> scan = sonarScan.scanData;
     
-    double distance = (index * time_beetween_bins * sonicVelocityInWater) / 2;
-    std::cout << "Time: " << scanTime << ", Angle: " << scanAngle << ", Distance: " << distance << ", Value: " << (uint)scan[index] << std::endl;
+    double distance = (index * time_beetween_bins * sonicVelocityInWater) / 2 / 10;
+    //std::cout << "Time: " << scanTime << ", Angle: " << scanAngle << ", Distance: " << distance << ", Value: " << (uint)scan[index] << std::endl;
         
     Eigen::Vector3d wallPoint(-distance,0,0);
     Eigen::Vector3d topPoint(0,0,1);
@@ -252,7 +259,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     wallPoint = orientation * wallPoint;
     topPoint = orientation * topPoint;
     
-    Eigen::AngleAxisd rotate(-scanAngle,topPoint);
+    Eigen::AngleAxisd rotate(scanAngle,topPoint);
     
     Eigen::Translation3d translate(position);
     wallPoint = translate * (rotate * wallPoint);
@@ -266,110 +273,24 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     return obstaclePoint;
 }
 
-void SonarBeamProcessing::computeWall(avalon::scanSegment& segment)
+bool SonarBeamProcessing::isSegmentDone(estimator& estimator)
 {
-    if (segment.pointCloud.size() > 2) 
+    std::list<obstaclePoint>::iterator endIt = estimator.segment.pointCloud.end();
+    endIt--;
+    switch (estimator.settings.segMode)
     {
-        segment.walls.clear();
-        if(segment.latestBeam != segment.pointCloud.end())
-        {
-            std::vector<cv::Point3f> cvPoints1;
-            for(std::list<avalon::obstaclePoint>::iterator it = segment.pointCloud.begin(); it != segment.latestBeam; it++)
+        case forEachBeam:
+            return true;
+        case forEachEdge:
+            if (estimator.segment.pointCloud.begin() == estimator.segment.latestBeam || 
+                endIt == estimator.segment.latestBeam)
             {
-                base::Position& pos = it->position;
-                cvPoints1.push_back(cv::Point3f(pos.x(), pos.y(), pos.z()));
+                return true;
             }
-            
-            if(cvPoints1.size() >= 10) 
-            {
-                cv::Vec6f line1;
-                cv::Mat mat1 = cv::Mat(cvPoints1);
-                cv::fitLine(mat1, line1, CV_DIST_L2, 0, 0.01, 0.01);
-                
-                std::pair<base::Position, base::Position> wall1(base::Position(line1[3], line1[4], line1[5]), base::Position(line1[0], line1[1], line1[2]));
-                segment.walls.push_back(wall1);
-            }
-            
-            cv::vector<cv::Point3f> cvPoints2;
-            for(std::list<avalon::obstaclePoint>::iterator it = segment.latestBeam; it != segment.pointCloud.end(); it++)
-            {
-                base::Position& pos = it->position;
-                cvPoints2.push_back(cv::Point3d(pos.x(), pos.y(), pos.z()));
-            }
-            
-            if(cvPoints2.size() >= 10)
-            {
-                cv::Vec6f line2;
-                cv::Mat mat2(cvPoints2);
-                cv::fitLine(mat2, line2, CV_DIST_L2, 0, 0.01, 0.01);
-                
-                std::pair<base::Position, base::Position> wall2(base::Position(line2[3], line2[4], line2[5]), base::Position(line2[0], line2[1], line2[2]));
-                segment.walls.push_back(wall2);
-            }
-        } 
-        else
-        {
-            std::vector<cv::Point3f> cvPoints;
-            for(std::list<avalon::obstaclePoint>::iterator it = segment.pointCloud.begin(); it != segment.pointCloud.end(); it++)
-            {
-                base::Position& pos = it->position;
-                cvPoints.push_back(cv::Point3f(pos.x(), pos.y(), pos.z()));
-            }
-            
-            if(cvPoints.size() >= 2) 
-            {
-                cv::Vec6f line;
-                cv::Mat mat = cv::Mat(cvPoints);
-                std::cout << "cv::Mat: " << mat.elemSize() << " " << mat.isContinuous() << std::endl;
-                cv::fitLine(mat, line, CV_DIST_L2, 0, 0.01, 0.01);
-                
-                std::pair<base::Position, base::Position> wall(base::Position(line[3], line[4], line[5]), base::Position(line[0], line[1], line[2]));
-                segment.walls.push_back(wall);
-            }
-        }
+        case noSegments:
+        default:
+            return false;
     }
-}
-
-void SonarBeamProcessing::computeVirtualPoint(scanSegment& segment)
-{
-    if (segment.walls.size() == 1)
-    {
-        std::pair<base::Vector3d, base::Vector3d> wall = segment.walls[0];
-        double lambda = position.x() * wall.second.x() + position.y() * wall.second.y() + position.z() * wall.second.z();
-        double x = wall.second.x() * wall.first.x() + wall.second.y() * wall.first.y() + wall.second.z() * wall.first.z();
-        double y = wall.second.x() * wall.second.x() + wall.second.y() * wall.second.y() + wall.second.z() * wall.second.z();
-        lambda -= x;
-        lambda /= y;
-        segment.virtualpoint = wall.first + (lambda * wall.second);
-    }
-    else
-    {
-        segment.virtualpoint = base::Vector3d(0,0,0);
-    }
-}
-
-base::Vector3d SonarBeamProcessing::getVirtualPoint() const
-{
-    //TODO: make this better
-    if (segments.size() > 0 && estimateWalls)
-    {
-        base::Vector3d vpos(segments.back().virtualpoint);
-        vpos -= position;
-        vpos = orientation.conjugate() * vpos;
-        return vpos;
-    }
-    else 
-        return base::Vector3d(0,0,0);
-}
-
-void SonarBeamProcessing::createNewSegment()
-{
-    scanSegment segment;
-    computeWall(segments.back());
-    segments.push_back(segment);
-    //if(maximumSegmentCount < segments.size()) {
-    //    segments.erase(segments.begin());
-    //}
 }
 
 void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarScan)
@@ -378,13 +299,25 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
     double scanAngle = sonarScan.angle;
     double time_beetween_bins = sonarScan.time_beetween_bins;
     
+    //check if angle is required
+    bool required = false;
+    for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
+    {
+        if (scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
+        {
+            required = true;
+        }
+    }
+    if (!required)
+        return;
+    
     std::vector<int> indexList;
     // analyze index
     if (enableThreshold && (time_beetween_bins * sonicVelocityInWater > 0))
     {
         //cut scan index
-        int minIndex = (minThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
-        int maxIndex = (maxThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
+        int minIndex = (minThreshold * 2 * 10) / (time_beetween_bins * sonicVelocityInWater);
+        int maxIndex = (maxThreshold * 2 * 10) / (time_beetween_bins * sonicVelocityInWater);
         indexList = computeSonarScanIndex(scan, minIndex, maxIndex, minResponseValue);
     }
     else
@@ -403,34 +336,23 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
             obstaclePoints.push_back(obstaclePoint);
         }
     }
-    persistPoints(obstaclePoints, scanAngle, segments.back());
     
-    // estimate walls
-    scanSegment& activSegment = segments.back();
-    if (estimateWalls)
+    //persist points and feed estimators
+    for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        std::list<obstaclePoint>::iterator endIt = activSegment.pointCloud.end();
-        endIt--;
+        if (scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
+        {
+            persistPoints(obstaclePoints, scanAngle, it->segment);
+            it->segment.dirty = true;
+        }
+        if (it->segment.dirty && isSegmentDone(*it))
+        {
+            it->estimation->updateSegment(it->segment);
+            it->segment.dirty = false;
+        }
         
-        if (activSegment.pointCloud.begin() == activSegment.latestBeam || 
-            endIt == activSegment.latestBeam)// || activSegment.latestBeam->angle < 3.14 && activSegment.latestBeam->angle >= 3.1)
-        {
-            computeWall(activSegment);
-            computeVirtualPoint(activSegment);
-        }
-        else if (newOrientationOrPosition && activSegment.walls.size())
-        {
-            computeVirtualPoint(activSegment);
-        }
     }
-    else
-    {
-        if (activSegment.walls.size() > 0)
-        {
-            activSegment.walls.clear();
-            activSegment.virtualpoint = base::Vector3d(0,0,0);
-        }
-    }
+    
 }
 
 }
