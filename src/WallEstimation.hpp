@@ -6,6 +6,13 @@
 
 namespace avalon
 {
+    /**
+     * This class trys to estimate a line on a given pointcloud.
+     * 
+     * estimationSettings should be:
+     * - angle range less than PI
+     * - SegmentMode: forEachEdge
+     */
     class WallEstimation : public SonarEstimation
     {
     public:
