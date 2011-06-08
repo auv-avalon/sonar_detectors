@@ -29,6 +29,7 @@ namespace avalon
         
     private:
         double distance(const base::Vector3d& vec1, const base::Vector3d& vec2) const;
+        void checkTimeout();
         
         avalon::obstaclePoint actualPoint;
         double actualDistance;

@@ -16,11 +16,7 @@ DistanceEstimation::~DistanceEstimation()
 
 void DistanceEstimation::updateSegment(const avalon::scanSegment& segment)
 {
-    // timeout
-    if ((base::Time::now().toMilliseconds() - actualPoint.time.toMilliseconds()) > timeout)
-    {
-        actualDistance = -1;
-    }
+    checkTimeout();
     
     if(!segment.pointCloud.empty() || segment.latestBeam != segment.pointCloud.end())
     {
@@ -52,15 +48,17 @@ double DistanceEstimation::distance(const base::Vector3d& vec1, const base::Vect
     return sqrt(pow(vec1.x()-vec2.x(), 2) + pow(vec1.y()-vec2.y(), 2) + pow(vec1.z()-vec2.z(), 2));
 }
 
-double DistanceEstimation::getActualDistance()
+void DistanceEstimation::checkTimeout()
 {
-    // timeout
     if ((base::Time::now().toMilliseconds() - actualPoint.time.toMilliseconds()) > timeout)
     {
         actualDistance = -1;
     }
-    std::cout << "actual estimation: \n" << actualPoint.position << std::endl;
-    std::cout << "actual distance: " << actualDistance << std::endl;
+}
+
+double DistanceEstimation::getActualDistance()
+{
+    checkTimeout();
     return actualDistance;
 }
 
