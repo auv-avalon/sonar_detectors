@@ -43,6 +43,7 @@ class SonarBeamProcessing
         double minThreshold;
         double maxThreshold;
         int minResponseValue;
+        int indexWindowSize;
         
         std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, const int& minIndex, const int& maxIndex, const int& minValue);
         int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan);
