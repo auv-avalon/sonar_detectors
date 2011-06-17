@@ -277,7 +277,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     wallPoint = orientation * wallPoint;
     topPoint = orientation * topPoint;
     
-    Eigen::AngleAxisd rotate(scanAngle,topPoint);
+    Eigen::AngleAxisd rotate(-scanAngle,topPoint);
     
     Eigen::Translation3d translate(position);
     wallPoint = translate * (rotate * wallPoint);
