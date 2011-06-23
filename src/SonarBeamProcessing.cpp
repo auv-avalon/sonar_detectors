@@ -268,7 +268,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     double time_beetween_bins = sonarScan.time_beetween_bins;
     std::vector<base::samples::SonarScan::uint8_t> scan = sonarScan.scanData;
     
-    double distance = ((double)index * time_beetween_bins * sonicVelocityInWater) / 2.0 / 10.0;
+    double distance = ((double)index * time_beetween_bins * sonicVelocityInWater) / 2.0;
     //std::cout << "Time: " << scanTime << ", Angle: " << scanAngle << ", Distance: " << distance << ", Value: " << (uint)scan[index] << std::endl;
         
     Eigen::Vector3d wallPoint(-distance,0,0);
@@ -334,8 +334,8 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
     if (enableThreshold && (time_beetween_bins * sonicVelocityInWater > 0))
     {
         //cut scan index
-        int minIndex = (minThreshold * 2 * 10) / (time_beetween_bins * sonicVelocityInWater);
-        int maxIndex = (maxThreshold * 2 * 10) / (time_beetween_bins * sonicVelocityInWater);
+        int minIndex = (minThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
+        int maxIndex = (maxThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
         indexList = computeSonarScanIndex(scan, minIndex, maxIndex, minResponseValue);
     }
     else
