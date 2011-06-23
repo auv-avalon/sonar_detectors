@@ -1,12 +1,14 @@
 #include "WallEstimation.hpp"
-#include <opencv/cv.h>
+#include "SonarDetectorMath.hpp"
 
 namespace avalon
 {
     
 WallEstimation::WallEstimation()
 {
-
+    min_count_pointcloud = 6;
+    ransac_threshold = 0.5;
+    ransac_fit_rate = 0.7;
 }
 
 WallEstimation::~WallEstimation()
@@ -16,89 +18,45 @@ WallEstimation::~WallEstimation()
 
 void WallEstimation::updateSegment(const avalon::scanSegment& segment)
 {
-    computeWall(segment.pointCloud, segment.latestBeam);
-}
-
-void WallEstimation::computeWall(const std::list<obstaclePoint>& pointCloud, std::list<obstaclePoint>::const_iterator latestBeam)
-{
-    if (pointCloud.size() > 2) 
+    // check if enough points available
+    if (segment.pointCloud.size() < min_count_pointcloud)
     {
         walls.clear();
-        if(latestBeam != pointCloud.end())
-        {
-            std::vector<cv::Point3f> cvPoints1;
-            for(std::list<avalon::obstaclePoint>::const_iterator it = pointCloud.begin(); it != latestBeam; it++)
-            {
-                const base::Position& pos = it->position;
-                cvPoints1.push_back(cv::Point3f(pos.x(), pos.y(), pos.z()));
-            }
-            
-            if(cvPoints1.size() >= 10) 
-            {
-                cv::Vec6f line1;
-                cv::Mat mat1 = cv::Mat(cvPoints1);
-                cv::fitLine(mat1, line1, CV_DIST_L2, 0, 0.01, 0.01);
-                
-                std::pair<base::Position, base::Position> wall1(base::Position(line1[3], line1[4], line1[5]), base::Position(line1[0], line1[1], line1[2]));
-                walls.push_back(wall1);
-            }
-            
-            cv::vector<cv::Point3f> cvPoints2;
-            for(std::list<avalon::obstaclePoint>::const_iterator it = latestBeam; it != pointCloud.end(); it++)
-            {
-                const base::Position& pos = it->position;
-                cvPoints2.push_back(cv::Point3d(pos.x(), pos.y(), pos.z()));
-            }
-            
-            if(cvPoints2.size() >= 10)
-            {
-                cv::Vec6f line2;
-                cv::Mat mat2(cvPoints2);
-                cv::fitLine(mat2, line2, CV_DIST_L2, 0, 0.01, 0.01);
-                
-                std::pair<base::Position, base::Position> wall2(base::Position(line2[3], line2[4], line2[5]), base::Position(line2[0], line2[1], line2[2]));
-                walls.push_back(wall2);
-            }
-        } 
-        else
-        {
-            std::vector<cv::Point3f> cvPoints;
-            for(std::list<avalon::obstaclePoint>::const_iterator it = pointCloud.begin(); it != pointCloud.end(); it++)
-            {
-                const base::Position& pos = it->position;
-                cvPoints.push_back(cv::Point3f(pos.x(), pos.y(), pos.z()));
-            }
-            
-            if(cvPoints.size() >= 2) 
-            {
-                cv::Vec6f line;
-                cv::Mat mat = cv::Mat(cvPoints);
-                std::cout << "cv::Mat: " << mat.elemSize() << " " << mat.isContinuous() << std::endl;
-                cv::fitLine(mat, line, CV_DIST_L2, 0, 0.01, 0.01);
-                
-                std::pair<base::Position, base::Position> wall(base::Position(line[3], line[4], line[5]), base::Position(line[0], line[1], line[2]));
-                walls.push_back(wall);
-            }
-        }
+        return;
     }
+    
+    std::vector<base::Vector3d> pointCloud;
+    for(std::list<obstaclePoint>::const_iterator it = segment.pointCloud.begin(); it != segment.pointCloud.end(); it++)
+    {
+        pointCloud.push_back(it->position);
+    }
+    
+    std::pair<base::Vector3d, base::Vector3d> line(base::Vector3d(0,0,0), base::Vector3d(0,0,0));
+    int iterations = pointCloud.size() * 3;
+    if (iterations > 200) iterations = 200;
+    double error = avalon::ransac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, line);
+    
+    walls.clear();
+    if (error < 1.0)
+        walls.push_back(line);
 }
 
 void WallEstimation::computeVirtualPoint()
 {
     if (walls.size() == 1)
     {
-        std::pair<base::Vector3d, base::Vector3d> wall = walls[0];
-        double lambda = position->x() * wall.second.x() + position->y() * wall.second.y() + position->z() * wall.second.z();
-        double x = wall.second.x() * wall.first.x() + wall.second.y() * wall.first.y() + wall.second.z() * wall.first.z();
-        double y = wall.second.x() * wall.second.x() + wall.second.y() * wall.second.y() + wall.second.z() * wall.second.z();
-        lambda -= x;
-        lambda /= y;
-        virtualpoint = wall.first + (lambda * wall.second);
+        virtualpoint = computIntersection(walls[0], *position);
     }
     else
     {
         virtualpoint = base::Vector3d(0,0,0);
     }
+}
+
+void WallEstimation::setRansacParameters(double threshold, double fit_rate)
+{
+    ransac_fit_rate = fit_rate;
+    ransac_threshold = threshold;
 }
 
 const std::vector< std::pair< base::Vector3d, base::Vector3d > > WallEstimation::getWalls() const
