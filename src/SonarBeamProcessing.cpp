@@ -12,7 +12,7 @@ SonarBeamProcessing::SonarBeamProcessing(BeamMode beamMode, PersistMode displayM
     minResponseValue = 0;
     position.setZero();
     orientation = Eigen::Quaterniond::Identity();
-    indexWindowSize = 5;
+    indexWindowSize = 3;
 }
 
 SonarBeamProcessing::~SonarBeamProcessing()
@@ -291,7 +291,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     return obstaclePoint;
 }
 
-bool SonarBeamProcessing::isSegmentDone(estimator& estimator)
+bool SonarBeamProcessing::isSegmentDone(estimator& estimator, const double& angle)
 {
     std::list<obstaclePoint>::iterator endIt = estimator.segment.pointCloud.end();
     endIt--;
@@ -300,15 +300,34 @@ bool SonarBeamProcessing::isSegmentDone(estimator& estimator)
         case forEachBeam:
             return true;
         case forEachEdge:
+            if (estimator.segment.risingAngle)
+            {
+                if (estimator.segment.lastAngle <= angle)
+                {
+                    estimator.segment.risingAngle = false;
+                    return true;
+                }
+            }
+            else
+            {
+                if (estimator.segment.lastAngle >= angle)
+                {
+                    estimator.segment.risingAngle = true;
+                    return true;
+                }
+            }
+            /*  obsolete
             if (estimator.segment.pointCloud.begin() == estimator.segment.latestBeam || 
                 endIt == estimator.segment.latestBeam)
             {
                 return true;
             }
+            */
         case noSegments:
         default:
             return false;
     }
+    return false;
 }
 
 void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarScan)
@@ -363,11 +382,12 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
             persistPoints(obstaclePoints, scanAngle, it->segment);
             it->segment.dirty = true;
         }
-        if (it->segment.dirty && isSegmentDone(*it))
+        if (it->segment.dirty && isSegmentDone(*it, scanAngle))
         {
             it->estimation->updateSegment(it->segment);
             it->segment.dirty = false;
         }
+        it->segment.lastAngle = scanAngle;
         
     }
     

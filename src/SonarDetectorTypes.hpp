@@ -48,8 +48,10 @@ struct scanSegment
     std::list<obstaclePoint> pointCloud;
     std::list<obstaclePoint>::iterator latestBeam;
     bool dirty;
+    double lastAngle;
+    bool risingAngle;
     scanSegment()
-    : dirty(false){}
+    : dirty(false), lastAngle(0), risingAngle(false){}
 };
 
 struct estimationSettings
