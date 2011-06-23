@@ -1,4 +1,5 @@
 #include "DistanceEstimation.hpp"
+#include "SonarDetectorMath.hpp"
 #include <math.h>
 
 namespace avalon
@@ -28,7 +29,7 @@ void DistanceEstimation::updateSegment(const avalon::scanSegment& segment)
         }
         else 
         {
-            double dist = distance(nextPosition, actualPoint.position);
+            double dist = computeDistance(nextPosition, actualPoint.position);
             if(dist > max_distance)
             {
                 // limit distance to the next point
@@ -39,13 +40,8 @@ void DistanceEstimation::updateSegment(const avalon::scanSegment& segment)
 
         actualPoint.angle = segment.latestBeam->angle;
         actualPoint.time = base::Time::now();
-        actualDistance = distance(*position, actualPoint.position);
+        actualDistance = computeDistance(*position, actualPoint.position);
     }
-}
-
-double DistanceEstimation::distance(const base::Vector3d& vec1, const base::Vector3d& vec2) const
-{
-    return sqrt(pow(vec1.x()-vec2.x(), 2) + pow(vec1.y()-vec2.y(), 2) + pow(vec1.z()-vec2.z(), 2));
 }
 
 void DistanceEstimation::checkTimeout()
