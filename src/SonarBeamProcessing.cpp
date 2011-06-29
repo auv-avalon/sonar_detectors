@@ -30,12 +30,12 @@ void SonarBeamProcessing::selectPersistMode(PersistMode mode)
     persistMode = mode;
 }
 
-void SonarBeamProcessing::updateOrientation(base::Orientation& orientation)
+void SonarBeamProcessing::updateOrientation(const base::Orientation& orientation)
 {
     this->orientation = orientation;
 }
 
-void SonarBeamProcessing::updatePosition(base::Position& position)
+void SonarBeamProcessing::updatePosition(const base::Position& position)
 {
     this->position = position;
 }

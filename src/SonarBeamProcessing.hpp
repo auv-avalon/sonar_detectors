@@ -25,8 +25,8 @@ class SonarBeamProcessing
         void addSonarEstimation(avalon::SonarEstimation* estimation);
         void removeSonarEstimation(avalon::SonarEstimation* estimation);
         void updateSonarData(const base::samples::SonarScan& sonarScan);
-        void updateOrientation(base::Orientation& orientation);
-        void updatePosition(base::Position& position);
+        void updateOrientation(const base::Orientation& orientation);
+        void updatePosition(const base::Position& position);
         void selectBeamMode(BeamMode mode);
         void selectPersistMode(PersistMode mode);
         void enableBeamThreshold(bool b);
