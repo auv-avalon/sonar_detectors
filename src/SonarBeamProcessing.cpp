@@ -390,7 +390,7 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
             it->segment.dirty = false;
         }
         // write segment out if its dirty and the segment is complete
-        if (it->segment.dirty && isSegmentDone(*it, scanAngle))
+        if (isSegmentDone(*it, scanAngle) && it->segment.dirty)
         {
             it->estimation->updateSegment(it->segment);
             it->segment.dirty = false;
