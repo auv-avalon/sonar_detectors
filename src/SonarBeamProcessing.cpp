@@ -396,7 +396,6 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
             it->segment.dirty = false;
         }
         it->segment.lastAngle = scanAngle;
-        
     }
     
 }

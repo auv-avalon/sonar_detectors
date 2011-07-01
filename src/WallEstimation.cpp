@@ -31,14 +31,19 @@ void WallEstimation::updateSegment(const avalon::scanSegment& segment)
         pointCloud.push_back(it->position);
     }
     
-    std::pair<base::Vector3d, base::Vector3d> line(base::Vector3d(0,0,0), base::Vector3d(0,0,0));
+    std::vector< std::pair<base::Vector3d, base::Vector3d> > new_walls;
     int iterations = pointCloud.size() * 3;
     if (iterations > 200) iterations = 200;
-    double error = avalon::ransac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, line);
+    double error = avalon::wallRansac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, new_walls);
     
-    walls.clear();
     if (error < 1.0)
-        walls.push_back(line);
+    {
+        walls = new_walls;
+    }
+    else
+    {
+        walls.clear();
+    }
 }
 
 void WallEstimation::computeVirtualPoint()
@@ -46,6 +51,12 @@ void WallEstimation::computeVirtualPoint()
     if (walls.size() == 1)
     {
         virtualpoint = computIntersection(walls[0], *position);
+    }
+    else if (walls.size() == 2)
+    {
+        base::Vector3d vp1 = computIntersection(walls[0], *position);
+        base::Vector3d vp2 = computIntersection(walls[1], *position);
+        virtualpoint = vp1 + 0.5 * (vp2 - vp1);
     }
     else
     {
