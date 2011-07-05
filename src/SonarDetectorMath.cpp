@@ -29,6 +29,7 @@ double wallRansac(const std::vector< base::Vector3d >& pointCloud, int iteration
         
         if (fitrate_wall1 > 0.0)
         {
+            /*
             // second wall
             std::vector< base::Vector3d > outlier_wall2;
             std::pair< base::Vector3d, base::Vector3d > model_wall2;
@@ -50,7 +51,7 @@ double wallRansac(const std::vector< base::Vector3d >& pointCloud, int iteration
                     }
                 }
             }
-
+            */
             // handle one wall
             if (fitrate_wall1 > fit_rate)
             {
