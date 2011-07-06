@@ -12,7 +12,7 @@ SonarBeamProcessing::SonarBeamProcessing(BeamMode beamMode, PersistMode displayM
     minResponseValue = 0;
     position.setZero();
     orientation = Eigen::Quaterniond::Identity();
-    indexWindowSize = 3;
+    indexWindowSize = 15;
 }
 
 SonarBeamProcessing::~SonarBeamProcessing()
@@ -180,43 +180,60 @@ void SonarBeamProcessing::persistPoints(const std::vector<obstaclePoint>& obstac
     }
 }
 
-std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, const int& minIndex, const int& maxIndex, const int& minValue)
+std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, int minIndex, int maxIndex, int minValue)
 {
     std::vector<int> indexList;
-    base::samples::SonarScan::uint8_t max_value = (uint8_t)minValue;
-    unsigned int max_window_value = 0;
     int index = -1;
     int nextIndex = 0;
+
     switch (beamMode)
     {
+        //sliding window approach 
         case globalMaximum:
-            for(int i = minIndex; i < maxIndex && i < scan.size(); i += indexWindowSize)
+        {
+            if(scan.size() < maxIndex)
+                maxIndex = scan.size();
+
+            unsigned int act_window_value = 0;
+            unsigned int best_window_value = 0;
+            unsigned int best_window_pos = minIndex;
+
+            //fill window
+            unsigned end_index = minIndex + indexWindowSize;
+            if(end_index > scan.size())
+                    end_index = scan.size();
+            for(int i = minIndex; i < end_index ; ++i)
+                act_window_value += scan[i];
+
+            //slide window 
+            for(int i = end_index; i < maxIndex; i++)
             {
-                unsigned int window_value = 0;
-                base::samples::SonarScan::uint8_t max_value_in_window = scan[i];
-                int index_max_value_in_window = i;
-                for(int j = i; j < i + indexWindowSize && j < maxIndex && j < scan.size(); j++)
+                if(act_window_value > best_window_value)
                 {
-                    window_value += (unsigned int)scan[j];
-                    if (scan[j] > max_value_in_window)
-                    {
-                        max_value_in_window = scan[j];
-                        index_max_value_in_window = j;
-                    }
+                    best_window_value = act_window_value;
+                    best_window_pos = i;
                 }
-                if (window_value > max_window_value)
+                act_window_value+= scan[i];
+                act_window_value-= scan[i-indexWindowSize];
+            }
+            unsigned int best_val = 0;
+            int best_index = -1;
+            end_index = best_window_pos + indexWindowSize;
+
+            //find maximum insight the best window
+            for(int i = best_window_pos; i < end_index; ++i)
+            {
+                if(scan[i]> best_val)
                 {
-                    max_window_value = window_value;
-                    if(scan[index_max_value_in_window] > (uint8_t)minValue)
-                    {
-                        max_value = scan[index_max_value_in_window];
-                        index = index_max_value_in_window;
-                    }
+                    best_val = scan[i];
+                    best_index = i;
                 }
             }
-            if (index >= 0)
-                indexList.push_back(index);
+
+            if (best_index >= 0)
+                indexList.push_back(best_index);
             break;
+        }
         case firstLokalMaximum:
             index = getNextMaximum(minIndex, maxIndex, minValue, scan);
             indexList.push_back(index);
@@ -268,7 +285,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     double time_beetween_bins = sonarScan.time_beetween_bins;
     std::vector<base::samples::SonarScan::uint8_t> scan = sonarScan.scanData;
     
-    double distance = ((double)index * time_beetween_bins * sonicVelocityInWater) / 2.0;
+    double distance = (((double)index) * time_beetween_bins * sonicVelocityInWater)*0.5;
     //std::cout << "Time: " << scanTime << ", Angle: " << scanAngle << ", Distance: " << distance << ", Value: " << (uint)scan[index] << std::endl;
         
     Eigen::Vector3d wallPoint(-distance,0,0);
