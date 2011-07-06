@@ -230,7 +230,7 @@ std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<ba
                 }
             }
 
-            if (best_index >= 0)
+            if (best_index >= 0 && scan[best_index] > minValue)
                 indexList.push_back(best_index);
             break;
         }
