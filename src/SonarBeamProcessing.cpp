@@ -357,7 +357,7 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
     bool required = false;
     for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        if (scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
+        if (it->settings.startAngle < 0 || it->settings.endAngle < 0 || scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
         {
             required = true;
         }
