@@ -12,7 +12,7 @@ SonarBeamProcessing::SonarBeamProcessing(BeamMode beamMode, PersistMode displayM
     minResponseValue = 0;
     position.setZero();
     orientation = Eigen::Quaterniond::Identity();
-    indexWindowSize = 15;
+    indexWindowSize = 25;
 }
 
 SonarBeamProcessing::~SonarBeamProcessing()
@@ -211,7 +211,7 @@ std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<ba
                 if(act_window_value > best_window_value)
                 {
                     best_window_value = act_window_value;
-                    best_window_pos = i;
+                    best_window_pos = i - indexWindowSize;
                 }
                 act_window_value+= scan[i];
                 act_window_value-= scan[i-indexWindowSize];
