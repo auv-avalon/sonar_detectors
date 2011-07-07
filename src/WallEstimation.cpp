@@ -22,6 +22,7 @@ void WallEstimation::updateSegment(const avalon::scanSegment& segment)
     if (segment.pointCloud.size() < min_count_pointcloud)
     {
         walls.clear();
+        this->pointCloud.clear();
         return;
     }
     
@@ -39,10 +40,12 @@ void WallEstimation::updateSegment(const avalon::scanSegment& segment)
     if (error < 1.0)
     {
         walls = new_walls;
+        this->pointCloud = pointCloud;
     }
     else
     {
         walls.clear();
+        this->pointCloud.clear();
     }
 }
 
@@ -96,5 +99,10 @@ const base::Vector3d WallEstimation::getRelativeVirtualPoint()
         return vpos;
     }
 }   
+
+std::vector<base::Vector3d> WallEstimation::getPointCloud()
+{
+    return pointCloud;
+}
    
 }

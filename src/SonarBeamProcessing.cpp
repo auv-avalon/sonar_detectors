@@ -394,8 +394,9 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
     //persist points and feed estimators
     for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        // persist points if we are in a valid scan angle
-        if (scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
+        // persist points if we are in a valid scan angle or valid scan angle is deactivated.
+        if (it->settings.startAngle < 0 || it->settings.endAngle < 0
+            || scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
         {
             persistPoints(obstaclePoints, scanAngle, it->segment);
             it->segment.dirty = true;

@@ -60,7 +60,7 @@ struct estimationSettings
     double endAngle;
     SegmentMode segMode;
     estimationSettings()
-    : startAngle(0), endAngle(0), segMode(noSegments){}
+    : startAngle(-1), endAngle(-1), segMode(noSegments){}
 };
     
 }

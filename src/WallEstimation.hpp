@@ -21,6 +21,7 @@ namespace avalon
         const std::vector< std::pair<base::Vector3d, base::Vector3d> > getWalls() const;
         const base::Vector3d getVirtualPoint();
         const base::Vector3d getRelativeVirtualPoint();
+        std::vector<base::Vector3d> getPointCloud();
         void setRansacParameters(double threshold, double fit_rate);
         virtual void updateSegment(const avalon::scanSegment& segment);
         
@@ -28,6 +29,7 @@ namespace avalon
         void computeVirtualPoint();
         
         std::vector< std::pair<base::Vector3d, base::Vector3d> > walls;
+        std::vector<base::Vector3d> pointCloud;
         base::Vector3d virtualpoint;
         int min_count_pointcloud;
         double ransac_threshold;
