@@ -193,6 +193,9 @@ std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<ba
         {
             if(scan.size() < maxIndex)
                 maxIndex = scan.size();
+            
+            while(scan[minIndex] > 5 && minIndex < maxIndex)
+                minIndex++;
 
             unsigned int act_window_value = 0;
             unsigned int best_window_value = 0;
@@ -283,7 +286,6 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     base::Time scanTime = sonarScan.time;
     double scanAngle = sonarScan.angle;
     double time_beetween_bins = sonarScan.time_beetween_bins;
-    std::vector<base::samples::SonarScan::uint8_t> scan = sonarScan.scanData;
     
     double distance = (((double)index) * time_beetween_bins * sonicVelocityInWater)*0.5;
     //std::cout << "Time: " << scanTime << ", Angle: " << scanAngle << ", Distance: " << distance << ", Value: " << (uint)scan[index] << std::endl;
@@ -302,7 +304,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     avalon::obstaclePoint obstaclePoint;
     obstaclePoint.position = wallPoint;
     obstaclePoint.time = scanTime;
-    obstaclePoint.value = scan[index];
+    obstaclePoint.value = sonarScan.scanData[index];
     obstaclePoint.angle = scanAngle;
     
     return obstaclePoint;
@@ -349,7 +351,6 @@ bool SonarBeamProcessing::isSegmentDone(estimator& estimator, const double& angl
 
 void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarScan)
 {
-    std::vector<base::samples::SonarScan::uint8_t> scan = sonarScan.scanData;
     double scanAngle = sonarScan.angle;
     double time_beetween_bins = sonarScan.time_beetween_bins;
     
@@ -372,11 +373,11 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
         //cut scan index
         int minIndex = (minThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
         int maxIndex = (maxThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
-        indexList = computeSonarScanIndex(scan, minIndex, maxIndex, minResponseValue);
+        indexList = computeSonarScanIndex(sonarScan.scanData, minIndex, maxIndex, minResponseValue);
     }
     else
     {
-        indexList = computeSonarScanIndex(scan, 0, scan.size(), minResponseValue); 
+        indexList = computeSonarScanIndex(sonarScan.scanData, 0, sonarScan.scanData.size(), minResponseValue); 
     }
     
     std::vector<obstaclePoint> obstaclePoints;
