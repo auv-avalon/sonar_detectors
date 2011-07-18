@@ -1,4 +1,5 @@
 #include "SonarBeamProcessing.hpp"
+#include <iostream>
 
 namespace avalon
 {
