@@ -17,8 +17,7 @@ set(HEADERS
 rock_library(sonar_detectors
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
-    DEPS_PKGCONFIG opencv base-types avalontools
-    DEPS_CMAKE Eigen2 #Qt4
+    DEPS_PKGCONFIG opencv base-types avalontools eigen3
     )
 
 #rock_executable(dummyproject_bin main.cpp
