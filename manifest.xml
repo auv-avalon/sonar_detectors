@@ -8,6 +8,7 @@
   <logo></logo>
 
   <depend package="base/types" />
+  <depend package="avalon/avalontools" />
 
   <versioncontrol type="git" url="" />
   <export>
