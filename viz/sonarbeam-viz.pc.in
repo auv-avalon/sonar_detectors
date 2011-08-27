@@ -3,10 +3,10 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: sonar_detectors-viz
+Name: sonarbeam-viz
 Description: vizKit plugin for the sonar_detectors library
 Requires: sonar_detectors @PKGCONFIG_DEPS@
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -lsonar_detectors-viz
+Libs: -L${libdir} -lsonarbeam-viz
 Cflags: -I${includedir}
 
