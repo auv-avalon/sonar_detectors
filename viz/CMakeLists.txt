@@ -3,3 +3,8 @@ rock_vizkit_plugin(sonarbeam-viz
     DEPS sonar_detectors
     HEADERS SonarBeamVisualization.hpp)
 
+# install osg file
+install(FILES
+    ../resources/avalon.osg
+    DESTINATION share/vizkit
+    )
