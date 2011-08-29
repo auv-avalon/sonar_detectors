@@ -123,6 +123,13 @@ double ransac(const std::vector< base::Vector3d >& pointCloud, int iterations, d
     return best_fit_rate;
 }
 
+/**
+ * Compute the nearest point on the line to the given point.
+ *
+ * @param line the line
+ * @param point reverence point
+ * @return the nearest tangential point
+ */
 base::Vector3d computIntersection(const std::pair< base::Vector3d, base::Vector3d >& line, const base::Vector3d& point)
 {
     double lambda = point.x() * line.second.x() + point.y() * line.second.y() + point.z() * line.second.z();
@@ -133,17 +140,38 @@ base::Vector3d computIntersection(const std::pair< base::Vector3d, base::Vector3
     return line.first + (lambda * line.second);
 }
 
+/**
+ * Compute the distance between two 3d points.
+ *
+ * @param vec1
+ * @param vec2
+ * @return the distance in m
+ */
 double computeDistance(const base::Vector3d& vec1, const base::Vector3d& vec2)
 {
     return sqrt(pow(vec1.x()-vec2.x(), 2) + pow(vec1.y()-vec2.y(), 2) + pow(vec1.z()-vec2.z(), 2));
 }
 
+/**
+ * Compute the shoortest distance between a 3d line and a 3d point. 
+ *
+ * @param line the line
+ * @param point reverence point
+ * @return the distance in m
+ */
 double computeDistance(const std::pair< base::Vector3d, base::Vector3d >& line, const base::Vector3d& point)
 {
     base::Vector3d intersection_point = computIntersection(line, point);
     return computeDistance(point, intersection_point);
 }
 
+/**
+ * Compute the angle between two 3d lines.
+ *
+ * @param line1
+ * @param line2
+ * @return the angle in rad
+ */
 double computeAngle(const std::pair< base::Vector3d, base::Vector3d >& line1, const std::pair< base::Vector3d, base::Vector3d >& line2)
 {
     double angle = 0;
@@ -159,11 +187,23 @@ double computeAngle(const std::pair< base::Vector3d, base::Vector3d >& line1, co
     return angle;
 }
 
+/**
+ * Compute the length of a vector.
+ *
+ * @param vec the vector
+ * @return the lenght in m
+ */
 double length(const base::Vector3d& vec)
 {
     return sqrt(pow(vec.x(),2) + pow(vec.y(),2) + pow(vec.z(),2));
 }
 
+/**
+ * Uses openCV to approximate a line in a given point cloud.
+ *
+ * @param pointCloud the point cloud
+ * @param model the approximated line
+ */
 void computeModel(const std::vector< base::Vector3d >& pointCloud, std::pair< base::Vector3d, base::Vector3d >& model)
 {
     std::vector<cv::Point3f> cvPoints;

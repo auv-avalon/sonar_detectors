@@ -10,6 +10,10 @@
 
 namespace avalon{
     
+/**
+ * This will be used to select the major entries inside 
+ * a single beam.
+ */
 enum BeamMode 
 {
     globalMaximum,
@@ -18,12 +22,25 @@ enum BeamMode
     allEntries
 };
 
+/**
+ * This will be used to select when entries gets overwritten.
+ * persistNewScans means new entries overwrites old entries 
+ * with the same angle.
+ * persistAll means nothing gets overwritten.
+ */
 enum PersistMode 
 {
     persistNewScans,
     persistAll
 };
 
+/**
+ * This will be used to select when a estimator gets an 
+ * update of the new segment.
+ * noSegments means never.
+ * forEachEdge means of the beam changes direction.
+ * forEachBeam means everytime.
+ */
 enum SegmentMode
 {
     noSegments,
@@ -31,8 +48,15 @@ enum SegmentMode
     forEachBeam
 };
 
+/**
+ * constat for the sonic velocity in water
+ */
 static const double sonicVelocityInWater = 1500.0;
 
+
+/**
+ * Obstacle point
+ */
 struct obstaclePoint
 {
     base::Position position;
@@ -43,6 +67,11 @@ struct obstaclePoint
     : position(0,0,0), value(0), angle(0){}
 };
 
+/**
+ * Estimators get updated by scanSegments.
+ * A scan segment mainlly contains a point cloud 
+ * of obstacle points.
+ */
 struct scanSegment
 {
     std::list<obstaclePoint> pointCloud;
@@ -54,6 +83,10 @@ struct scanSegment
     : dirty(false), lastAngle(0), risingAngle(false){}
 };
 
+/**
+ * Settings for estimators.
+ * Relevant angle range and update mode.
+ */
 struct estimationSettings
 {
     double startAngle;
