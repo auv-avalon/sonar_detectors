@@ -1,9 +1,8 @@
 #ifndef SONAR_DETECTOR_TYPES_HPP_
 #define SONAR_DETECTOR_TYPES_HPP_
 
-#include <base/samples/sonar_scan.h>
 #include <base/eigen.h>
-#include <base/samples/rigid_body_state.h>
+#include <base/time.h>
 
 #include <list>
 #include <vector>
@@ -38,7 +37,7 @@ enum PersistMode
  * This will be used to select when a estimator gets an 
  * update of the new segment.
  * noSegments means never.
- * forEachEdge means of the beam changes direction.
+ * forEachEdge means if the beam changes direction.
  * forEachBeam means everytime.
  */
 enum SegmentMode
@@ -53,18 +52,17 @@ enum SegmentMode
  */
 static const double sonicVelocityInWater = 1500.0;
 
-
 /**
  * Obstacle point
  */
 struct obstaclePoint
 {
-    base::Position position;
-    base::samples::SonarScan::uint8_t value;
+    base::Vector3d position;
+    uint8_t value;
     base::Time time;
     double angle;
     obstaclePoint()
-    : position(0,0,0), value(0), angle(0){}
+    : position(0,0,0), value(0), time(base::Time::now()), angle(0){}
 };
 
 /**

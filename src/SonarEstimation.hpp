@@ -2,6 +2,7 @@
 #define SONAR_ESTIMATION_HPP_
 
 #include "SonarDetectorTypes.hpp"
+#include <base/samples/rigid_body_state.h>
 
 namespace avalon
 {
