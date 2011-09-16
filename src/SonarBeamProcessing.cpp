@@ -282,14 +282,11 @@ int SonarBeamProcessing::getNextMaximum(const int& startIndex, const int& endInd
     return index;
 }
 
-obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const base::samples::SonarScan& sonarScan)
+obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const base::samples::SonarScan& sonarScan, const base::Orientation& orientation)
 {
-    base::Time scanTime = sonarScan.time;
     double scanAngle = sonarScan.angle;
     double time_beetween_bins = sonarScan.time_beetween_bins;
-    
-    double distance = (((double)index) * time_beetween_bins * sonicVelocityInWater)*0.5;
-    //std::cout << "Time: " << scanTime << ", Angle: " << scanAngle << ", Distance: " << distance << ", Value: " << (uint)scan[index] << std::endl;
+    double distance = (double)index * sonarScan.getScale(sonicVelocityInWater);
         
     Eigen::Vector3d wallPoint(-distance,0,0);
     Eigen::Vector3d topPoint(0,0,1);
@@ -299,12 +296,11 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     
     Eigen::AngleAxisd rotate(-scanAngle,topPoint);
     
-    Eigen::Translation3d translate(position);
-    wallPoint = translate * (rotate * wallPoint);
+    wallPoint = rotate * wallPoint;
         
     avalon::obstaclePoint obstaclePoint;
     obstaclePoint.position = wallPoint;
-    obstaclePoint.time = scanTime;
+    obstaclePoint.time = sonarScan.time;
     obstaclePoint.value = sonarScan.scanData[index];
     obstaclePoint.angle = scanAngle;
     
@@ -387,7 +383,7 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
         // calculate points
         while (indexList.size() > 0)
         {
-            avalon::obstaclePoint obstaclePoint = computeObstaclePoint(indexList.back(), sonarScan);
+            avalon::obstaclePoint obstaclePoint = computeObstaclePoint(indexList.back(), sonarScan, orientation);
             indexList.pop_back();
             obstaclePoints.push_back(obstaclePoint);
         }

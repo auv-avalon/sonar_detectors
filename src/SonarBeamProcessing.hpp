@@ -33,6 +33,8 @@ class SonarBeamProcessing
         void setBeamThreshold(double minThreshold, double maxThreshold);
         void setMinResponseValue(int minValue);
         
+        static avalon::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarScan& sonarScan, const base::Orientation& orientation);
+        
     private:
         std::vector<estimator> estimators;
         base::Orientation orientation;
@@ -47,7 +49,6 @@ class SonarBeamProcessing
         
         std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, int minIndex, int maxIndex, int minValue);
         int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan);
-        avalon::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarScan& sonarScan);
         void persistPoints(const std::vector<obstaclePoint>& obstaclePoints, const double& angle, scanSegment& segment);
         bool isSegmentDone(avalon::estimator& estimator, const double& angle);
 };
