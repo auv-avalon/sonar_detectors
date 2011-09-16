@@ -17,19 +17,25 @@ WallEstimation::~WallEstimation()
 }
 
 void WallEstimation::updateSegment(const avalon::scanSegment& segment)
-{
+{    
     // check if enough points available
     if (segment.pointCloud.size() < min_count_pointcloud)
     {
         walls.clear();
         this->pointCloud.clear();
+        for(std::list<obstaclePoint>::const_iterator it = segment.pointCloud.begin(); it != segment.pointCloud.end(); it++)
+        {
+            this->pointCloud.push_back(it->position);
+        }
         return;
     }
     
+    this->pointCloud.clear();
     std::vector<base::Vector3d> pointCloud;
     for(std::list<obstaclePoint>::const_iterator it = segment.pointCloud.begin(); it != segment.pointCloud.end(); it++)
     {
         pointCloud.push_back(it->position);
+        this->pointCloud.push_back(it->position);
     }
     
     std::vector< std::pair<base::Vector3d, base::Vector3d> > new_walls;
@@ -40,12 +46,10 @@ void WallEstimation::updateSegment(const avalon::scanSegment& segment)
     if (error < 1.0)
     {
         walls = new_walls;
-        this->pointCloud = pointCloud;
     }
     else
     {
         walls.clear();
-        this->pointCloud.clear();
     }
 }
 
