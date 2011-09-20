@@ -12,6 +12,7 @@ set(HEADERS
         SonarDetectorTypes.hpp
         DistanceEstimation.hpp
         SonarDetectorMath.hpp
+        SonarMap.hpp
 )
 
 rock_library(sonar_detectors
