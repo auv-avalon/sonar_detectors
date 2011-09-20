@@ -24,7 +24,7 @@ namespace avalon
     public:
         DistanceEstimation();
         ~DistanceEstimation();
-        virtual void updateSegment(const avalon::scanSegment& segment);
+        virtual void updateSegment(const std::vector<avalon::obstaclePoint> &features);
         double getActualDistance();
         
     private:

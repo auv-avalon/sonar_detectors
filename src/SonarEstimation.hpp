@@ -9,7 +9,7 @@ namespace avalon
     class SonarEstimation
     {
     public:
-        virtual void updateSegment(const avalon::scanSegment& segment) = 0;
+        virtual void updateSegment(const std::vector<avalon::obstaclePoint> &features) = 0;
         
         avalon::estimationSettings getSettings() 
         {
@@ -36,7 +36,6 @@ namespace avalon
     {
         SonarEstimation* estimation;
         estimationSettings settings;
-        scanSegment segment;
     };
 }
 

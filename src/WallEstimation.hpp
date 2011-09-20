@@ -3,6 +3,7 @@
 
 #include "SonarDetectorTypes.hpp"
 #include "SonarEstimation.hpp"
+#include "SonarMap.hpp"
 
 namespace avalon
 {
@@ -23,11 +24,13 @@ namespace avalon
         const base::Vector3d getRelativeVirtualPoint();
         std::vector<base::Vector3d> getPointCloud();
         void setRansacParameters(double threshold, double fit_rate);
-        virtual void updateSegment(const avalon::scanSegment& segment);
+        virtual void updateSegment(const std::vector<avalon::obstaclePoint>& features);
         
     private:
         void computeVirtualPoint();
         
+        avalon::SonarMap< std::vector<obstaclePoint> > sonarMap;
+        std::list< std::vector<obstaclePoint> >* featureList;
         std::vector< std::pair<base::Vector3d, base::Vector3d> > walls;
         std::vector<base::Vector3d> pointCloud;
         base::Vector3d virtualpoint;

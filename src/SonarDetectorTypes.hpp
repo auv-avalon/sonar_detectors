@@ -22,32 +22,6 @@ enum BeamMode
 };
 
 /**
- * This will be used to select when entries gets overwritten.
- * persistNewScans means new entries overwrites old entries 
- * with the same angle.
- * persistAll means nothing gets overwritten.
- */
-enum PersistMode 
-{
-    persistNewScans,
-    persistAll
-};
-
-/**
- * This will be used to select when a estimator gets an 
- * update of the new segment.
- * noSegments means never.
- * forEachEdge means if the beam changes direction.
- * forEachBeam means everytime.
- */
-enum SegmentMode
-{
-    noSegments,
-    forEachEdge,
-    forEachBeam
-};
-
-/**
  * constat for the sonic velocity in water
  */
 static const double sonicVelocityInWater = 1500.0;
@@ -66,22 +40,6 @@ struct obstaclePoint
 };
 
 /**
- * Estimators get updated by scanSegments.
- * A scan segment mainlly contains a point cloud 
- * of obstacle points.
- */
-struct scanSegment
-{
-    std::list<obstaclePoint> pointCloud;
-    std::list<obstaclePoint>::iterator latestBeam;
-    bool dirty;
-    double lastAngle;
-    bool risingAngle;
-    scanSegment()
-    : dirty(false), lastAngle(0), risingAngle(false){}
-};
-
-/**
  * Settings for estimators.
  * Relevant angle range and update mode.
  */
@@ -89,7 +47,6 @@ struct estimationSettings
 {
     double startAngle;
     double endAngle;
-    SegmentMode segMode;
     estimationSettings()
     : startAngle(-1), endAngle(-1), segMode(noSegments){}
 };

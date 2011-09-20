@@ -15,30 +15,30 @@ DistanceEstimation::~DistanceEstimation()
     
 }
 
-void DistanceEstimation::updateSegment(const avalon::scanSegment& segment)
+void DistanceEstimation::updateSegment(const std::vector<avalon::obstaclePoint> &features)
 {
     checkTimeout();
     
-    if(!segment.pointCloud.empty() || segment.latestBeam != segment.pointCloud.end())
+    if (!features.empty())
     {
-        base::Position nextPosition(segment.latestBeam->position);
+        obstaclePoint nextPosition = features.front();
         
         if (actualDistance < 0)
         {
-            actualPoint.position = nextPosition;
+            actualPoint.position = nextPosition.position;
         }
         else 
         {
-            double dist = computeDistance(nextPosition, actualPoint.position);
+            double dist = computeDistance(nextPosition.position, actualPoint.position);
             if(dist > max_distance)
             {
                 // limit distance to the next point
-                nextPosition = actualPoint.position + ((nextPosition - actualPoint.position) / dist) * max_distance;
+                nextPosition.position = actualPoint.position + ((nextPosition.position - actualPoint.position) / dist) * max_distance;
             }
-            actualPoint.position = actualPoint.position * weightOldValue + nextPosition * weightNewValue;
+            actualPoint.position = actualPoint.position * weightOldValue + nextPosition.position * weightNewValue;
         }
 
-        actualPoint.angle = segment.latestBeam->angle;
+        actualPoint.angle = nextPosition.angle;
         actualPoint.time = base::Time::now();
         actualDistance = computeDistance(*position, actualPoint.position);
     }

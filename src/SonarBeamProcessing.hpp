@@ -20,7 +20,7 @@ namespace avalon
 class SonarBeamProcessing 
 {   
     public:
-        SonarBeamProcessing(BeamMode beamMode, PersistMode persistMode);
+        SonarBeamProcessing(BeamMode beamMode);
         ~SonarBeamProcessing();
         void addSonarEstimation(avalon::SonarEstimation* estimation);
         void removeSonarEstimation(avalon::SonarEstimation* estimation);
@@ -28,7 +28,6 @@ class SonarBeamProcessing
         void updateOrientation(const base::Orientation& orientation);
         void updatePosition(const base::Position& position);
         void selectBeamMode(BeamMode mode);
-        void selectPersistMode(PersistMode mode);
         void enableBeamThreshold(bool b);
         void setBeamThreshold(double minThreshold, double maxThreshold);
         void setMinResponseValue(int minValue);
@@ -40,7 +39,6 @@ class SonarBeamProcessing
         base::Orientation orientation;
         base::Position position;
         BeamMode beamMode;
-        PersistMode persistMode;
         bool enableThreshold;
         double minThreshold;
         double maxThreshold;
@@ -49,7 +47,6 @@ class SonarBeamProcessing
         
         std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, int minIndex, int maxIndex, int minValue);
         int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan);
-        bool isSegmentDone(avalon::estimator& estimator, const double& angle);
 };
 
 }

@@ -9,6 +9,7 @@ WallEstimation::WallEstimation()
     min_count_pointcloud = 6;
     ransac_threshold = 0.5;
     ransac_fit_rate = 0.7;
+    featureList = sonarMap.getFeatureListPtr();
 }
 
 WallEstimation::~WallEstimation()
@@ -16,40 +17,51 @@ WallEstimation::~WallEstimation()
 
 }
 
-void WallEstimation::updateSegment(const avalon::scanSegment& segment)
-{    
-    // check if enough points available
-    if (segment.pointCloud.size() < min_count_pointcloud)
+void WallEstimation::updateSegment(const std::vector<avalon::obstaclePoint>& features)
+{
+    if(!features.empty())
     {
-        walls.clear();
-        this->pointCloud.clear();
-        for(std::list<obstaclePoint>::const_iterator it = segment.pointCloud.begin(); it != segment.pointCloud.end(); it++)
+        sonarMap.addFeature(features, features.front().angle, features.front().time);
+        
+        // check if enough points available
+        if (pointCloud.size() < min_count_pointcloud)
         {
-            this->pointCloud.push_back(it->position);
+            walls.clear();
+            this->pointCloud.clear();
+            for(std::list< std::vector<obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
+            {
+                for(std::vector<obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
+                {
+                    this->pointCloud.push_back(v_it->position);
+                }
+            }
+            return;
         }
-        return;
-    }
-    
-    this->pointCloud.clear();
-    std::vector<base::Vector3d> pointCloud;
-    for(std::list<obstaclePoint>::const_iterator it = segment.pointCloud.begin(); it != segment.pointCloud.end(); it++)
-    {
-        pointCloud.push_back(it->position);
-        this->pointCloud.push_back(it->position);
-    }
-    
-    std::vector< std::pair<base::Vector3d, base::Vector3d> > new_walls;
-    int iterations = pointCloud.size() * 3;
-    if (iterations > 200) iterations = 200;
-    double error = avalon::wallRansac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, new_walls);
-    
-    if (error < 1.0)
-    {
-        walls = new_walls;
-    }
-    else
-    {
-        walls.clear();
+        
+        this->pointCloud.clear();
+        std::vector<base::Vector3d> pointCloud;
+        for(std::list< std::vector<obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
+        {
+            for(std::vector<obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
+            {
+            pointCloud.push_back(v_it->position);
+            this->pointCloud.push_back(v_it->position);
+            }
+        }
+        
+        std::vector< std::pair<base::Vector3d, base::Vector3d> > new_walls;
+        int iterations = pointCloud.size() * 3;
+        if (iterations > 200) iterations = 200;
+        double error = avalon::wallRansac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, new_walls);
+        
+        if (error < 1.0)
+        {
+            walls = new_walls;
+        }
+        else
+        {
+            walls.clear();
+        }
     }
 }
 

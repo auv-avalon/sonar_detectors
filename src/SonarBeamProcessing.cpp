@@ -3,10 +3,9 @@
 
 namespace avalon
 {
-SonarBeamProcessing::SonarBeamProcessing(BeamMode beamMode, PersistMode displayMode)
+SonarBeamProcessing::SonarBeamProcessing(BeamMode beamMode)
 {
     this->beamMode = beamMode;
-    this->persistMode = displayMode;
     minThreshold = 0;
     maxThreshold = 100;
     enableThreshold = false;
@@ -24,11 +23,6 @@ SonarBeamProcessing::~SonarBeamProcessing()
 void SonarBeamProcessing::selectBeamMode(BeamMode mode)
 {
     beamMode = mode;
-}
-
-void SonarBeamProcessing::selectPersistMode(PersistMode mode)
-{
-    persistMode = mode;
 }
 
 void SonarBeamProcessing::updateOrientation(const base::Orientation& orientation)
@@ -215,45 +209,6 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     return obstaclePoint;
 }
 
-bool SonarBeamProcessing::isSegmentDone(estimator& estimator, const double& angle)
-{
-    std::list<obstaclePoint>::iterator endIt = estimator.segment.pointCloud.end();
-    endIt--;
-    switch (estimator.settings.segMode)
-    {
-        case forEachBeam:
-            return true;
-        case forEachEdge:
-            if (estimator.segment.risingAngle)
-            {
-                if (estimator.segment.lastAngle <= angle)
-                {
-                    estimator.segment.risingAngle = false;
-                    return true;
-                }
-            }
-            else
-            {
-                if (estimator.segment.lastAngle >= angle)
-                {
-                    estimator.segment.risingAngle = true;
-                    return true;
-                }
-            }
-            /*  obsolete
-            if (estimator.segment.pointCloud.begin() == estimator.segment.latestBeam || 
-                endIt == estimator.segment.latestBeam)
-            {
-                return true;
-            }
-            */
-        case noSegments:
-        default:
-            return false;
-    }
-    return false;
-}
-
 void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarScan)
 {
     double scanAngle = sonarScan.angle;
@@ -297,28 +252,15 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
         }
     }
     
-    //persist points and feed estimators
+    //feed estimators
     for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        // persist points if we are in a valid scan angle or valid scan angle is deactivated.
+        // send new features to the estimators if they are in their scan range
         if (it->settings.startAngle < 0 || it->settings.endAngle < 0
             || scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
         {
-            it->segment.dirty = true;
+            it->estimation->updateSegment(obstaclePoints);
         }
-        else if (it->segment.dirty)
-        {
-            // we are outside the scan range and the segment is still dirty, so write it out
-            it->estimation->updateSegment(it->segment);
-            it->segment.dirty = false;
-        }
-        // write segment out if its dirty and the segment is complete
-        if (isSegmentDone(*it, scanAngle) && it->segment.dirty)
-        {
-            it->estimation->updateSegment(it->segment);
-            it->segment.dirty = false;
-        }
-        it->segment.lastAngle = scanAngle;
     }
     
 }
