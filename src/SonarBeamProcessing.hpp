@@ -4,7 +4,7 @@
 #include "SonarDetectorTypes.hpp"
 #include "SonarEstimation.hpp"
 
-#include <base/samples/sonar_scan.h>
+#include <base/samples/sonar_beam.h>
 #include <base/eigen.h>
 #include <base/samples/rigid_body_state.h>
 #include <Eigen/Core>
@@ -24,7 +24,7 @@ class SonarBeamProcessing
         ~SonarBeamProcessing();
         void addSonarEstimation(avalon::SonarEstimation* estimation);
         void removeSonarEstimation(avalon::SonarEstimation* estimation);
-        void updateSonarData(const base::samples::SonarScan& sonarScan);
+        void updateSonarData(const base::samples::SonarBeam& sonarScan);
         void updateOrientation(const base::Orientation& orientation);
         void updatePosition(const base::Position& position);
         void selectBeamMode(BeamMode mode);
@@ -32,7 +32,7 @@ class SonarBeamProcessing
         void setBeamThreshold(double minThreshold, double maxThreshold);
         void setMinResponseValue(int minValue);
         
-        static avalon::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarScan& sonarScan, const base::Orientation& orientation);
+        static avalon::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation);
         
     private:
         std::vector<estimator> estimators;
@@ -45,8 +45,8 @@ class SonarBeamProcessing
         int minResponseValue;
         int indexWindowSize;
         
-        std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, int minIndex, int maxIndex, int minValue);
-        int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan);
+        std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarBeam::uint8_t>& scan, int minIndex, int maxIndex, int minValue);
+        int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarBeam::uint8_t>& scan);
 };
 
 }

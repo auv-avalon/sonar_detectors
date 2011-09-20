@@ -48,7 +48,7 @@ struct estimationSettings
     double startAngle;
     double endAngle;
     estimationSettings()
-    : startAngle(-1), endAngle(-1), segMode(noSegments){}
+    : startAngle(-1), endAngle(-1){}
 };
     
 }

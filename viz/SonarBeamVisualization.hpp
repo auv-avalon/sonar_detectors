@@ -3,7 +3,7 @@
 
 #include <vizkit/Vizkit3DPlugin.hpp>
 #include <base/eigen.h>
-#include <base/samples/sonar_scan.h>
+#include <base/samples/sonar_beam.h>
 #include <base/samples/rigid_body_state.h>
 #include <sonar_detectors/SonarDetectorTypes.hpp>
 #include <sonar_detectors/SonarMap.hpp>
@@ -20,7 +20,7 @@ namespace vizkit
  * If the class gets updated with a body state the sonar 
  * data is absolute, otherwise relative.
  */
-class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::SonarScan >,
+class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::SonarBeam >,
                                public vizkit::VizPluginAddType< base::samples::RigidBodyState >
 {    
     public:
@@ -30,7 +30,7 @@ class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::Son
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
-        void updateDataIntern ( const base::samples::SonarScan& data );
+        void updateDataIntern ( const base::samples::SonarBeam& data );
         void updateDataIntern ( const base::samples::RigidBodyState& data );
         
     private:

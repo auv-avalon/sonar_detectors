@@ -7,7 +7,7 @@ namespace vizkit
 
 SonarBeamVisualization::SonarBeamVisualization()
 {
-    VizPluginRubyAdapter(SonarBeamVisualization, base::samples::SonarScan, SonarScan);
+    VizPluginRubyAdapter(SonarBeamVisualization, base::samples::SonarBeam, SonarBeam);
     VizPluginRubyAdapter(SonarBeamVisualization, base::samples::RigidBodyState, BodyState);
     bodyState.invalidate();
     newSonarScan = false;
@@ -71,16 +71,16 @@ const std::string SonarBeamVisualization::getPluginName() const
  * 
  * @param data new sonar data
  */
-void SonarBeamVisualization::updateDataIntern(const base::samples::SonarScan& data)
+void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& data)
 {
     std::vector<avalon::obstaclePoint> features;
-    for(int i = 0; i < data.scanData.size(); i++)
+    for(int i = 0; i < data.beam.size(); i++)
     {
-        if(data.scanData[i] > 0)
+        if(data.beam[i] > 0)
             features.push_back(avalon::SonarBeamProcessing::computeObstaclePoint(i, data, bodyState.orientation));
     }
-    sonarMap.addFeature(features, data.angle, data.time);
-    currentAngle = data.angle;
+    sonarMap.addFeature(features, data.bearing.rad, data.time);
+    currentAngle = data.bearing.rad;
     newSonarScan = true;
 }
 

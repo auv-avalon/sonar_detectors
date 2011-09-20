@@ -83,7 +83,7 @@ void SonarBeamProcessing::removeSonarEstimation(SonarEstimation* estimation)
     }
 }
 
-std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, int minIndex, int maxIndex, int minValue)
+std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<base::samples::SonarBeam::uint8_t>& scan, int minIndex, int maxIndex, int minValue)
 {
     std::vector<int> indexList;
     int index = -1;
@@ -168,9 +168,9 @@ std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<ba
 }
 
 //NOTE: maximas actually have to be greater in each following step
-int SonarBeamProcessing::getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan) 
+int SonarBeamProcessing::getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarBeam::uint8_t>& scan) 
 {
-    base::samples::SonarScan::uint8_t data = scan[startIndex] < minValue ? minValue : scan[startIndex];
+    base::samples::SonarBeam::uint8_t data = scan[startIndex] < minValue ? minValue : scan[startIndex];
     int index = startIndex;
     for(unsigned i = startIndex + 1; i < endIndex && i < scan.size(); i++)
     {
@@ -184,11 +184,10 @@ int SonarBeamProcessing::getNextMaximum(const int& startIndex, const int& endInd
     return index;
 }
 
-obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const base::samples::SonarScan& sonarScan, const base::Orientation& orientation)
+obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation)
 {
-    double scanAngle = sonarScan.angle;
-    double time_beetween_bins = sonarScan.time_beetween_bins;
-    double distance = (double)index * sonarScan.getScale(sonicVelocityInWater);
+    double scanAngle = sonarScan.bearing.rad;
+    double distance = (double)index * sonarScan.getSpatialResolution();
         
     Eigen::Vector3d wallPoint(-distance,0,0);
     Eigen::Vector3d topPoint(0,0,1);
@@ -203,16 +202,16 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     avalon::obstaclePoint obstaclePoint;
     obstaclePoint.position = wallPoint;
     obstaclePoint.time = sonarScan.time;
-    obstaclePoint.value = sonarScan.scanData[index];
+    obstaclePoint.value = sonarScan.beam[index];
     obstaclePoint.angle = scanAngle;
     
     return obstaclePoint;
 }
 
-void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarScan)
+void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarScan)
 {
-    double scanAngle = sonarScan.angle;
-    double time_beetween_bins = sonarScan.time_beetween_bins;
+    double scanAngle = sonarScan.bearing.rad;
+    double time_beetween_bins = sonarScan.sampling_interval;
     
     //check if angle is required
     bool required = false;
@@ -233,11 +232,11 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
         //cut scan index
         int minIndex = (minThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
         int maxIndex = (maxThreshold * 2) / (time_beetween_bins * sonicVelocityInWater);
-        indexList = computeSonarScanIndex(sonarScan.scanData, minIndex, maxIndex, minResponseValue);
+        indexList = computeSonarScanIndex(sonarScan.beam, minIndex, maxIndex, minResponseValue);
     }
     else
     {
-        indexList = computeSonarScanIndex(sonarScan.scanData, 0, sonarScan.scanData.size(), minResponseValue); 
+        indexList = computeSonarScanIndex(sonarScan.beam, 0, sonarScan.beam.size(), minResponseValue); 
     }
     
     std::vector<obstaclePoint> obstaclePoints;

@@ -15,8 +15,7 @@ sonarbeamviz = view3d.createPlugin("sonarbeam","SonarBeamVisualization")
 log = Orocos::Log::Replay.open(ARGV)
 
 log.sonar.BaseScan :type => :buffer, :size => 100  do |sample|
-    sonarbeamviz.updateSonarScan(sample)
-    #puts sample.angle
+    sonarbeamviz.updateSonarBeam(sample)
     sample
 end
 
