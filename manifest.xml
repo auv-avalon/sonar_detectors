@@ -9,6 +9,7 @@
 
   <depend package="base/types" />
   <depend package="avalon/avalontools" />
+  <depend package="gui/vizkit" optional="1" />
 
   <versioncontrol type="git" url="" />
   <export>
