@@ -8,6 +8,11 @@ rock_vizkit_plugin(sonarfeature-viz
     DEPS sonar_detectors
     HEADERS SonarFeatureVisualization.hpp)
 
+rock_vizkit_plugin(wall-viz
+    WallVisualization.cpp
+    DEPS sonar_detectors
+    HEADERS WallVisualization.hpp)
+
 rock_vizkit_plugin(auv_avalon-viz
     AUVAvalonVisualization.cpp
     DEPS sonar_detectors
