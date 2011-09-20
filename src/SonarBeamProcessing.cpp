@@ -89,98 +89,6 @@ void SonarBeamProcessing::removeSonarEstimation(SonarEstimation* estimation)
     }
 }
 
-void SonarBeamProcessing::persistPoints(const std::vector<obstaclePoint>& obstaclePoints, const double& angle, scanSegment& segment)
-{
-    std::list<obstaclePoint>& sortedPoints = segment.pointCloud;
-    std::list<obstaclePoint>::iterator& listIterator = segment.latestBeam;
-    switch (persistMode)
-    {
-        case persistNewScans:
-        {
-            std::vector<obstaclePoint>::const_iterator beginIt = obstaclePoints.begin();
-            std::vector<obstaclePoint>::const_iterator endIt = obstaclePoints.end();
-            // init empty list
-            if (sortedPoints.empty())
-            {
-                listIterator = sortedPoints.end();
-                sortedPoints.insert(listIterator, beginIt, endIt);
-                listIterator--;
-                return;
-            }
-            // handle switch between 0 and 2 PI
-            if (std::abs(segment.latestBeam->angle - angle) > M_PI)
-            {
-                if (angle > M_PI) 
-                {
-                    segment.latestBeam = segment.pointCloud.end();
-                    segment.latestBeam--;
-                }
-                else 
-                    segment.latestBeam = segment.pointCloud.begin();
-            }
-            // insert new points
-            std::list<obstaclePoint>::iterator shiftedListIterator(listIterator);
-            // points with equal angle
-            if (angle == listIterator->angle)
-            {
-                // delete equal points
-                shiftedListIterator--;
-                while(listIterator != sortedPoints.begin() && angle == shiftedListIterator->angle)
-                {
-                    listIterator--;
-                    shiftedListIterator--;
-                }
-                while(listIterator != sortedPoints.end() && angle == listIterator->angle)
-                {
-                    listIterator = sortedPoints.erase(listIterator);
-                }
-                // add new points
-                sortedPoints.insert(listIterator, beginIt, endIt);
-                listIterator--;
-            }
-            else if (angle > listIterator->angle)
-            {
-                shiftedListIterator++;
-                while(shiftedListIterator != sortedPoints.end() && listIterator->angle == shiftedListIterator->angle)
-                {
-                    listIterator++;
-                    shiftedListIterator++;
-                }
-                listIterator++;
-                while(listIterator != sortedPoints.end() && angle >= listIterator->angle)
-                {
-                    listIterator = sortedPoints.erase(listIterator);
-                }
-                sortedPoints.insert(listIterator, beginIt, endIt);
-                listIterator--;
-            }
-            else if (angle < listIterator->angle)
-            {
-                shiftedListIterator--;
-                while(listIterator != sortedPoints.begin() && listIterator->angle == shiftedListIterator->angle)
-                {
-                    listIterator--;
-                    shiftedListIterator--;
-                }
-                while(listIterator != sortedPoints.begin() && angle <= shiftedListIterator->angle)
-                {
-                    shiftedListIterator = sortedPoints.erase(shiftedListIterator);
-                    shiftedListIterator--;
-                }
-                sortedPoints.insert(listIterator, beginIt, endIt);
-                listIterator--;
-            }
-        }
-        break;
-        case persistAll:
-            for(std::vector<obstaclePoint>::const_iterator it = obstaclePoints.begin(); it != obstaclePoints.end(); it++)
-            {
-                sortedPoints.push_back(*it);
-            }
-            break;
-    }
-}
-
 std::vector<int> SonarBeamProcessing::computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, int minIndex, int maxIndex, int minValue)
 {
     std::vector<int> indexList;
@@ -396,7 +304,6 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarScan& sonarS
         if (it->settings.startAngle < 0 || it->settings.endAngle < 0
             || scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
         {
-            persistPoints(obstaclePoints, scanAngle, it->segment);
             it->segment.dirty = true;
         }
         else if (it->segment.dirty)

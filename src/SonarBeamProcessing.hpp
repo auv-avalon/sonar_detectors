@@ -49,7 +49,6 @@ class SonarBeamProcessing
         
         std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarScan::uint8_t>& scan, int minIndex, int maxIndex, int minValue);
         int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarScan::uint8_t>& scan);
-        void persistPoints(const std::vector<obstaclePoint>& obstaclePoints, const double& angle, scanSegment& segment);
         bool isSegmentDone(avalon::estimator& estimator, const double& angle);
 };
 
