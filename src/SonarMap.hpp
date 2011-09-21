@@ -32,7 +32,7 @@ public:
             // handle switch between 0 and 2 PI
             if (abs(angle_it->first - angle) > M_PI)
             {
-                if (angle > M_PI) 
+                if (angle >= 0) 
                 {
                     angle_it = angles.end();
                     feature_it = features.end();

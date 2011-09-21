@@ -124,11 +124,11 @@ void SonarBeamVisualization::updateMainNode(osg::Node* node)
         pointGeom->setVertexArray(pointsOSG);
         
         // draw current beam position
-        Eigen::Vector3d beam_range(-24,0,0);
+        Eigen::Vector3d beam_range(24,0,0);
         Eigen::Vector3d topPoint(0,0,1);
         beam_range = bodyState.orientation * beam_range;
         topPoint = bodyState.orientation * topPoint;
-        Eigen::AngleAxisd rotate(-currentAngle,topPoint);
+        Eigen::AngleAxisd rotate(currentAngle,topPoint);
         beam_range = rotate * beam_range;
         beamPos->begin()->x() = beam_range.x();
         beamPos->begin()->y() = beam_range.y();

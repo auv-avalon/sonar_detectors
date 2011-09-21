@@ -189,13 +189,13 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     double scanAngle = sonarScan.bearing.rad;
     double distance = (double)index * sonarScan.getSpatialResolution();
         
-    Eigen::Vector3d wallPoint(-distance,0,0);
+    Eigen::Vector3d wallPoint(distance,0,0);
     Eigen::Vector3d topPoint(0,0,1);
     
     wallPoint = orientation * wallPoint;
     topPoint = orientation * topPoint;
     
-    Eigen::AngleAxisd rotate(-scanAngle,topPoint);
+    Eigen::AngleAxisd rotate(scanAngle,topPoint);
     
     wallPoint = rotate * wallPoint;
         
