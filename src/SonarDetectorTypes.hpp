@@ -35,8 +35,9 @@ struct obstaclePoint
     uint8_t value;
     base::Time time;
     double angle;
+    double distance;
     obstaclePoint()
-    : position(0,0,0), value(0), time(base::Time::now()), angle(0){}
+    : position(0,0,0), value(0), time(base::Time::now()), angle(0), distance(0){}
 };
 
 /**

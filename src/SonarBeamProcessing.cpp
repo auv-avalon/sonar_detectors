@@ -203,6 +203,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     obstaclePoint.position = wallPoint;
     obstaclePoint.time = sonarScan.time;
     obstaclePoint.value = sonarScan.beam[index];
+    obstaclePoint.distance = distance;
     obstaclePoint.angle = scanAngle;
     
     return obstaclePoint;
