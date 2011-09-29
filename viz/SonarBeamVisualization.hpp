@@ -45,6 +45,8 @@ class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::Son
         osg::ref_ptr<osg::Geometry> beamGeom;
         osg::ref_ptr<osg::Vec3Array> beamPos;
         osg::ref_ptr<osg::DrawArrays> beamDrawArray;
+        osg::ref_ptr<osg::Vec4Array> color;
+        std::map<uint8_t, osg::Vec4> colorMap;
 };
 
 }

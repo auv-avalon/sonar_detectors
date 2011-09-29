@@ -28,13 +28,22 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
     pointGeom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
     pointGeom->setVertexArray(pointsOSG);
-    osg::Vec4Array* color = new osg::Vec4Array;
+    color = new osg::Vec4Array;
     color->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
     pointGeom->setColorArray(color);
-    pointGeom->setColorBinding(osg::Geometry::BIND_OVERALL);
+    pointGeom->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE);
     pointGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, pointsOSG->size() );
     pointGeom->addPrimitiveSet(drawArrays.get());
+    
+    // create color mapping
+    for(unsigned int i = 0; i < 256; i++)
+    {
+        colorMap[i] = osg::Vec4((i < 80) ? (float)i / 80.0 : 1.0f, 
+                                           (i > 80) ? ((float)i - 80.0) / 80.0 : 0.0f, 
+                                           (i > 160) ? ((float)i - 160.0) / 80.0 : 0.0f,
+                                           1.0f);
+    }
     
     // set up beam line
     beamGeom = new osg::Geometry;
@@ -110,6 +119,7 @@ void SonarBeamVisualization::updateMainNode(osg::Node* node)
         newSonarScan = false;
         // draw sonar data
         pointsOSG->clear();
+        color->clear();
         for(std::list< std::vector<avalon::obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
         {
             for(std::vector<avalon::obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
@@ -117,11 +127,13 @@ void SonarBeamVisualization::updateMainNode(osg::Node* node)
                 osg::Vec3d vec(v_it->position.x(), v_it->position.y(), v_it->position.z());
                 pointsOSG->push_back(vec);
                 pointsOSG->push_back(vec + osg::Vec3d(0,0,v_it->value)/51.0);
+                color->push_back(colorMap[v_it->value]);
             }
             
         }
         drawArrays->setCount(pointsOSG->size());
         pointGeom->setVertexArray(pointsOSG);
+        pointGeom->setColorArray(color);
         
         // draw current beam position
         Eigen::Vector3d beam_range(24,0,0);
