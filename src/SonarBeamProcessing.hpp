@@ -39,9 +39,6 @@ class SonarBeamProcessing
         base::Position position;
         double minThreshold;
         sonar_detectors::FeatureExtraction featureExtraction;
-        
-        std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarBeam::uint8_t>& scan, int minIndex, int maxIndex, int minValue);
-        int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarBeam::uint8_t>& scan);
 };
 
 }
