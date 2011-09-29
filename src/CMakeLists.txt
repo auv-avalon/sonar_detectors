@@ -3,6 +3,7 @@ set(SOURCES
         WallEstimation.cpp
         DistanceEstimation.cpp
         SonarDetectorMath.cpp
+        FeatureExtraction.cpp
 )
 
 set(HEADERS
@@ -13,6 +14,7 @@ set(HEADERS
         DistanceEstimation.hpp
         SonarDetectorMath.hpp
         SonarMap.hpp
+        FeatureExtraction.hpp
 )
 
 rock_library(sonar_detectors
