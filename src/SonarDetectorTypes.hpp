@@ -4,22 +4,7 @@
 #include <base/eigen.h>
 #include <base/time.h>
 
-#include <list>
-#include <vector>
-
 namespace avalon{
-    
-/**
- * This will be used to select the major entries inside 
- * a single beam.
- */
-enum BeamMode 
-{
-    globalMaximum,
-    firstLokalMaximum,
-    allLokalMaxima,
-    allEntries
-};
 
 /**
  * constat for the sonic velocity in water

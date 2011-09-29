@@ -3,6 +3,7 @@
 
 #include "SonarDetectorTypes.hpp"
 #include "SonarEstimation.hpp"
+#include "FeatureExtraction.hpp"
 
 #include <base/samples/sonar_beam.h>
 #include <base/eigen.h>
@@ -20,17 +21,15 @@ namespace avalon
 class SonarBeamProcessing 
 {   
     public:
-        SonarBeamProcessing(BeamMode beamMode);
+        SonarBeamProcessing();
         ~SonarBeamProcessing();
         void addSonarEstimation(avalon::SonarEstimation* estimation);
         void removeSonarEstimation(avalon::SonarEstimation* estimation);
         void updateSonarData(const base::samples::SonarBeam& sonarScan);
         void updateOrientation(const base::Orientation& orientation);
         void updatePosition(const base::Position& position);
-        void selectBeamMode(BeamMode mode);
-        void enableBeamThreshold(bool b);
-        void setBeamThreshold(double minThreshold, double maxThreshold);
-        void setMinResponseValue(int minValue);
+        void setBeamThreshold(double minThreshold);
+        void setMinResponseValue(double minValue);
         
         static avalon::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation);
         
@@ -38,12 +37,8 @@ class SonarBeamProcessing
         std::vector<estimator> estimators;
         base::Orientation orientation;
         base::Position position;
-        BeamMode beamMode;
-        bool enableThreshold;
         double minThreshold;
-        double maxThreshold;
-        int minResponseValue;
-        int indexWindowSize;
+        sonar_detectors::FeatureExtraction featureExtraction;
         
         std::vector<int> computeSonarScanIndex(const std::vector<base::samples::SonarBeam::uint8_t>& scan, int minIndex, int maxIndex, int minValue);
         int getNextMaximum(const int& startIndex, const int& endIndex, const int& minValue, const std::vector<base::samples::SonarBeam::uint8_t>& scan);

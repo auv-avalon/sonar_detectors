@@ -3,6 +3,7 @@
 
 #include "SonarDetectorTypes.hpp"
 #include <base/samples/rigid_body_state.h>
+#include <vector>
 
 namespace avalon
 {
