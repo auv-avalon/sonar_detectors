@@ -6,7 +6,7 @@ namespace vizkit
 
 SonarFeatureVisualization::SonarFeatureVisualization()
 {
-    VizPluginRubyAdapter(SonarFeatureVisualization, std::vector< base::Vector3d >, PointCloud)
+    VizPluginRubyAdapter(SonarFeatureVisualization, base::samples::Pointcloud, PointCloud)
 }
 
 /**
@@ -50,7 +50,7 @@ const std::string SonarFeatureVisualization::getPluginName() const
  * 
  * @param data new sonar data
  */
-void SonarFeatureVisualization::updateDataIntern(const std::vector< base::Vector3d >& data)
+void SonarFeatureVisualization::updateDataIntern(const base::samples::Pointcloud& data)
 {
     pointCloud = data;
 }
@@ -67,7 +67,7 @@ void SonarFeatureVisualization::updateDataIntern(const std::vector< base::Vector
 void SonarFeatureVisualization::updateMainNode(osg::Node* node)
 {
     pointsOSG->clear();
-    for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.begin(); pos != pointCloud.end(); pos++)
+    for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
     {
         osg::Vec3d vec(pos->x(), pos->y(), pos->z());
         pointsOSG->push_back(vec);

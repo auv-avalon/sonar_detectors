@@ -3,7 +3,7 @@
 
 #include <list>
 #include <base/time.h>
-#include <iostream>
+#include <stdint.h>
 
 namespace avalon
 {

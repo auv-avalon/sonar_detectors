@@ -2,7 +2,7 @@
 #define SonarFeatureVisualization_H
 
 #include <vizkit/Vizkit3DPlugin.hpp>
-#include <base/eigen.h>
+#include <base/samples/pointcloud.h>
 
 #include <osg/Node>
 #include <osg/Geometry>
@@ -16,7 +16,7 @@ namespace vizkit
  * If the class gets updated with a body state the sonar 
  * data is absolute, otherwise relative.
  */
-class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< std::vector< base::Vector3d > >
+class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< base::samples::Pointcloud >
 {    
     public:
         SonarFeatureVisualization();
@@ -25,10 +25,10 @@ class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< std::vector< ba
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
-        void updateDataIntern ( const std::vector< base::Vector3d >& data );
+        void updateDataIntern ( const base::samples::Pointcloud& data );
         
     private:
-        std::vector< base::Vector3d > pointCloud;
+        base::samples::Pointcloud pointCloud;
         osg::ref_ptr<osg::Vec3Array> pointsOSG;
         osg::ref_ptr<osg::DrawArrays> drawArrays;
         osg::ref_ptr<osg::Geometry> pointGeom;
