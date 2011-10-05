@@ -97,7 +97,8 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarS
         return;
     
     featureExtraction.setBoundingBox(minThreshold, sonarScan.sampling_interval ,sonarScan.speed_of_sound);
-    int index = featureExtraction.getFeatureGlobalMaxima(sonarScan.beam);
+    std::vector<float> beam = featureExtraction.noFilter(sonarScan.beam);
+    int index = featureExtraction.getFeatureGlobalMaxima(beam);
     
     std::vector<obstaclePoint> obstaclePoints;
     if (index >= 0)

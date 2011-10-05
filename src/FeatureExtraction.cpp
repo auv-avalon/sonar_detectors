@@ -159,9 +159,22 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
         return -1;
 }
 
-std::vector<uint8_t> FeatureExtraction::filterData(const std::vector<uint8_t>& beam)
+std::vector< float > FeatureExtraction::noFilter(const std::vector< uint8_t >& beam)
 {
-    std::vector<uint8_t> filtered_beam;
+    std::vector<float> filtered_beam;
+    for(unsigned int i = 1; i < beam.size(); i++)
+    {
+        filtered_beam.push_back((float)beam[i]);
+    }
+    return filtered_beam;
+}
+
+std::vector<float> FeatureExtraction::smoothFilter(const std::vector<uint8_t>& beam)
+{
+    if(beam.size() == 0)
+        return std::vector<float>();
+        
+    std::vector<float> filtered_beam;
     filtered_beam.push_back(beam[0] * 0.5);
     for(unsigned int i = 1; i < beam.size(); i++)
     {
@@ -170,11 +183,55 @@ std::vector<uint8_t> FeatureExtraction::filterData(const std::vector<uint8_t>& b
     return filtered_beam;
 }
 
+std::vector<float> FeatureExtraction::balancePointFilter(const std::vector<uint8_t>& beam)
+{
+    std::vector<float> filtered_beam;
+    int window_value = 0;
+    
+    //fill window
+    unsigned window_index = 0;
+    for(unsigned int i = window_index; i < indexWindowSize && i < beam.size(); i++)
+        window_value += beam[i];
+    
+    for(int i = 0; i < indexWindowSize / 2; i++)
+        filtered_beam.push_back(0);
+
+    //slide window
+    for(int i = window_index; i < ((int)beam.size()) - indexWindowSize; i++)
+    {
+        filtered_beam.push_back((uint8_t)(window_value / indexWindowSize));
+        window_value+= beam[i+indexWindowSize];
+        window_value-= beam[i];
+    }
+
+    for(int i = 0; i < indexWindowSize / 2; i++)
+        filtered_beam.push_back(0);
+
+    return filtered_beam;
+}
+
+void FeatureExtraction::removeInfluence(std::vector< float >& beam)
+{
+    unsigned int start_pos = beam.size();
+    for(int i = beam.size() - 1; i > minimumIndex; i--)
+    {
+        if(beam[i] < 3)
+        {
+            for(int j = i; j < start_pos; j++)
+            {
+                beam[j] = 0;
+            }
+            start_pos = i;
+        }
+    }
+}
 
 void FeatureExtraction::setBoundingBox(const double radius, const double sampling_interval, const int sonicVelocityInWater)
 {
     if (sampling_interval != 0 && sonicVelocityInWater != 0)
         minimumIndex = (radius * 2) / (sampling_interval * sonicVelocityInWater);
+    if (minimumIndex < indexWindowSize * 0.5)
+        minimumIndex = indexWindowSize * 0.5;
 }
 
 void FeatureExtraction::setMinResponseValue(double minValue)
