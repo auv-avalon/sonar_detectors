@@ -11,14 +11,14 @@ FeatureExtraction::FeatureExtraction() :
     
 }
     
-int FeatureExtraction::getFeatureGlobalMaxima(const std::vector<uint8_t>& beam)
+int FeatureExtraction::getFeatureGlobalMaxima(const std::vector<float>& beam)
 {    
     // cut up noise
     while(beam[minimumIndex] > 5 && minimumIndex < beam.size())
         minimumIndex++;
 
-    unsigned int act_window_value = 0;
-    unsigned int best_window_value = 0;
+    float act_window_value = 0;
+    float best_window_value = 0;
     unsigned int best_window_pos = minimumIndex;
 
     //fill window
@@ -59,13 +59,13 @@ int FeatureExtraction::getFeatureGlobalMaxima(const std::vector<uint8_t>& beam)
         return -1;
 }
 
-int FeatureExtraction::getFeatureHighestWaveFromBehind(const std::vector< uint8_t >& beam)
+int FeatureExtraction::getFeatureHighestWaveFromBehind(const std::vector< float >& beam)
 {
     if(beam.size() == 0)
         return -1;
         
-    unsigned int act_window_value = 0;
-    unsigned int best_window_value = 0;
+    float act_window_value = 0;
+    float best_window_value = 0;
     unsigned int best_window_pos = 0;
     
     //fill window
@@ -92,7 +92,7 @@ int FeatureExtraction::getFeatureHighestWaveFromBehind(const std::vector< uint8_
     }
     
     //find maximum insight the best window
-    unsigned int best_val = 0;
+    float best_val = 0;
     int best_index = -1;
     for(unsigned int i = best_window_pos; i < beam.size() || i < best_window_pos + indexWindowSize; i++)
     {
@@ -109,7 +109,7 @@ int FeatureExtraction::getFeatureHighestWaveFromBehind(const std::vector< uint8_
         return -1;
 }
 
-int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< uint8_t >& beam)
+int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float >& beam)
 {
     if(beam.size() == 0)
         return -1;
