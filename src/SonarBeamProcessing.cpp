@@ -75,7 +75,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     obstaclePoint.time = sonarScan.time;
     obstaclePoint.value = sonarScan.beam[index];
     obstaclePoint.distance = distance;
-    obstaclePoint.angle = scanAngle;
+    obstaclePoint.angle = base::Angle::normalizeRad(scanAngle + base::getYaw(orientation));
     
     return obstaclePoint;
 }
