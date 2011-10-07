@@ -4,7 +4,8 @@
 #include <base/eigen.h>
 #include <base/time.h>
 
-namespace avalon{
+namespace sonar_detectors
+{
 
 /**
  * constat for the sonic velocity in water

@@ -15,7 +15,7 @@
 #include <cmath>
 #include <avalonmath.h>
 
-namespace avalon
+namespace sonar_detectors
 {
   
 class SonarBeamProcessing 
@@ -23,15 +23,15 @@ class SonarBeamProcessing
     public:
         SonarBeamProcessing();
         ~SonarBeamProcessing();
-        void addSonarEstimation(avalon::SonarEstimation* estimation);
-        void removeSonarEstimation(avalon::SonarEstimation* estimation);
+        void addSonarEstimation(sonar_detectors::SonarEstimation* estimation);
+        void removeSonarEstimation(sonar_detectors::SonarEstimation* estimation);
         void updateSonarData(const base::samples::SonarBeam& sonarScan);
         void updateOrientation(const base::Orientation& orientation);
         void updatePosition(const base::Position& position);
         void setBeamThreshold(double minThreshold);
         void setMinResponseValue(double minValue);
         
-        static avalon::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation);
+        static sonar_detectors::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation);
         
     private:
         std::vector<estimator> estimators;

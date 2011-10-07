@@ -5,7 +5,7 @@
 #include "SonarEstimation.hpp"
 #include "SonarMap.hpp"
 
-namespace avalon
+namespace sonar_detectors
 {
     /**
      * This class trys to estimate a line on a given pointcloud.
@@ -24,12 +24,12 @@ namespace avalon
         const base::Vector3d getRelativeVirtualPoint();
         std::vector<base::Vector3d> getPointCloud();
         void setRansacParameters(double threshold, double fit_rate);
-        virtual void updateSegment(const std::vector<avalon::obstaclePoint>& features);
+        virtual void updateSegment(const std::vector<sonar_detectors::obstaclePoint>& features);
         
     private:
         void computeVirtualPoint();
         
-        avalon::SonarMap< std::vector<obstaclePoint> > sonarMap;
+        sonar_detectors::SonarMap< std::vector<obstaclePoint> > sonarMap;
         std::list< std::vector<obstaclePoint> >* featureList;
         std::vector< std::pair<base::Vector3d, base::Vector3d> > walls;
         std::vector<base::Vector3d> pointCloud;

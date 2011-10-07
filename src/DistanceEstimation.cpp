@@ -2,7 +2,7 @@
 #include "SonarDetectorMath.hpp"
 #include <math.h>
 
-namespace avalon
+namespace sonar_detectors
 {
 
 DistanceEstimation::DistanceEstimation()
@@ -15,7 +15,7 @@ DistanceEstimation::~DistanceEstimation()
     
 }
 
-void DistanceEstimation::updateSegment(const std::vector<avalon::obstaclePoint> &features)
+void DistanceEstimation::updateSegment(const std::vector<sonar_detectors::obstaclePoint> &features)
 {
     checkTimeout();
     

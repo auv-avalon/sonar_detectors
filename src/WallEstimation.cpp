@@ -1,7 +1,7 @@
 #include "WallEstimation.hpp"
 #include "SonarDetectorMath.hpp"
 
-namespace avalon
+namespace sonar_detectors
 {
     
 WallEstimation::WallEstimation()
@@ -17,7 +17,7 @@ WallEstimation::~WallEstimation()
 
 }
 
-void WallEstimation::updateSegment(const std::vector<avalon::obstaclePoint>& features)
+void WallEstimation::updateSegment(const std::vector<sonar_detectors::obstaclePoint>& features)
 {
     if(!features.empty())
     {
@@ -52,7 +52,7 @@ void WallEstimation::updateSegment(const std::vector<avalon::obstaclePoint>& fea
         std::vector< std::pair<base::Vector3d, base::Vector3d> > new_walls;
         int iterations = pointCloud.size() * 3;
         if (iterations > 200) iterations = 200;
-        double error = avalon::wallRansac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, new_walls);
+        double error = sonar_detectors::wallRansac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, new_walls);
         
         if (error < 1.0)
         {

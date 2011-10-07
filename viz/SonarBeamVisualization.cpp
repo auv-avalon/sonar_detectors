@@ -82,11 +82,11 @@ const std::string SonarBeamVisualization::getPluginName() const
  */
 void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& data)
 {
-    std::vector<avalon::obstaclePoint> features;
+    std::vector<sonar_detectors::obstaclePoint> features;
     for(int i = 0; i < data.beam.size(); i++)
     {
         if(data.beam[i] > 0)
-            features.push_back(avalon::SonarBeamProcessing::computeObstaclePoint(i, data, bodyState.orientation));
+            features.push_back(sonar_detectors::SonarBeamProcessing::computeObstaclePoint(i, data, bodyState.orientation));
     }
     sonarMap.addFeature(features, data.bearing.rad, data.time);
     currentAngle = data.bearing.rad;
@@ -120,9 +120,9 @@ void SonarBeamVisualization::updateMainNode(osg::Node* node)
         // draw sonar data
         pointsOSG->clear();
         color->clear();
-        for(std::list< std::vector<avalon::obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
+        for(std::list< std::vector<sonar_detectors::obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
         {
-            for(std::vector<avalon::obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
+            for(std::vector<sonar_detectors::obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
             {
                 osg::Vec3d vec(v_it->position.x(), v_it->position.y(), v_it->position.z());
                 pointsOSG->push_back(vec);

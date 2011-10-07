@@ -1,7 +1,7 @@
 #include "SonarDetectorMath.hpp"
 #include <opencv/cv.h>
 
-namespace avalon
+namespace sonar_detectors
 {
 
 /**

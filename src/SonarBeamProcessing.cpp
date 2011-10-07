@@ -1,7 +1,7 @@
 #include "SonarBeamProcessing.hpp"
 #include <iostream>
 
-namespace avalon
+namespace sonar_detectors
 {
 SonarBeamProcessing::SonarBeamProcessing()
 {
@@ -70,7 +70,7 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     
     wallPoint = rotate * wallPoint;
         
-    avalon::obstaclePoint obstaclePoint;
+    sonar_detectors::obstaclePoint obstaclePoint;
     obstaclePoint.position = wallPoint;
     obstaclePoint.time = sonarScan.time;
     obstaclePoint.value = sonarScan.beam[index];
@@ -104,7 +104,7 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarS
     if (index >= 0)
     {
         // calculate feature
-        avalon::obstaclePoint obstaclePoint = computeObstaclePoint(index, sonarScan, orientation);
+        sonar_detectors::obstaclePoint obstaclePoint = computeObstaclePoint(index, sonarScan, orientation);
         obstaclePoints.push_back(obstaclePoint);
     }
     

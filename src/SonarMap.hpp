@@ -5,7 +5,7 @@
 #include <base/time.h>
 #include <stdint.h>
 
-namespace avalon
+namespace sonar_detectors
 {
 
 template <class T>

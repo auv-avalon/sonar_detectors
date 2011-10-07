@@ -4,7 +4,7 @@
 #include "SonarDetectorTypes.hpp"
 #include "SonarEstimation.hpp"
 
-namespace avalon
+namespace sonar_detectors
 {
     
     const static double weightNewValue = 0.4;
@@ -24,13 +24,13 @@ namespace avalon
     public:
         DistanceEstimation();
         ~DistanceEstimation();
-        virtual void updateSegment(const std::vector<avalon::obstaclePoint> &features);
+        virtual void updateSegment(const std::vector<sonar_detectors::obstaclePoint> &features);
         double getActualDistance();
         
     private:
         void checkTimeout();
         
-        avalon::obstaclePoint actualPoint;
+        sonar_detectors::obstaclePoint actualPoint;
         double actualDistance;
     };
 }

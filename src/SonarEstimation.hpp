@@ -5,19 +5,19 @@
 #include <base/samples/rigid_body_state.h>
 #include <vector>
 
-namespace avalon
+namespace sonar_detectors
 {
     class SonarEstimation
     {
     public:
-        virtual void updateSegment(const std::vector<avalon::obstaclePoint> &features) = 0;
+        virtual void updateSegment(const std::vector<sonar_detectors::obstaclePoint> &features) = 0;
         
-        avalon::estimationSettings getSettings() 
+        sonar_detectors::estimationSettings getSettings() 
         {
             return settings;
         };
         
-        void setSettings(avalon::estimationSettings& settings)
+        void setSettings(sonar_detectors::estimationSettings& settings)
         {
             this->settings = settings;
         };
@@ -30,7 +30,7 @@ namespace avalon
     protected:
         const base::Orientation* orientation;
         const base::Position* position;
-        avalon::estimationSettings settings;
+        sonar_detectors::estimationSettings settings;
     };
     
     struct estimator

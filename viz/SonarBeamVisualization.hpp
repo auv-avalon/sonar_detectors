@@ -37,8 +37,8 @@ class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::Son
         base::samples::RigidBodyState bodyState;
         bool newSonarScan;
         double currentAngle;
-        avalon::SonarMap< std::vector<avalon::obstaclePoint> > sonarMap;
-        std::list< std::vector<avalon::obstaclePoint> > *featureList;
+        sonar_detectors::SonarMap< std::vector<sonar_detectors::obstaclePoint> > sonarMap;
+        std::list< std::vector<sonar_detectors::obstaclePoint> > *featureList;
         osg::ref_ptr<osg::Vec3Array> pointsOSG;
         osg::ref_ptr<osg::DrawArrays> drawArrays;
         osg::ref_ptr<osg::Geometry> pointGeom;

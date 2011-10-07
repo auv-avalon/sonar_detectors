@@ -4,7 +4,7 @@
 #include <vector>
 #include <base/eigen.h>
 
-namespace avalon
+namespace sonar_detectors
 {  
     const static double right_angle_variance = M_PI / 18.0; // ~10°
     
