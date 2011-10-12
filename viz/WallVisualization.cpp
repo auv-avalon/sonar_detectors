@@ -35,11 +35,6 @@ osg::ref_ptr< osg::Node > WallVisualization::createMainNode()
     return mainNode;
 }
 
-const std::string WallVisualization::getPluginName() const
-{
-    return "WallVisualization";
-}
-
 void WallVisualization::updateDataIntern(const std::vector<base::Vector3d>& data)
 {
     wall = data;

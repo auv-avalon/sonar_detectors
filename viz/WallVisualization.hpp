@@ -14,7 +14,6 @@ class WallVisualization : public vizkit::Vizkit3DPlugin< std::vector<base::Vecto
 {
 public:
     WallVisualization();
-    const std::string getPluginName() const;
     
 protected:
     virtual osg::ref_ptr<osg::Node> createMainNode();

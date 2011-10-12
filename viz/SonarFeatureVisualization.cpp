@@ -38,14 +38,6 @@ osg::ref_ptr< osg::Node > SonarFeatureVisualization::createMainNode()
 }
 
 /**
- * @return plugin name
- */
-const std::string SonarFeatureVisualization::getPluginName() const
-{
-    return "SonarFeatureVisualization";
-}
-
-/**
  * Updates the class with the new sonar data of type SonarScan.
  * 
  * @param data new sonar data

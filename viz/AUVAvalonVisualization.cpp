@@ -88,14 +88,6 @@ osg::ref_ptr< osg::Node > AUVAvalonVisualization::printPrimitivModel(float alpha
     return geode;
 }
 
-/**
- * @return plugin name
- */
-const std::string AUVAvalonVisualization::getPluginName() const
-{
-    return "AUVAvalonVisualization";
-}
-
 void AUVAvalonVisualization::showDesiredModelPosition(bool b)
 {
     showDesiredModel = b;

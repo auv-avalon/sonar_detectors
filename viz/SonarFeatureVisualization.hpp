@@ -20,7 +20,6 @@ class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< base::samples::
 {    
     public:
         SonarFeatureVisualization();
-        const std::string getPluginName() const;
         
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();

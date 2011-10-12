@@ -68,14 +68,6 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
 }
 
 /**
- * @return plugin name
- */
-const std::string SonarBeamVisualization::getPluginName() const
-{
-    return "SonarBeamVisualization";
-}
-
-/**
  * Updates the class with the new sonar data of type SonarScan.
  * 
  * @param data new sonar data

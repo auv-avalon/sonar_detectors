@@ -16,7 +16,6 @@ class AUVAvalonVisualization : public vizkit::Vizkit3DPlugin<base::samples::Rigi
 {
 public:
     AUVAvalonVisualization();
-    const std::string getPluginName() const;
     
 protected:
     virtual osg::ref_ptr<osg::Node> createMainNode();

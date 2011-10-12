@@ -25,7 +25,6 @@ class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::Son
 {    
     public:
         SonarBeamVisualization();
-        const std::string getPluginName() const;
         
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
