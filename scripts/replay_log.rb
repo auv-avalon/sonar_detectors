@@ -8,7 +8,7 @@ if ARGV[0] == nil
 	exit
 end
 
-view3d = Vizkit.default_loader.create_widget('vizkit::Vizkit3DWidget')
+view3d = Vizkit.default_loader.create_widget('vizkit::QVizkitMainWindow')
 view3d.show
 sonarbeamviz = view3d.createPlugin("sonarbeam","SonarBeamVisualization")
 

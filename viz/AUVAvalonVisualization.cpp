@@ -103,6 +103,11 @@ void AUVAvalonVisualization::desiredModelPositionRelHeading(bool b)
     desiredModel_rel_heading = b;
 }
 
+double AUVAvalonVisualization::getCurrentDepth()
+{
+    return rbs.position.z();
+}
+
 /**
  * Updates the class with the new body state of type RigidBodyState.
  * 
@@ -111,6 +116,7 @@ void AUVAvalonVisualization::desiredModelPositionRelHeading(bool b)
 void AUVAvalonVisualization::updateDataIntern(const base::samples::RigidBodyState& data)
 {
     rbs = data;
+    emit propertyChanged("current_depth");
 }
 
 /**

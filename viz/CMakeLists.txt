@@ -16,7 +16,8 @@ rock_vizkit_plugin(wall-viz
 rock_vizkit_plugin(auv_avalon-viz
     AUVAvalonVisualization.cpp
     DEPS sonar_detectors
-    HEADERS AUVAvalonVisualization.hpp)
+    HEADERS AUVAvalonVisualization.hpp
+    MOC AUVAvalonVisualization.hpp)
 
 # install osg file
 install(FILES

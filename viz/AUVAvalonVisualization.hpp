@@ -4,6 +4,7 @@
 #include <vizkit/Vizkit3DPlugin.hpp>
 #include <base/samples/rigid_body_state.h>
 #include <base/motion_command.h>
+#include <QObject>
 
 #include <osg/Node>
 #include <osg/PositionAttitudeTransform>
@@ -14,6 +15,9 @@ namespace vizkit
 class AUVAvalonVisualization : public vizkit::Vizkit3DPlugin<base::samples::RigidBodyState>,
                                public vizkit::VizPluginAddType<base::AUVPositionCommand>
 {
+    Q_OBJECT
+    Q_PROPERTY(double current_depth READ getCurrentDepth)
+    
 public:
     AUVAvalonVisualization();
     
@@ -25,6 +29,7 @@ protected:
     void showDesiredModelPosition(bool b);
     void desiredModelPositionRelZ(bool b);
     void desiredModelPositionRelHeading(bool b);
+    double getCurrentDepth();
     
 private:
     osg::ref_ptr< osg::Node > printPrimitivModel(float alpha = 1.0);
