@@ -21,7 +21,7 @@ void WallEstimation::updateSegment(const std::vector<sonar_detectors::obstaclePo
 {
     if(!features.empty())
     {
-        sonarMap.addFeature(features, features.front().angle, features.front().time);
+        sonarMap.addFeature(features, features.front().angle.rad, features.front().time);
         
         // check if enough points available
         if (pointCloud.size() < min_count_pointcloud)

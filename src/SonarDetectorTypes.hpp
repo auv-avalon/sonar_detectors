@@ -3,6 +3,7 @@
 
 #include <base/eigen.h>
 #include <base/time.h>
+#include <base/angle.h>
 
 namespace sonar_detectors
 {
@@ -20,10 +21,10 @@ struct obstaclePoint
     base::Vector3d position;
     uint8_t value;
     base::Time time;
-    double angle;
+    base::Angle angle;
     double distance;
     obstaclePoint()
-    : position(0,0,0), value(0), time(base::Time::now()), angle(0), distance(0){}
+    : position(0,0,0), value(0), time(base::Time::now()), distance(0){}
 };
 
 /**
@@ -32,10 +33,15 @@ struct obstaclePoint
  */
 struct estimationSettings
 {
-    double startAngle;
-    double endAngle;
+    base::Angle startAngle;
+    base::Angle endAngle;
+    bool boundedInput;
     estimationSettings()
-    : startAngle(-1), endAngle(-1){}
+    : boundedInput(0)
+    {
+        startAngle = base::Angle::fromRad(-M_PI);
+        endAngle = base::Angle::fromRad(M_PI);
+    }
 };
     
 }

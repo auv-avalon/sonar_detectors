@@ -29,7 +29,7 @@ public:
         }
         else
         {
-            // handle switch between 0 and 2 PI
+            // handle switch between -PI and PI
             if (abs(angle_it->first - angle) > M_PI)
             {
                 if (angle >= 0) 
