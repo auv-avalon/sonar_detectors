@@ -274,14 +274,14 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
         return -1;
 }
 
-std::vector< float > FeatureExtraction::noFilter(const std::vector< uint8_t >& beam)
+std::vector< float > FeatureExtraction::convertBeam(const std::vector< uint8_t >& beam)
 {
-    std::vector<float> filtered_beam;
+    std::vector<float> converted_beam;
     for(unsigned int i = 1; i < beam.size(); i++)
     {
-        filtered_beam.push_back((float)beam[i]);
+        converted_beam.push_back((float)beam[i]);
     }
-    return filtered_beam;
+    return converted_beam;
 }
 
 std::vector<float> FeatureExtraction::smoothFilter(const std::vector<uint8_t>& beam)

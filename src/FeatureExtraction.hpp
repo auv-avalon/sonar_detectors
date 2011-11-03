@@ -51,9 +51,9 @@ public:
     int getFeatureHighestWaveFromBehind(const std::vector<float>& beam);
     int getFeatureMaximalLevelDifference(const std::vector<float>& beam);
     
-    std::vector<float> noFilter(const std::vector<uint8_t>& beam);
     std::vector<float> smoothFilter(const std::vector<uint8_t>& beam);
     std::vector<float> balancePointFilter(const std::vector<uint8_t>& beam);
+    std::vector<float> convertBeam(const std::vector<uint8_t>& beam);
     
     void removeInfluence(std::vector<float>& beam);
     
