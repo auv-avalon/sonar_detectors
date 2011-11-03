@@ -38,17 +38,14 @@ void SonarBeamProcessing::setMinResponseValue(double minValue)
 void SonarBeamProcessing::addSonarEstimation(SonarEstimation* estimation)
 {
     estimation->setPose(&orientation, &position);
-    estimator est;
-    est.estimation = estimation;
-    est.settings = estimation->getSettings();
-    estimators.push_back(est);
+    estimators.push_back(estimation);
 }
 
 void SonarBeamProcessing::removeSonarEstimation(SonarEstimation* estimation)
 {
-    for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
+    for(std::vector<SonarEstimation*>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        if (it->estimation == estimation)
+        if ((*it) == estimation)
         {
             estimators.erase(it);
         }
@@ -82,13 +79,11 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
 
 void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarScan)
 {
-    double scanAngle = sonarScan.bearing.rad;
-    
     //check if angle is required
     bool required = false;
-    for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
+    for(std::vector<SonarEstimation*>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        if (it->settings.startAngle < 0 || it->settings.endAngle < 0 || scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
+        if ((*it)->isAngleInRange(sonarScan.bearing))
         {
             required = true;
         }
@@ -97,7 +92,7 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarS
         return;
     
     featureExtraction.setBoundingBox(minThreshold, sonarScan.sampling_interval ,sonarScan.speed_of_sound);
-    std::vector<float> beam = featureExtraction.noFilter(sonarScan.beam);
+    std::vector<float> beam = featureExtraction.convertBeam(sonarScan.beam);
     int index = featureExtraction.getFeatureGlobalMaxima(beam);
     
     std::vector<obstaclePoint> obstaclePoints;
@@ -109,14 +104,9 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarS
     }
     
     //feed estimators
-    for(std::vector<estimator>::iterator it = estimators.begin(); it != estimators.end(); it++)
+    for(std::vector<SonarEstimation*>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        // send new features to the estimators if they are in their scan range
-        if (it->settings.startAngle < 0 || it->settings.endAngle < 0
-            || scanAngle > it->settings.startAngle && scanAngle < it->settings.endAngle)
-        {
-            it->estimation->updateSegment(obstaclePoints);
-        }
+        (*it)->updateFeatures(obstaclePoints);
     }
     
 }

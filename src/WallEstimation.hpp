@@ -24,7 +24,7 @@ namespace sonar_detectors
         const base::Vector3d getRelativeVirtualPoint();
         std::vector<base::Vector3d> getPointCloud();
         void setRansacParameters(double threshold, double fit_rate);
-        virtual void updateSegment(const std::vector<sonar_detectors::obstaclePoint>& features);
+        virtual void updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint>& features);
         
     private:
         void computeVirtualPoint();

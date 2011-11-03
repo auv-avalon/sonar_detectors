@@ -15,7 +15,7 @@ DistanceEstimation::~DistanceEstimation()
     
 }
 
-void DistanceEstimation::updateSegment(const std::vector<sonar_detectors::obstaclePoint> &features)
+void DistanceEstimation::updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint> &features)
 {
     checkTimeout();
     

@@ -34,7 +34,7 @@ class SonarBeamProcessing
         static sonar_detectors::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation);
         
     private:
-        std::vector<estimator> estimators;
+        std::vector<SonarEstimation*> estimators;
         base::Orientation orientation;
         base::Position position;
         double minThreshold;

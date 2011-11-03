@@ -24,7 +24,7 @@ namespace sonar_detectors
     public:
         DistanceEstimation();
         ~DistanceEstimation();
-        virtual void updateSegment(const std::vector<sonar_detectors::obstaclePoint> &features);
+        virtual void updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint> &features);
         double getActualDistance();
         
     private:

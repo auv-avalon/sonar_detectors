@@ -17,7 +17,7 @@ WallEstimation::~WallEstimation()
 
 }
 
-void WallEstimation::updateSegment(const std::vector<sonar_detectors::obstaclePoint>& features)
+void WallEstimation::updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint>& features)
 {
     if(!features.empty())
     {
