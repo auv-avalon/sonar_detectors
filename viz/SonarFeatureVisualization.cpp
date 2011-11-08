@@ -7,6 +7,8 @@ namespace vizkit
 SonarFeatureVisualization::SonarFeatureVisualization()
 {
     VizPluginRubyAdapter(SonarFeatureVisualization, base::samples::Pointcloud, PointCloud)
+    VizPluginRubyAdapter(SonarFeatureVisualization, std::vector< base::Vector3d >, ChannelData)
+    newPoints = false;
 }
 
 /**
@@ -22,10 +24,9 @@ osg::ref_ptr< osg::Node > SonarFeatureVisualization::createMainNode()
     pointGeom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
     pointGeom->setVertexArray(pointsOSG);
-    osg::Vec4Array* color = new osg::Vec4Array;
-    color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    color = new osg::Vec4Array;
     pointGeom->setColorArray(color);
-    pointGeom->setColorBinding(osg::Geometry::BIND_OVERALL);
+    pointGeom->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE);
     pointGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, pointsOSG->size() );
     pointGeom->addPrimitiveSet(drawArrays.get());
@@ -45,6 +46,12 @@ osg::ref_ptr< osg::Node > SonarFeatureVisualization::createMainNode()
 void SonarFeatureVisualization::updateDataIntern(const base::samples::Pointcloud& data)
 {
     pointCloud = data;
+    newPoints = true;
+}
+
+void SonarFeatureVisualization::updateDataIntern(const std::vector< base::Vector3d >& data)
+{
+    channelInfos = data;
 }
 
 /**
@@ -58,15 +65,31 @@ void SonarFeatureVisualization::updateDataIntern(const base::samples::Pointcloud
  */
 void SonarFeatureVisualization::updateMainNode(osg::Node* node)
 {
-    pointsOSG->clear();
-    for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
+    if(newPoints)
     {
-        osg::Vec3d vec(pos->x(), pos->y(), pos->z());
-        pointsOSG->push_back(vec);
-        pointsOSG->push_back(vec + osg::Vec3d(0,0,2));
+        newPoints = false;
+        pointsOSG->clear();
+        std::vector<base::Vector3d>::const_iterator chan_pos = channelInfos.begin();
+        for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
+        {
+            osg::Vec3d vec(pos->x(), pos->y(), pos->z());
+            pointsOSG->push_back(vec);
+            pointsOSG->push_back(vec + osg::Vec3d(0,0,2));
+            
+            if(chan_pos != channelInfos.end())
+            {
+                color->push_back(osg::Vec4(chan_pos->x(), chan_pos->y(), chan_pos->z(), 1.0f));
+                chan_pos++;
+            }
+            else
+            {
+                color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+            }
+        }
+        drawArrays->setCount(pointsOSG->size());
+        pointGeom->setVertexArray(pointsOSG);
+        pointGeom->setColorArray(color);
     }
-    drawArrays->setCount(pointsOSG->size());
-    pointGeom->setVertexArray(pointsOSG);
 }
 
 VizkitQtPlugin(SonarFeatureVisualization)
