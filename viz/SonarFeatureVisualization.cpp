@@ -69,6 +69,7 @@ void SonarFeatureVisualization::updateMainNode(osg::Node* node)
     {
         newPoints = false;
         pointsOSG->clear();
+        color->clear();
         std::vector<base::Vector3d>::const_iterator chan_pos = channelInfos.begin();
         for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
         {
