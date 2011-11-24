@@ -23,9 +23,9 @@ void SonarEnvironmentModel::getExpectedObstaclePositions(const double beam_angle
 {
     // transform beam angle value to range 1..-1
     double linearized_beam_angle = beam_angle;
-    if(beam_angle < 0)
-        linearized_beam_angle = linearized_beam_angle * -1;
-    linearized_beam_angle = ((linearized_beam_angle / M_PI_2) - 1) * -1;
+    if(beam_angle < 0.0)
+        linearized_beam_angle = linearized_beam_angle * -1.0;
+    linearized_beam_angle = ((linearized_beam_angle / M_PI_2) - 1.0) * -1.0;
     
     double auv_pitch_angle = orientation.toRotationMatrix().eulerAngles(2,1,0)[1];
     double beamwidth_vertical_up = (beamwidth_vertical * 0.5) - auv_pitch_angle * linearized_beam_angle;
@@ -38,7 +38,7 @@ void SonarEnvironmentModel::getExpectedObstaclePositions(const double beam_angle
 
 int SonarEnvironmentModel::getExpectedObstaclePosition(const double beamwidth_vertical_angle, const double distance_to_plain)
 {
-    if(distance_to_plain <= 0 || beamwidth_vertical_angle <= 0)
+    if(distance_to_plain <= 0.0 || beamwidth_vertical_angle <= 0.0)
         return -1;
     
     double distance = distance_to_plain / tan(beamwidth_vertical_angle);
@@ -50,10 +50,10 @@ int SonarEnvironmentModel::getExpectedObstaclePosition(const double beamwidth_ve
 int SonarEnvironmentModel::getAUVModelConstrains(const double beam_angle, double& beamwidth_vertical_down)
 {
     double positive_beam_angle = beam_angle;
-    if(positive_beam_angle < 0)
-        positive_beam_angle = positive_beam_angle * -1;
+    if(positive_beam_angle < 0.0)
+        positive_beam_angle = positive_beam_angle * -1.0;
     
-    double distance = 0;
+    double distance = 0.0;
     if(angle_to_edge_distance.find(positive_beam_angle) == angle_to_edge_distance.end())
     {
         int i = 0;
@@ -100,8 +100,8 @@ void SonarEnvironmentModel::updateAUVOrientation(const base::Quaterniond orienta
 
 void SonarEnvironmentModel::updateDistanceToGround(const double distance)
 {
-    if(distance < 0)
-        distance_to_ground = 0;
+    if(distance < 0.0)
+        distance_to_ground = 0.0;
     else 
         distance_to_ground = distance;
 }
@@ -109,7 +109,7 @@ void SonarEnvironmentModel::updateDistanceToGround(const double distance)
 void SonarEnvironmentModel::updateDistanceToSurface(const double distance)
 {
     if(distance < 0)
-        distance_to_surface = 0;
+        distance_to_surface = 0.0;
     else 
         distance_to_surface = distance;
 }
@@ -120,7 +120,7 @@ void SonarEnvironmentModel::updateDistanceToSurface(const double distance)
     
 FeatureExtraction::FeatureExtraction() :
                     minimumIndex(0),
-                    minimumValue(20),
+                    minimumValue(20.0),
                     indexWindowSize(50)
 {
     
@@ -129,11 +129,11 @@ FeatureExtraction::FeatureExtraction() :
 int FeatureExtraction::getFeatureGlobalMaxima(const std::vector<float>& beam)
 {    
     // cut up noise
-    while(beam[minimumIndex] > 5 && minimumIndex < beam.size())
+    while(beam[minimumIndex] > 5.0f && minimumIndex < beam.size())
         minimumIndex++;
 
-    float act_window_value = 0;
-    float best_window_value = 0;
+    float act_window_value = 0.0f;
+    float best_window_value = 0.0f;
     unsigned int best_window_pos = minimumIndex;
 
     //fill window
@@ -179,10 +179,10 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
     if(beam.size() == 0)
         return -1;
     
-    float first_window_value = 0;
-    float second_window_value = 0;
-    float best_window_difference = -10000;
-    float best_value_difference = 0;
+    float first_window_value = 0.0f;
+    float second_window_value = 0.0f;
+    float best_window_difference = -10000.0f;
+    float best_value_difference = 0.0f;
     unsigned int best_window_pos = 0;
     
     //fill windows
@@ -205,7 +205,7 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
     int j = second_window_index - 1;
     for(int i = first_window_index - 1; j >= minimumIndex; i--, j--)
     {
-        float diff_value = second_window_value - first_window_value * 3;
+        float diff_value = second_window_value - first_window_value * 3.0f;
         if(diff_value > best_window_difference)
         {
             best_window_difference = diff_value;
@@ -242,7 +242,7 @@ void FeatureExtraction::setBoundingBox(const double radius, const double samplin
         minimumIndex = indexWindowSize * 0.5;
 }
 
-void FeatureExtraction::setMinResponseValue(double minValue)
+void FeatureExtraction::setMinResponseValue(const double minValue)
 {
     this->minimumValue = minValue;
 }

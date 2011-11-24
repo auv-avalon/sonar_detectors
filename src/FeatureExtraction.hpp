@@ -34,12 +34,10 @@ private:
     double distance_to_ground;
     double distance_to_surface;
     double distance_to_avalon_model;
-    
     base::Quaterniond orientation;
     double sampling_interval;
     float beamwidth_vertical;
     float speed_of_sound;
-    
 };
 
 class FeatureExtraction
@@ -53,9 +51,9 @@ public:
     std::vector<float> convertBeam(const std::vector<uint8_t>& beam);
     
     void setBoundingBox(const double radius, const double sampling_interval, const int speed_of_sound = 1500);
+    void setMinResponseValue(const double minValue);
     
-    void setMinResponseValue(double minValue);
-    
+
 private:
     unsigned int minimumIndex;
     double minimumValue;
