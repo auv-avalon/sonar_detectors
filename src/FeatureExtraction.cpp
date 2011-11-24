@@ -86,19 +86,19 @@ int SonarEnvironmentModel::getAUVModelConstrains(const double beam_angle, double
     return -1;
 }
     
-void SonarEnvironmentModel::setSonarBeamProperties(const double sampling_interval, const float beamwidth_vertical, const float speed_of_sound)
+void SonarEnvironmentModel::updateSonarBeamProperties(const double sampling_interval, const float beamwidth_vertical, const float speed_of_sound)
 {
     this->sampling_interval = sampling_interval;
     this->beamwidth_vertical = beamwidth_vertical;
     this->speed_of_sound = speed_of_sound;
 }
 
-void SonarEnvironmentModel::setAUVOrientation(const base::Quaterniond orientation)
+void SonarEnvironmentModel::updateAUVOrientation(const base::Quaterniond orientation)
 {
     this->orientation = orientation;
 }
 
-void SonarEnvironmentModel::setDistanceToGround(const double distance)
+void SonarEnvironmentModel::updateDistanceToGround(const double distance)
 {
     if(distance < 0)
         distance_to_ground = 0;
@@ -106,7 +106,7 @@ void SonarEnvironmentModel::setDistanceToGround(const double distance)
         distance_to_ground = distance;
 }
 
-void SonarEnvironmentModel::setDistanceToSurface(const double distance)
+void SonarEnvironmentModel::updateDistanceToSurface(const double distance)
 {
     if(distance < 0)
         distance_to_surface = 0;
@@ -341,10 +341,10 @@ void FeatureExtraction::removeInfluence(std::vector< float >& beam)
     }
 }
 
-void FeatureExtraction::setBoundingBox(const double radius, const double sampling_interval, const int sonicVelocityInWater)
+void FeatureExtraction::setBoundingBox(const double radius, const double sampling_interval, const int speed_of_sound)
 {
-    if (sampling_interval != 0 && sonicVelocityInWater != 0)
-        minimumIndex = (radius * 2) / (sampling_interval * sonicVelocityInWater);
+    if (sampling_interval != 0.0 && speed_of_sound != 0)
+        minimumIndex = (radius * 2) / (sampling_interval * speed_of_sound);
     if (minimumIndex < indexWindowSize * 0.5)
         minimumIndex = indexWindowSize * 0.5;
 }

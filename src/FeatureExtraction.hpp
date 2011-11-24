@@ -19,10 +19,10 @@ public:
     
     void getExpectedObstaclePositions(const double beam_angle, int &pos_auv, int &pos_ground, int &pos_surface);
     
-    void setAUVOrientation(const base::Quaterniond orientation);
-    void setDistanceToGround(const double distance);
-    void setDistanceToSurface(const double distance);
-    void setSonarBeamProperties(const double sampling_interval, const float beamwidth_vertical = (35.0/180.0)*M_PI, const float speed_of_sound = 1500);
+    void updateAUVOrientation(const base::Quaterniond orientation);
+    void updateDistanceToGround(const double distance);
+    void updateDistanceToSurface(const double distance);
+    void updateSonarBeamProperties(const double sampling_interval, const float beamwidth_vertical = (35.0/180.0)*M_PI, const float speed_of_sound = 1500.0);
     
 private:
     int getExpectedObstaclePosition(const double beamwidth_vertical_angle, const double distance_to_plain);
@@ -55,9 +55,9 @@ public:
     std::vector<float> balancePointFilter(const std::vector<uint8_t>& beam);
     std::vector<float> convertBeam(const std::vector<uint8_t>& beam);
     
+    void setBoundingBox(const double radius, const double sampling_interval, const int speed_of_sound = 1500);
     void removeInfluence(std::vector<float>& beam);
     
-    void setBoundingBox(const double radius, const double sampling_interval, const int sonicVelocityInWater = 1500);
     void setMinResponseValue(double minValue);
     
 private:
