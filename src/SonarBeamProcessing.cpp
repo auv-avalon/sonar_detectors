@@ -77,6 +77,30 @@ obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const 
     return obstaclePoint;
 }
 
+base::samples::LaserScan SonarBeamProcessing::computeLaserScan(const int& index, const base::samples::SonarBeam& sonarBeam)
+{
+    base::samples::LaserScan laser_scan;
+    laser_scan.reset();
+    laser_scan.minRange = 1000;
+    laser_scan.maxRange = (uint32_t)(1000 * (sonarBeam.beam.size()-1) * sonarBeam.getSpatialResolution());
+    laser_scan.angular_resolution = 0.0;
+    laser_scan.speed = 0.0;
+    laser_scan.start_angle = sonarBeam.bearing.rad;
+    laser_scan.time = sonarBeam.time;
+    
+    if(index >= 0)
+    {
+        laser_scan.ranges.push_back((uint32_t)(index * sonarBeam.getSpatialResolution() * 1000));
+        laser_scan.remission.push_back(sonarBeam.beam[index]);
+    }
+    else
+    {
+        laser_scan.ranges.push_back(base::samples::TOO_FAR);
+    }
+    
+    return laser_scan;
+}
+
 void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarScan)
 {
     //check if angle is required

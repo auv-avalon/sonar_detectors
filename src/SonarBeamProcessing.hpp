@@ -6,6 +6,7 @@
 #include "FeatureExtraction.hpp"
 
 #include <base/samples/sonar_beam.h>
+#include <base/samples/laser_scan.h>
 #include <base/eigen.h>
 #include <base/samples/rigid_body_state.h>
 #include <Eigen/Core>
@@ -32,6 +33,7 @@ class SonarBeamProcessing
         void setMinResponseValue(double minValue);
         
         static sonar_detectors::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation);
+        static base::samples::LaserScan computeLaserScan(const int& index, const base::samples::SonarBeam& sonarBeam);
         
     private:
         std::vector<SonarEstimation*> estimators;
