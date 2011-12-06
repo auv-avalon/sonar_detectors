@@ -22,7 +22,7 @@ set(HEADERS
 rock_library(sonar_detectors
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
-    DEPS_PKGCONFIG opencv base-types avalontools eigen3
+    DEPS_PKGCONFIG opencv base-types avalontools eigen3 dsp_acoustics
     )
 
 #rock_executable(dummyproject_bin main.cpp
