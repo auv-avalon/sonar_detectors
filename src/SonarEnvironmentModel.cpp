@@ -45,40 +45,60 @@ void SonarEnvironmentModel::updateNoiseDistributionValues(const double beam_angl
     getExpectedObstaclePositions(beam_angle, pos_auv, pos_ground, pos_surface);
 
     // correct device noise sigma
-    std::vector<float>::const_iterator device_noise_new_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator, std::vector<float>::iterator>(beam.begin(), beam.end(), find_first_min_windowsize);
-    if(device_noise_new_local_min != beam.begin())
+    if(pos_auv >= 0)
     {
-        device_noise_first_local_min_pos = device_noise_first_local_min_pos * (1-device_noise_minpos_update_rate) + (device_noise_new_local_min - beam.begin()) * device_noise_minpos_update_rate;
-        if(device_noise_first_local_min_pos < pos_auv)
-            device_noise_first_local_min_pos = pos_auv;
-        float diff = beam[device_noise_first_local_min_pos] - device_noise_distribution(device_noise_first_local_min_pos);
-        device_noise_sigma += (device_noise_grow_update_rate * diff);
-        if(device_noise_sigma < 1.0f) device_noise_sigma = 1.0f;
+        std::vector<float>::const_iterator device_noise_new_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_auv, beam.end() - (beam.size() * 0.8), find_first_min_windowsize);
+        if(device_noise_new_local_min != beam.begin())
+        {
+            device_noise_first_local_min_pos = device_noise_first_local_min_pos * (1-device_noise_minpos_update_rate) + (device_noise_new_local_min - beam.begin()) * device_noise_minpos_update_rate;
+            if(device_noise_first_local_min_pos < pos_auv)
+                device_noise_first_local_min_pos = pos_auv;
+            
+            float mean_diff = 0.0f;
+            for(int i = 0; i < device_noise_first_local_min_pos; i++)
+            {
+                mean_diff += (beam[i] > device_noise_distribution(i)) ? beam[i] - device_noise_distribution(i) : 0.0f;
+            }
+            mean_diff = mean_diff / device_noise_first_local_min_pos;
+            
+            float diff = -1.0f;
+            if(mean_diff > 0.0f)
+                diff = mean_diff;
+            
+            device_noise_sigma += (device_noise_grow_update_rate * diff);
+            if(device_noise_sigma < 1.0f) device_noise_sigma = 1.0f;
+        }
     }
     
     // correct surface gaussian sigma
-    gaussian_surface_u = (float)pos_surface;
-    std::vector<float>::const_iterator gaussian_surface_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator, std::vector<float>::iterator>(beam.begin() + pos_surface, beam.end(), find_first_min_windowsize);
-    float diff_surface = *gaussian_surface_local_min - gaussian_distribution_surface(gaussian_surface_local_min - beam.begin());
-    gaussian_surface_sigma += (gaussian_surface_update_rate * diff_surface);
-    if(gaussian_surface_sigma < 1.0f) gaussian_surface_sigma = 1.0f;
-    // correct surface gaussian k
-    diff_surface = beam[pos_surface] - gaussian_distribution_surface(pos_surface);
-    gaussian_surface_k += (gaussian_surface_update_rate * diff_surface);
-    if(gaussian_surface_k < 1.0f) gaussian_surface_k = 1.0f;
-    //TODO improve the relation between height and width of the gauss distributions
-    //else if (gaussian_surface_k > gaussian_surface_sigma) gaussian_surface_k = gaussian_surface_sigma;
+    if(pos_surface >= 0)
+    {
+        gaussian_surface_u = (float)pos_surface;
+        std::vector<float>::const_iterator gaussian_surface_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_surface, beam.end(), find_first_min_windowsize);
+        float diff_surface = *gaussian_surface_local_min - gaussian_distribution_surface(gaussian_surface_local_min - beam.begin());
+        gaussian_surface_sigma += (gaussian_surface_update_rate * diff_surface);
+        if(gaussian_surface_sigma < 1.0f) gaussian_surface_sigma = 1.0f;
+        // correct surface gaussian k
+        diff_surface = beam[pos_surface] - gaussian_distribution_surface(pos_surface);
+        gaussian_surface_k += (gaussian_surface_update_rate * diff_surface);
+        if(gaussian_surface_k < 1.0f) gaussian_surface_k = 1.0f;
+        //TODO improve the relation between height and width of the gauss distributions
+        //else if (gaussian_surface_k > gaussian_surface_sigma) gaussian_surface_k = gaussian_surface_sigma;
+    }
     
     // correct ground gaussian sigma
-    gaussian_ground_u = (float)pos_ground;
-    std::vector<float>::const_iterator gaussian_ground_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator, std::vector<float>::iterator>(beam.begin() + pos_ground, beam.end(), find_first_min_windowsize);
-    float diff_ground = *gaussian_ground_local_min - gaussian_distribution_ground(gaussian_ground_local_min - beam.begin());
-    gaussian_ground_sigma += (gaussian_ground_update_rate * diff_ground);
-    if(gaussian_ground_sigma < 1.0f) gaussian_ground_sigma = 1.0f;
-    // correct ground gaussian k
-    diff_ground = beam[pos_ground] - gaussian_distribution_ground(pos_ground);
-    gaussian_ground_k += (gaussian_ground_update_rate * diff_ground);
-    if(gaussian_ground_k < 1.0f) gaussian_ground_k = 1.0f;
+    if(pos_ground >= 0)
+    {
+        gaussian_ground_u = (float)pos_ground;
+        std::vector<float>::const_iterator gaussian_ground_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_ground, beam.end(), find_first_min_windowsize);
+        float diff_ground = *gaussian_ground_local_min - gaussian_distribution_ground(gaussian_ground_local_min - beam.begin());
+        gaussian_ground_sigma += (gaussian_ground_update_rate * diff_ground);
+        if(gaussian_ground_sigma < 1.0f) gaussian_ground_sigma = 1.0f;
+        // correct ground gaussian k
+        diff_ground = beam[pos_ground] - gaussian_distribution_ground(pos_ground);
+        gaussian_ground_k += (gaussian_ground_update_rate * diff_ground);
+        if(gaussian_ground_k < 1.0f) gaussian_ground_k = 1.0f;
+    }
 }
 
 void SonarEnvironmentModel::getExpectedObstaclePositions(const double beam_angle, int& pos_auv, int& pos_ground, int& pos_surface)
