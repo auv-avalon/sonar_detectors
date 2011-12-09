@@ -1,17 +1,26 @@
 #include "FeatureExtraction.hpp"
+#include <dsp_acoustics/FIRFilter.h>
+#include <iostream>
 
 namespace sonar_detectors
 {
     
 FeatureExtraction::FeatureExtraction() :
                     minimumIndex(0),
-                    minimumValue(20.0),
-                    indexWindowSize(50)
+                    minimumValue(20.0)
 {
-    
+}
+
+FeatureExtraction::~FeatureExtraction()
+{
+    for(std::list< std::vector<float>* >::iterator it = derivativeHistory.begin(); it != derivativeHistory.end(); it++)
+    {
+        delete *it;
+        derivativeHistory.erase(it);
+    }
 }
     
-int FeatureExtraction::getFeatureGlobalMaxima(const std::vector<float>& beam)
+int FeatureExtraction::getFeatureGlobalMaxima(const std::vector<float>& beam, const unsigned int &indexWindowSize)
 {    
     // cut up noise
     while(beam[minimumIndex] > 5.0f && minimumIndex < beam.size())
@@ -59,7 +68,7 @@ int FeatureExtraction::getFeatureGlobalMaxima(const std::vector<float>& beam)
         return -1;
 }
 
-int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float >& beam)
+int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float >& beam, const unsigned int &indexWindowSize)
 {
     if(beam.size() == 0)
         return -1;
@@ -109,6 +118,140 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
         return -1;
 }
 
+int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length, const float &threshold, const bool &indoor_mode)
+{
+    try
+    {
+        addToDerivativeHistory(beam, history_length);
+    }
+    catch (std::runtime_error e)
+    {
+        std::cerr << "Can't compute the derivative of this beam. " << e.what() << std::endl;
+        return -1;
+    }
+
+    std::vector<float> min_derivative;
+    if(derivativeHistory.size() > 0)
+    {
+        for(std::vector<float>::const_iterator it = derivativeHistory.front()->begin(); it != derivativeHistory.front()->end(); it++)
+        {
+            min_derivative.push_back(*it);
+        }
+        std::list< std::vector<float>* >::iterator it = derivativeHistory.begin();
+        it++;
+        for(; it != derivativeHistory.end(); it++)
+        {
+            if((*it)->size() > min_derivative.size())
+            {
+                min_derivative.resize((*it)->size());
+            }
+            dsp::minimizeSignals<std::vector<float>::const_iterator, std::vector<float>::iterator>(min_derivative.begin(), min_derivative.end(), (*it)->begin(), (*it)->end(), min_derivative.begin());
+        }
+    }
+    
+    int best_pos = -1;
+    float best_peak = 0.0f;
+    float best_pos_plain_window_value = 1000.0f;
+    if(indoor_mode)
+    {
+        std::vector<float>::const_iterator it = min_derivative.begin();
+        do
+        {
+            it++;
+            if(*it > threshold)
+            {
+                int index = it - min_derivative.begin();
+                // analyze plain
+                while(min_derivative[index] > 0 && index > 0)
+                    index--;
+                float plain_window_value = 0.0f;
+                int plain_len = min_derivative.size() * 0.05;
+                if(index - plain_len < 0)
+                    continue;
+                for(int i = index; i < index - plain_len; i--)
+                {
+                    plain_window_value += beam[i];
+                }
+                plain_window_value = plain_window_value / plain_len;
+                // get highest peak
+                index = it - min_derivative.begin();
+                int highest_peak = index;
+                while(min_derivative[index] > 0 && index < min_derivative.size() - 2)
+                {
+                    if (min_derivative[index] > min_derivative[highest_peak])
+                        highest_peak = index;
+                    index++;
+                }
+                highest_peak = index;
+                
+                if((best_pos_plain_window_value > plain_window_value || min_derivative[highest_peak] > best_peak * 2.0) && plain_window_value < threshold)
+                {
+                    best_pos_plain_window_value = plain_window_value;
+                    best_peak = min_derivative[highest_peak];
+                    best_pos = highest_peak;
+                }
+            }
+        }
+        while(it < min_derivative.end() - 1);
+    }
+    else
+    {
+        std::vector<float>::const_iterator it = min_derivative.end();
+        do
+        {
+            it--;
+            if(*it < threshold * -1.0f)
+            {
+                int index = it - min_derivative.begin();
+                // analyze plain
+                while(min_derivative[index] < 0 && index < min_derivative.size() - 2)
+                    index++;
+                float plain_window_value = 0.0f;
+                int plain_len = min_derivative.size() * 0.05;
+                if(index + plain_len > min_derivative.size())
+                    continue;
+                for(int i = index; i < index + plain_len; i++)
+                {
+                    plain_window_value += beam[i];
+                }
+                plain_window_value = plain_window_value / plain_len;
+                
+                // get smallest peak
+                index = it - min_derivative.begin();
+                int smallest_peak = index;
+                while(min_derivative[index] < 0 && index > 0)
+                {
+                    if (min_derivative[index] < min_derivative[smallest_peak])
+                        smallest_peak = index;
+                    index--;
+                }
+                
+                if((best_pos_plain_window_value > plain_window_value || min_derivative[smallest_peak] < best_peak * 2.0) && plain_window_value < threshold * 2.0)
+                {
+                    best_pos_plain_window_value = plain_window_value;
+                    best_peak = min_derivative[smallest_peak];
+                    best_pos = smallest_peak;
+                }
+            }
+        }
+        while(it >= min_derivative.begin());
+    }
+    return best_pos;
+}
+
+void FeatureExtraction::addToDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length)
+{
+    std::vector<float> *derivative = new std::vector<float>(beam.size());
+    dsp::derivativeSignal<std::vector<float>::const_iterator, std::vector<float>::iterator>(beam.begin(), beam.end(), derivative->begin(), 10, 0.1);
+    derivativeHistory.push_front(derivative);
+    while(derivativeHistory.size() > history_length)
+    {
+        std::vector<float> *old_beam = derivativeHistory.back();
+        derivativeHistory.pop_back();
+        delete old_beam;
+    }
+}
+
 std::vector< float > FeatureExtraction::convertBeam(const std::vector< uint8_t >& beam)
 {
     std::vector<float> converted_beam;
@@ -123,13 +266,11 @@ void FeatureExtraction::setBoundingBox(const double radius, const double samplin
 {
     if (sampling_interval != 0.0 && speed_of_sound != 0)
         minimumIndex = (radius * 2) / (sampling_interval * speed_of_sound);
-    if (minimumIndex < indexWindowSize * 0.5)
-        minimumIndex = indexWindowSize * 0.5;
 }
 
 void FeatureExtraction::setMinResponseValue(const double minValue)
 {
     this->minimumValue = minValue;
 }
-    
+
 }
