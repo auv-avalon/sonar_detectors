@@ -1,21 +1,38 @@
 #include "FeatureExtraction.hpp"
 #include <dsp_acoustics/FIRFilter.h>
 #include <iostream>
+#include <sonar_detectors/SonarEnvironmentModel.hpp>
 
 namespace sonar_detectors
 {
     
 FeatureExtraction::FeatureExtraction() :
                     minimumIndex(0),
-                    minimumValue(20.0)
+                    minimumValue(20.0),
+                    sum_best_values(0.0f),
+                    value_threshold(0.0f),
+                    cooldown_threshold(0)
 {
+    // feature extraction config
+    /* forces the feature to have a nearby empty plain behind falling derivative */
+    force_plain = true;
+        /* the length of the plain in percent of signal length */
+        plain_length = 0.1f; //[0..1]
+        /* the threshold to be a acceptable plain in percent of the mean signal strength */
+        plain_threshold = 0.7f; //[0..1]
+    /* signal_balancing is a slope that corrects the signal moderation. 
+     * From 0.8 to 1.0 on the hole signal in case of signal_balancing = 0.2 */
+    signal_balancing = 0.2f; //[0..1]
+    /* describes how many best-features will be saved to build the threshold */
+    best_values_size = 100;
+    /* threshold for new features in percent of the mean of the last |best_values_size| best features */
+    feature_threshold = 0.6f; //[0..1]
 }
 
 FeatureExtraction::~FeatureExtraction()
 {
     for(std::list< std::vector<float>* >::iterator it = derivativeHistory.begin(); it != derivativeHistory.end(); it++)
     {
-        delete *it;
         derivativeHistory.erase(it);
     }
 }
@@ -118,8 +135,9 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
         return -1;
 }
 
-int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length, const float &threshold, const bool &indoor_mode)
+int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length)
 {
+    // campute and add derivative
     try
     {
         addToDerivativeHistory(beam, history_length);
@@ -130,6 +148,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
         return -1;
     }
 
+    // get the minimum signal of |history_length| derivatives
     std::vector<float> min_derivative;
     if(derivativeHistory.size() > 0)
     {
@@ -149,93 +168,117 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
         }
     }
     
-    int best_pos = -1;
-    float best_peak = 0.0f;
-    float best_pos_plain_window_value = 1000.0f;
-    if(indoor_mode)
+    // find the most likely obstacle position
+    std::vector<float>::const_iterator it = min_derivative.end();
+    std::vector<int> possible_positions;
+    std::vector<float> mean_values;
+    std::vector<float> plain_values;
+    do
     {
-        std::vector<float>::const_iterator it = min_derivative.begin();
-        do
+        it--;
+        if(*it < 0.0f)
         {
-            it++;
-            if(*it > threshold)
+            // analyze plain
+            float plain_window_value = 0.0f;
+            if(force_plain)
             {
                 int index = it - min_derivative.begin();
-                // analyze plain
-                while(min_derivative[index] > 0 && index > 0)
-                    index--;
-                float plain_window_value = 0.0f;
-                int plain_len = min_derivative.size() * 0.05;
-                if(index - plain_len < 0)
-                    continue;
-                for(int i = index; i < index - plain_len; i--)
-                {
-                    plain_window_value += beam[i];
-                }
-                plain_window_value = plain_window_value / plain_len;
-                // get highest peak
-                index = it - min_derivative.begin();
-                int highest_peak = index;
-                while(min_derivative[index] > 0 && index < min_derivative.size() - 2)
-                {
-                    if (min_derivative[index] > min_derivative[highest_peak])
-                        highest_peak = index;
-                    index++;
-                }
-                highest_peak = index;
-                
-                if((best_pos_plain_window_value > plain_window_value || min_derivative[highest_peak] > best_peak * 2.0) && plain_window_value < threshold)
-                {
-                    best_pos_plain_window_value = plain_window_value;
-                    best_peak = min_derivative[highest_peak];
-                    best_pos = highest_peak;
-                }
-            }
-        }
-        while(it < min_derivative.end() - 1);
-    }
-    else
-    {
-        std::vector<float>::const_iterator it = min_derivative.end();
-        do
-        {
-            it--;
-            if(*it < threshold * -1.0f)
-            {
-                int index = it - min_derivative.begin();
-                // analyze plain
                 while(min_derivative[index] < 0 && index < min_derivative.size() - 2)
                     index++;
-                float plain_window_value = 0.0f;
-                int plain_len = min_derivative.size() * 0.05;
-                if(index + plain_len > min_derivative.size())
-                    continue;
-                for(int i = index; i < index + plain_len; i++)
+                int plain_len = min_derivative.size() * plain_length;
+                for(int i = index; i < index + plain_len && i < min_derivative.size(); i++)
                 {
                     plain_window_value += beam[i];
                 }
                 plain_window_value = plain_window_value / plain_len;
-                
-                // get smallest peak
-                index = it - min_derivative.begin();
-                int smallest_peak = index;
-                while(min_derivative[index] < 0 && index > 0)
-                {
-                    if (min_derivative[index] < min_derivative[smallest_peak])
-                        smallest_peak = index;
-                    index--;
-                }
-                
-                if((best_pos_plain_window_value > plain_window_value || min_derivative[smallest_peak] < best_peak * 2.0) && plain_window_value < threshold * 2.0)
-                {
-                    best_pos_plain_window_value = plain_window_value;
-                    best_peak = min_derivative[smallest_peak];
-                    best_pos = smallest_peak;
-                }
+            }
+            
+            // analyze positive and negative slope
+            int count = 0;
+            float mean_value = 0.0f;
+            while(it > min_derivative.begin() && *it < 0.0f)
+            {
+                count++;
+                mean_value -= *it;
+                it--;
+            }
+            int position = it - min_derivative.begin();
+            while(it >= min_derivative.begin() && *it == 0.0f)
+            {
+                it--;
+            }
+            while(it >= min_derivative.begin() && *it > 0.0f)
+            {
+                count++;
+                mean_value += *it;
+                it--;
+            }
+            if(count > 0)
+            {
+                mean_value = mean_value / count;
+                mean_values.push_back(mean_value);
+                possible_positions.push_back(position);
+                plain_values.push_back(plain_window_value);
             }
         }
-        while(it >= min_derivative.begin());
     }
+    while(it > min_derivative.begin());
+    
+    for(int i = 0; i < possible_positions.size(); i++)
+    {
+        // correct signal moderation
+        mean_values[i] = mean_values[i] * ((1.0f - signal_balancing) + ((signal_balancing * (float)possible_positions[i]) / (float)min_derivative.size()));
+        // reduce signal weight in device noise area
+        mean_values[i] = mean_values[i] * (1 + ( pow((SonarEnvironmentModel::device_noise_distribution((float)possible_positions[i]) / 255.0f), 0.5) * -1.0f ));
+    }
+    
+    // compute plain threshold
+    float plain_window_threshold = 100.0f;
+    if(force_plain)
+    {
+        plain_window_threshold = 0.0f;
+        int index_counter = 0;
+        for(int i = 0; i < beam.size(); i++)
+        {
+            if(beam[i] > 1.0f)
+            {
+                index_counter++;
+                plain_window_threshold += beam[i];
+            }
+        }
+        plain_window_threshold = (plain_window_threshold / (float)index_counter) * plain_threshold;
+    }
+    
+    // find the best value
+    int best_pos = -1;
+    float best_value = value_threshold;
+    float best_peak = 0.0f;
+    for(int i = 0; i < possible_positions.size(); i++)
+    {
+        if(mean_values[i] > best_value && plain_values[i] < plain_window_threshold)
+        {
+            best_value = mean_values[i];
+            best_pos = possible_positions[i];
+            best_peak = min_derivative[possible_positions[i]];
+        }
+    }
+    
+    // update value threshold
+    cooldown_threshold++;
+    if(best_pos >= 0 || (cooldown_threshold%2) == 2)
+    {
+        cooldown_threshold = 0;
+        best_values.push_back(best_value);
+        sum_best_values += best_value;
+        if(best_values.size() >= best_values_size)
+        {
+            sum_best_values -= *best_values.begin();
+            best_values.erase(best_values.begin());
+        }
+        if(best_values.size() > best_values_size / 5)
+        value_threshold = (sum_best_values / (float)best_values.size()) * feature_threshold;
+    }
+    
     return best_pos;
 }
 
