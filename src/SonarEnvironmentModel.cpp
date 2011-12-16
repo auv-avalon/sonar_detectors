@@ -47,7 +47,7 @@ void SonarEnvironmentModel::updateNoiseDistributionValues(const double beam_angl
     // correct device noise sigma
     if(pos_auv >= 0)
     {
-        std::vector<float>::const_iterator device_noise_new_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_auv, beam.end() - (beam.size() * 0.8), find_first_min_windowsize);
+        std::vector<float>::const_iterator device_noise_new_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_auv, beam.end() - (beam.size() * 0.7), find_first_min_windowsize);
         if(device_noise_new_local_min != beam.begin())
         {
             device_noise_first_local_min_pos = device_noise_first_local_min_pos * (1-device_noise_minpos_update_rate) + (device_noise_new_local_min - beam.begin()) * device_noise_minpos_update_rate;
@@ -165,7 +165,7 @@ int SonarEnvironmentModel::getAUVModelConstrains(const double beam_angle, double
         int pos = (int)(distance / (sampling_interval * 0.5 * speed_of_sound));
         return pos;
     }
-    return -1;
+    return 0;
 }
     
 void SonarEnvironmentModel::updateSonarBeamProperties(const double sampling_interval, const float beamwidth_vertical, const float speed_of_sound)
