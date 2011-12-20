@@ -14,12 +14,14 @@ FeatureExtraction::FeatureExtraction() :
                     cooldown_threshold(0)
 {
     // feature extraction config
+    /* history length of the derivatives */
+    derivative_history_length = 3;
     /* forces the feature to have a nearby empty plain behind falling derivative */
     force_plain = true;
         /* the length of the plain in percent of signal length */
         plain_length = 0.1f; //[0..1]
         /* the threshold to be a acceptable plain in percent of the mean signal strength */
-        plain_threshold = 0.7f; //[0..1]
+        plain_threshold = 0.9f; //[0..1]
     /* signal_balancing is a slope that corrects the signal moderation. 
      * From 0.8 to 1.0 on the hole signal in case of signal_balancing = 0.2 */
     signal_balancing = 0.2f; //[0..1]
@@ -135,12 +137,12 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
         return -1;
 }
 
-int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length)
+int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& beam)
 {
     // campute and add derivative
     try
     {
-        addToDerivativeHistory(beam, history_length);
+        addToDerivativeHistory(beam, derivative_history_length);
     }
     catch (std::runtime_error e)
     {
@@ -167,6 +169,9 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
             dsp::minimizeSignals<std::vector<float>::const_iterator, std::vector<float>::iterator>(min_derivative.begin(), min_derivative.end(), (*it)->begin(), (*it)->end(), min_derivative.begin());
         }
     }
+    
+    if(min_derivative.size() == 0)
+        return -1;
     
     // find the most likely obstacle position
     std::vector<float>::const_iterator it = min_derivative.end();
