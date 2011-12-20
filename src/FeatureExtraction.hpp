@@ -65,6 +65,11 @@ public:
      */
     void featureDerivativeHistoryConfiguration(const unsigned int &derivative_history_length, const float &feature_threshold, const unsigned int &best_values_size, 
         const float &signal_balancing, const float &plain_length, const float &plain_threshold);
+    /**
+     * Provides intermediate results of getFeatureDerivativeHistory for debugging purposes.
+     */
+    void getFDHDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold, 
+                         std::vector<int> &candidates, std::vector<float> &candidate_mean_value, std::vector<float> &candidate_plain_value);
     
     
     std::vector<float> convertBeam(const std::vector<uint8_t>& beam);
@@ -87,9 +92,16 @@ protected:
     std::vector< float > best_values;
     float sum_best_values;
     float value_threshold;
+    float plain_window_threshold;
     
     unsigned int minimumIndex;
     double minimumValue;
+    
+    // debug data
+    std::vector<float> min_derivative;
+    std::vector<int> possible_positions;
+    std::vector<float> mean_values;
+    std::vector<float> plain_values;
 };
 
 }

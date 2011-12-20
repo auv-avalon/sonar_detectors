@@ -11,6 +11,7 @@ FeatureExtraction::FeatureExtraction() :
                     minimumValue(20.0),
                     sum_best_values(0.0f),
                     value_threshold(0.0f),
+                    plain_window_threshold(0.0f),
                     cooldown_threshold(0)
 {
     // feature extraction config
@@ -151,7 +152,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     }
 
     // get the minimum signal of |history_length| derivatives
-    std::vector<float> min_derivative;
+    min_derivative.clear();
     if(derivativeHistory.size() > 0)
     {
         for(std::vector<float>::const_iterator it = derivativeHistory.front()->begin(); it != derivativeHistory.front()->end(); it++)
@@ -175,9 +176,9 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     
     // find the most likely obstacle position
     std::vector<float>::const_iterator it = min_derivative.end();
-    std::vector<int> possible_positions;
-    std::vector<float> mean_values;
-    std::vector<float> plain_values;
+    possible_positions.clear();
+    mean_values.clear();
+    plain_values.clear();
     do
     {
         it--;
@@ -238,7 +239,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     }
     
     // compute plain threshold
-    float plain_window_threshold = 100.0f;
+    plain_window_threshold = 100.0f;
     if(force_plain)
     {
         plain_window_threshold = 0.0f;
@@ -305,6 +306,16 @@ void FeatureExtraction::featureDerivativeHistoryConfiguration(const unsigned int
     {
         this->force_plain = false;
     }
+}
+
+void FeatureExtraction::getFDHDebugData(std::vector< float >& minimum_derivative, float& value_threshold, float& plain_window_threshold, std::vector< int >& candidates, std::vector< float >& candidate_mean_value, std::vector< float >& candidate_plain_value)
+{
+    minimum_derivative = this->min_derivative;
+    value_threshold = this->value_threshold;
+    plain_window_threshold = this->plain_window_threshold;
+    candidates = this->possible_positions;
+    candidate_mean_value = this->mean_values;
+    candidate_plain_value = this->plain_values;
 }
 
 void FeatureExtraction::addToDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length)
