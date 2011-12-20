@@ -287,6 +287,26 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     return best_pos;
 }
 
+void FeatureExtraction::featureDerivativeHistoryConfiguration(const unsigned int& derivative_history_length, const float& feature_threshold, 
+                                                              const unsigned int& best_values_size, const float& signal_balancing, 
+                                                              const float& plain_length, const float& plain_threshold)
+{
+    this->derivative_history_length = derivative_history_length;
+    this->feature_threshold = feature_threshold;
+    this->best_values_size = best_values_size;
+    this->signal_balancing = signal_balancing;
+    if(plain_length > 0.0f)
+    {
+        this->force_plain = true;
+        this->plain_length = plain_length;
+        this->plain_threshold = plain_threshold;
+    }
+    else
+    {
+        this->force_plain = false;
+    }
+}
+
 void FeatureExtraction::addToDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length)
 {
     std::vector<float> *derivative = new std::vector<float>(beam.size());

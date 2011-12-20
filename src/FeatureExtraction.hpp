@@ -17,6 +17,9 @@ public:
     int getFeatureGlobalMaxima(const std::vector<float>& beam, const unsigned int &indexWindowSize = 20);
     int getFeatureMaximalLevelDifference(const std::vector<float>& beam, const unsigned int &indexWindowSize = 20);
     int getFeatureDerivativeHistory(const std::vector<float>& beam);
+    void featureDerivativeHistoryConfiguration(const unsigned int &derivative_history_length, const float &feature_threshold, const unsigned int &best_values_size, 
+        const float &signal_balancing, const float &plain_length, const float &plain_threshold);
+    
     
     std::vector<float> convertBeam(const std::vector<uint8_t>& beam);
     void setBoundingBox(const double radius, const double sampling_interval, const int speed_of_sound = 1500);
