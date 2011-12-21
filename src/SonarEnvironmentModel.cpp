@@ -4,16 +4,25 @@
 namespace sonar_detectors
 {
     
+//noise distributions variables
+static float gaussian_ground_sigma;
+static float gaussian_ground_u;
+static float gaussian_ground_k;
+static float gaussian_surface_sigma;
+static float gaussian_surface_u;
+static float gaussian_surface_k;
+static float device_noise_sigma;
+    
 const static float sqrt_2_PI = sqrt(2.0f*M_PI);
     
 SonarEnvironmentModel::SonarEnvironmentModel() : 
+                        distance_to_ground(0),
+                        distance_to_surface(0),
+                        distance_to_avalon_model(0.15),
                         orientation(base::Quaterniond::Identity()),
                         sampling_interval(0),
                         beamwidth_vertical(0),
-                        speed_of_sound(0),
-                        distance_to_ground(0),
-                        distance_to_surface(0),
-                        distance_to_avalon_model(0.15)
+                        speed_of_sound(0)
 {
     // abstract plain model of avalon
     avalon_model.push_back(base::Vector2d(0, 0.4));
@@ -138,7 +147,7 @@ int SonarEnvironmentModel::getAUVModelConstrains(const double beam_angle, double
     double distance = 0.0;
     if(angle_to_edge_distance.find(positive_beam_angle) == angle_to_edge_distance.end())
     {
-        int i = 0;
+        unsigned int i = 0;
         while(i < avalon_model.size() - 1 && positive_beam_angle > avalon_model[i+1].x())
         {
             i++;

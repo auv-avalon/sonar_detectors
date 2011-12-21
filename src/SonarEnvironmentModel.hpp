@@ -11,15 +11,6 @@
 namespace sonar_detectors
 {
     
-//noise distributions variables
-static float gaussian_ground_sigma;
-static float gaussian_ground_u;
-static float gaussian_ground_k;
-static float gaussian_surface_sigma;
-static float gaussian_surface_u;
-static float gaussian_surface_k;
-static float device_noise_sigma;
-    
 class SonarEnvironmentModel
 {
 public:

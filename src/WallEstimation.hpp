@@ -34,7 +34,7 @@ namespace sonar_detectors
         std::vector< std::pair<base::Vector3d, base::Vector3d> > walls;
         std::vector<base::Vector3d> pointCloud;
         base::Vector3d virtualpoint;
-        int min_count_pointcloud;
+        unsigned int min_count_pointcloud;
         double ransac_threshold;
         double ransac_fit_rate;
     };

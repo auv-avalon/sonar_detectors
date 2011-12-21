@@ -10,7 +10,7 @@ namespace sonar_detectors
     const static double weightNewValue = 0.4;
     const static double weightOldValue = 0.6;
     const static double max_distance = 0.5;
-    const static uint64_t timeout = 1000; //timeout in milliseconds
+    const static int64_t timeout = 1000; //timeout in milliseconds
     
     /**
      * This class trys to estimate the current distance to an object.

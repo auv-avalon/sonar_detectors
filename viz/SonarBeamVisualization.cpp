@@ -75,7 +75,7 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
 void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& data)
 {
     std::vector<sonar_detectors::obstaclePoint> features;
-    for(int i = 0; i < data.beam.size(); i++)
+    for(unsigned int i = 0; i < data.beam.size(); i++)
     {
         if(data.beam[i] > 0)
             features.push_back(sonar_detectors::SonarBeamProcessing::computeObstaclePoint(i, data, bodyState.orientation));

@@ -58,7 +58,7 @@ void WallVisualization::updateMainNode(osg::Node* node)
         if(wallOSG->size() >= 4) 
         {
             wallGeom->setVertexArray(wallOSG);
-            for(int i = 0; i < wallOSG->size() - 3; i += 4)
+            for(unsigned int i = 0; i < wallOSG->size() - 3; i += 4)
             {
                 osg::ref_ptr<osg::DrawElementsUInt> drawWall = new osg::DrawElementsUInt(osg::PrimitiveSet::QUADS, 0);
                 drawWall->push_back(i);

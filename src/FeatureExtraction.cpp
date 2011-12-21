@@ -7,12 +7,12 @@ namespace sonar_detectors
 {
     
 FeatureExtraction::FeatureExtraction() :
-                    minimumIndex(0),
-                    minimumValue(20.0),
+                    cooldown_threshold(0),
                     sum_best_values(0.0f),
                     value_threshold(0.0f),
                     plain_window_threshold(0.0f),
-                    cooldown_threshold(0)
+                    minimumIndex(0),
+                    minimumValue(20.0)
 {
     // feature extraction config
     /* history length of the derivatives */
@@ -117,7 +117,7 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
     
     //slide windows
     int j = second_window_index - 1;
-    for(int i = first_window_index - 1; j >= minimumIndex; i--, j--)
+    for(int i = first_window_index - 1; j >= (int)minimumIndex; i--, j--)
     {
         float diff_value = second_window_value - first_window_value * 3.0f;
         if(diff_value > best_window_difference)
@@ -128,8 +128,8 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
         }
         first_window_value+= beam[i];
         first_window_value-= beam[i+indexWindowSize];
-        second_window_value+= beam[j];
-        second_window_value-= beam[j+indexWindowSize];
+        second_window_value+= beam[(unsigned int)j];
+        second_window_value-= beam[(unsigned int)j+indexWindowSize];
     }
     
     if (best_window_pos > 0 && best_value_difference > minimumValue)
@@ -188,15 +188,15 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
             float plain_window_value = 0.0f;
             if(force_plain)
             {
-                int index = it - min_derivative.begin();
-                while(min_derivative[index] < 0 && index < min_derivative.size() - 2)
+                unsigned int index = it - min_derivative.begin();
+                while(min_derivative[index] < 0.0f && index < min_derivative.size() - 2)
                     index++;
-                int plain_len = min_derivative.size() * plain_length;
-                for(int i = index; i < index + plain_len && i < min_derivative.size(); i++)
+                unsigned int plain_len = min_derivative.size() * plain_length;
+                for(unsigned int i = index; i < index + plain_len && i < min_derivative.size(); i++)
                 {
                     plain_window_value += beam[i];
                 }
-                plain_window_value = plain_window_value / plain_len;
+                plain_window_value = plain_window_value / (float)plain_len;
             }
             
             // analyze positive and negative slope
@@ -221,7 +221,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
             }
             if(count > 0)
             {
-                mean_value = mean_value / count;
+                mean_value = mean_value / (float)count;
                 mean_values.push_back(mean_value);
                 possible_positions.push_back(position);
                 plain_values.push_back(plain_window_value);
@@ -230,7 +230,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     }
     while(it > min_derivative.begin());
     
-    for(int i = 0; i < possible_positions.size(); i++)
+    for(unsigned int i = 0; i < possible_positions.size(); i++)
     {
         // correct signal moderation
         mean_values[i] = mean_values[i] * ((1.0f - signal_balancing) + ((signal_balancing * (float)possible_positions[i]) / (float)min_derivative.size()));
@@ -244,7 +244,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     {
         plain_window_threshold = 0.0f;
         int index_counter = 0;
-        for(int i = 0; i < beam.size(); i++)
+        for(unsigned int i = 0; i < beam.size(); i++)
         {
             if(beam[i] > 1.0f)
             {
@@ -259,7 +259,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     int best_pos = -1;
     float best_value = value_threshold;
     float best_peak = 0.0f;
-    for(int i = 0; i < possible_positions.size(); i++)
+    for(unsigned int i = 0; i < possible_positions.size(); i++)
     {
         if(mean_values[i] > best_value && plain_values[i] < plain_window_threshold)
         {
