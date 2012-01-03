@@ -24,14 +24,15 @@ namespace sonar_detectors
     public:
         DistanceEstimation();
         ~DistanceEstimation();
-        virtual void updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint> &features);
         double getActualDistance();
+        
+    protected:
+        virtual void updateFeatureIntern(const base::samples::LaserScan &feature);
         
     private:
         void checkTimeout();
         
-        sonar_detectors::obstaclePoint actualPoint;
-        double actualDistance;
+        base::samples::LaserScan actualFeature;
     };
 }
 

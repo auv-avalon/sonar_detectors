@@ -22,17 +22,18 @@ namespace sonar_detectors
         const std::vector< std::pair<base::Vector3d, base::Vector3d> > getWalls() const;
         const base::Vector3d getVirtualPoint();
         const base::Vector3d getRelativeVirtualPoint();
-        std::vector<base::Vector3d> getPointCloud();
+        std::list<base::Vector3d> getPointCloud();
         void setRansacParameters(double threshold, double fit_rate);
-        virtual void updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint>& features);
+        
+    protected:
+        virtual void updateFeatureIntern(const base::samples::LaserScan& feature);
         
     private:
         void computeVirtualPoint();
         
-        sonar_detectors::SonarMap< std::vector<obstaclePoint> > sonarMap;
-        std::list< std::vector<obstaclePoint> >* featureList;
+        sonar_detectors::SonarMap< base::Vector3d > sonarMap;
+        std::list< base::Vector3d >* featureList;
         std::vector< std::pair<base::Vector3d, base::Vector3d> > walls;
-        std::vector<base::Vector3d> pointCloud;
         base::Vector3d virtualpoint;
         unsigned int min_count_pointcloud;
         double ransac_threshold;

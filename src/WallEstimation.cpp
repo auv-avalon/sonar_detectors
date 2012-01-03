@@ -17,36 +17,26 @@ WallEstimation::~WallEstimation()
 
 }
 
-void WallEstimation::updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint>& features)
+void WallEstimation::updateFeatureIntern(const base::samples::LaserScan& feature)
 {
-    if(!features.empty())
+    std::vector<Eigen::Vector3d> featureVector;
+    feature.convertScanToPointCloud(featureVector);
+    
+    if(featureVector.size() > 0)
     {
-        sonarMap.addFeature(features, features.front().angle.rad, features.front().time);
+        sonarMap.addFeature(featureVector.front(), feature.start_angle, feature.time);
         
         // check if enough points available
-        if (pointCloud.size() < min_count_pointcloud)
+        if (featureList->size() < min_count_pointcloud)
         {
             walls.clear();
-            this->pointCloud.clear();
-            for(std::list< std::vector<obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
-            {
-                for(std::vector<obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
-                {
-                    this->pointCloud.push_back(v_it->position);
-                }
-            }
             return;
         }
-        
-        this->pointCloud.clear();
+
         std::vector<base::Vector3d> pointCloud;
-        for(std::list< std::vector<obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
+        for(std::list< base::Vector3d >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
         {
-            for(std::vector<obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
-            {
-            pointCloud.push_back(v_it->position);
-            this->pointCloud.push_back(v_it->position);
-            }
+            pointCloud.push_back(*l_it);
         }
         
         std::vector< std::pair<base::Vector3d, base::Vector3d> > new_walls;
@@ -116,9 +106,9 @@ const base::Vector3d WallEstimation::getRelativeVirtualPoint()
     }
 }   
 
-std::vector<base::Vector3d> WallEstimation::getPointCloud()
+std::list<base::Vector3d> WallEstimation::getPointCloud()
 {
-    return pointCloud;
+    return sonarMap.getFeatureList();
 }
    
 }

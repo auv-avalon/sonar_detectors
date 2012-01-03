@@ -70,18 +70,13 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarS
     std::vector<float> beam = featureExtraction.convertBeam(sonarScan.beam);
     int index = featureExtraction.getFeatureGlobalMaxima(beam);
     
-    std::vector<obstaclePoint> obstaclePoints;
-    if (index >= 0)
-    {
-        // calculate feature
-        sonar_detectors::obstaclePoint obstaclePoint = sonar_detectors::FeatureExtraction::computeObstaclePoint(index, sonarScan, orientation);
-        obstaclePoints.push_back(obstaclePoint);
-    }
+    // calculate feature
+    base::samples::LaserScan feature = sonar_detectors::FeatureExtraction::computeLaserScan(index, sonarScan);
     
     //feed estimators
     for(std::vector<SonarEstimation*>::iterator it = estimators.begin(); it != estimators.end(); it++)
     {
-        (*it)->updateFeatures(obstaclePoints);
+        (*it)->updateFeature(feature);
     }
     
 }

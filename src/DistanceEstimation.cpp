@@ -1,13 +1,13 @@
 #include "DistanceEstimation.hpp"
 #include "SonarDetectorMath.hpp"
-#include <math.h>
+#include <cmath>
 
 namespace sonar_detectors
 {
 
 DistanceEstimation::DistanceEstimation()
 {
-    actualDistance = -1;
+    actualFeature.ranges.front() = base::samples::MEASUREMENT_ERROR;
 }
 
 DistanceEstimation::~DistanceEstimation()
@@ -15,47 +15,49 @@ DistanceEstimation::~DistanceEstimation()
     
 }
 
-void DistanceEstimation::updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint> &features)
+void DistanceEstimation::updateFeatureIntern(const base::samples::LaserScan &feature)
 {
     checkTimeout();
     
-    if (!features.empty())
+    if(feature.isValidBeam(0) && feature.ranges.front() > base::samples::MAX_RANGE_ERROR)
     {
-        obstaclePoint nextPosition = features.front();
-        
-        if (actualDistance < 0)
+        if(actualFeature.ranges.front() <= base::samples::MAX_RANGE_ERROR)
         {
-            actualPoint.position = nextPosition.position;
+            actualFeature.ranges.front() = feature.ranges.front();
         }
         else 
         {
-            double dist = computeDistance(nextPosition.position, actualPoint.position);
+            double new_range = (double)feature.ranges.front() * 0.001;
+            double actual_range = (double)actualFeature.ranges.front() * 0.001;
+            double dist = abs(new_range - actual_range);
             if(dist > max_distance)
             {
                 // limit distance to the next point
-                nextPosition.position = actualPoint.position + ((nextPosition.position - actualPoint.position) / dist) * max_distance;
+                new_range = actual_range + ((new_range - actual_range) / dist) * max_distance;
             }
-            actualPoint.position = actualPoint.position * weightOldValue + nextPosition.position * weightNewValue;
+            actual_range = actual_range * weightOldValue + new_range * weightNewValue;
+            actualFeature.ranges.front() = (uint32_t)(actual_range * 1000.0);
         }
 
-        actualPoint.angle = nextPosition.angle;
-        actualPoint.time = base::Time::now();
-        actualDistance = computeDistance(*position, actualPoint.position);
+        actualFeature.start_angle = feature.start_angle;
+        actualFeature.time = feature.time;
     }
 }
 
 void DistanceEstimation::checkTimeout()
 {
-    if ((base::Time::now().toMilliseconds() - actualPoint.time.toMilliseconds()) > timeout)
+    if ((base::Time::now().toMilliseconds() - actualFeature.time.toMilliseconds()) > timeout)
     {
-        actualDistance = -1;
+        actualFeature.ranges.front() = base::samples::MEASUREMENT_ERROR;
     }
 }
 
 double DistanceEstimation::getActualDistance()
 {
     checkTimeout();
-    return actualDistance;
+    if(actualFeature.ranges.front() <= base::samples::MAX_RANGE_ERROR)
+        return -1;
+    return (double)actualFeature.ranges.front() * 0.001;
 }
 
 }

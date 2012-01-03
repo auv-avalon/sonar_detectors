@@ -3,6 +3,7 @@
 
 #include "SonarDetectorTypes.hpp"
 #include <base/samples/rigid_body_state.h>
+#include <base/samples/laser_scan.h>
 #include <vector>
 
 namespace sonar_detectors
@@ -10,19 +11,17 @@ namespace sonar_detectors
     class SonarEstimation
     {
     public:
-        virtual void updateFeaturesIntern(const std::vector<sonar_detectors::obstaclePoint> &features) = 0;
-        
-        void updateFeatures(const std::vector<sonar_detectors::obstaclePoint> &features)
+        void updateFeature(const base::samples::LaserScan &feature)
         {
             // check if vector is empty
-            if(features.empty())
+            if(feature.ranges.empty())
                 return;
             
             // check if features are out of range
-            if(!isAngleInRange(features.front().angle))
+            if(!isAngleInRange(base::Angle::fromRad(feature.start_angle)))
                 return;
             
-            updateFeaturesIntern(features);
+            updateFeatureIntern(feature);
         };
         
         sonar_detectors::estimationSettings getSettings() 
@@ -30,12 +29,12 @@ namespace sonar_detectors
             return settings;
         };
         
-        bool isAngleInRange(base::Angle angle)
+        bool isAngleInRange(const base::Angle &angle)
         {
             return (settings.boundedInput ? angle.isInRange(settings.startAngle, settings.endAngle) : true);
         };
         
-        void setSettings(sonar_detectors::estimationSettings& settings)
+        void setSettings(const sonar_detectors::estimationSettings& settings)
         {
             this->settings = settings;
         };
@@ -45,6 +44,9 @@ namespace sonar_detectors
             this->orientation = orientation;
             this->position = position;
         };
+    protected:
+        virtual void updateFeatureIntern(const base::samples::LaserScan &feature) = 0;
+        
     protected:
         const base::Orientation* orientation;
         const base::Position* position;
