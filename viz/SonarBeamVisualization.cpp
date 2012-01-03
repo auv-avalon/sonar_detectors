@@ -78,7 +78,7 @@ void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& da
     for(unsigned int i = 0; i < data.beam.size(); i++)
     {
         if(data.beam[i] > 0)
-            features.push_back(sonar_detectors::SonarBeamProcessing::computeObstaclePoint(i, data, bodyState.orientation));
+            features.push_back(sonar_detectors::FeatureExtraction::computeObstaclePoint(i, data, bodyState.orientation));
     }
     sonarMap.addFeature(features, data.bearing.rad, data.time);
     currentAngle = data.bearing.rad;

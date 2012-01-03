@@ -5,6 +5,11 @@
 #include <list>
 #include <stdint.h>
 
+#include "SonarDetectorTypes.hpp"
+#include <base/samples/laser_scan.h>
+#include <base/samples/sonar_beam.h>
+#include <base/pose.h>
+
 namespace sonar_detectors
 {
 
@@ -70,6 +75,26 @@ public:
      */
     void getFDHDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold, 
                          std::vector<int> &candidates, std::vector<float> &candidate_mean_value, std::vector<float> &candidate_plain_value);
+    
+    
+    /**
+     * Computes an obstaclePoint from a given SonarBeam and index.
+     * If the orientation is not the identity the resulting vector is absolut in the orientation. 
+     * @param index of the feature in the beam
+     * @param sonarBeam the sonar beam
+     * @param orientation orientation
+     * @returns sonar_detectors::obstaclePoint
+     */
+    static sonar_detectors::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonar_beam, const base::Orientation& orientation = base::Quaterniond::Identity());
+    /**
+     * Computes an LaserScan from a given SonarBeam and index. The LaserScan
+     * has ony one entry, which is the feature.
+     * @param index of the feature in the beam
+     * @param sonarBeam the sonar beam
+     * @param orientation orientation
+     * @returns a base::samples::LaserScan
+     */
+    static base::samples::LaserScan computeLaserScan(const int& index, const base::samples::SonarBeam& sonar_beam);
     
     
     std::vector<float> convertBeam(const std::vector<uint8_t>& beam);

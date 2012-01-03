@@ -32,9 +32,6 @@ class SonarBeamProcessing
         void setBeamThreshold(double minThreshold);
         void setMinResponseValue(double minValue);
         
-        static sonar_detectors::obstaclePoint computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation);
-        static base::samples::LaserScan computeLaserScan(const int& index, const base::samples::SonarBeam& sonarBeam);
-        
     private:
         std::vector<SonarEstimation*> estimators;
         base::Orientation orientation;

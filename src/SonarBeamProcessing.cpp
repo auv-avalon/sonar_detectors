@@ -52,55 +52,6 @@ void SonarBeamProcessing::removeSonarEstimation(SonarEstimation* estimation)
     }
 }
 
-obstaclePoint SonarBeamProcessing::computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonarScan, const base::Orientation& orientation)
-{
-    double scanAngle = sonarScan.bearing.rad;
-    double distance = (double)index * sonarScan.getSpatialResolution();
-        
-    Eigen::Vector3d wallPoint(distance,0,0);
-    Eigen::Vector3d topPoint(0,0,1);
-    
-    wallPoint = orientation * wallPoint;
-    topPoint = orientation * topPoint;
-    
-    Eigen::AngleAxisd rotate(scanAngle,topPoint);
-    
-    wallPoint = rotate * wallPoint;
-        
-    sonar_detectors::obstaclePoint obstaclePoint;
-    obstaclePoint.position = wallPoint;
-    obstaclePoint.time = sonarScan.time;
-    obstaclePoint.value = sonarScan.beam[index];
-    obstaclePoint.distance = distance;
-    obstaclePoint.angle = base::Angle::fromRad(scanAngle + base::getYaw(orientation));
-    
-    return obstaclePoint;
-}
-
-base::samples::LaserScan SonarBeamProcessing::computeLaserScan(const int& index, const base::samples::SonarBeam& sonarBeam)
-{
-    base::samples::LaserScan laser_scan;
-    laser_scan.reset();
-    laser_scan.minRange = 1000;
-    laser_scan.maxRange = (uint32_t)(1000 * (sonarBeam.beam.size()-1) * sonarBeam.getSpatialResolution());
-    laser_scan.angular_resolution = 0.0;
-    laser_scan.speed = 0.0;
-    laser_scan.start_angle = sonarBeam.bearing.rad;
-    laser_scan.time = sonarBeam.time;
-    
-    if(index >= 0)
-    {
-        laser_scan.ranges.push_back((uint32_t)(index * sonarBeam.getSpatialResolution() * 1000));
-        laser_scan.remission.push_back(sonarBeam.beam[index]);
-    }
-    else
-    {
-        laser_scan.ranges.push_back(base::samples::TOO_FAR);
-    }
-    
-    return laser_scan;
-}
-
 void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarScan)
 {
     //check if angle is required
@@ -123,7 +74,7 @@ void SonarBeamProcessing::updateSonarData(const base::samples::SonarBeam& sonarS
     if (index >= 0)
     {
         // calculate feature
-        sonar_detectors::obstaclePoint obstaclePoint = computeObstaclePoint(index, sonarScan, orientation);
+        sonar_detectors::obstaclePoint obstaclePoint = sonar_detectors::FeatureExtraction::computeObstaclePoint(index, sonarScan, orientation);
         obstaclePoints.push_back(obstaclePoint);
     }
     

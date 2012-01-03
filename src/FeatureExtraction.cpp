@@ -352,4 +352,53 @@ void FeatureExtraction::setMinResponseValue(const double minValue)
     this->minimumValue = minValue;
 }
 
+obstaclePoint FeatureExtraction::computeObstaclePoint(const int& index, const base::samples::SonarBeam& sonar_beam, const base::Orientation& orientation)
+{
+    double scanAngle = sonar_beam.bearing.rad;
+    double distance = (double)index * sonar_beam.getSpatialResolution();
+        
+    Eigen::Vector3d wallPoint(distance,0,0);
+    Eigen::Vector3d topPoint(0,0,1);
+    
+    wallPoint = orientation * wallPoint;
+    topPoint = orientation * topPoint;
+    
+    Eigen::AngleAxisd rotate(scanAngle,topPoint);
+    
+    wallPoint = rotate * wallPoint;
+        
+    sonar_detectors::obstaclePoint obstaclePoint;
+    obstaclePoint.position = wallPoint;
+    obstaclePoint.time = sonar_beam.time;
+    obstaclePoint.value = sonar_beam.beam[index];
+    obstaclePoint.distance = distance;
+    obstaclePoint.angle = base::Angle::fromRad(scanAngle + base::getYaw(orientation));
+    
+    return obstaclePoint;
+}
+
+base::samples::LaserScan FeatureExtraction::computeLaserScan(const int& index, const base::samples::SonarBeam& sonar_beam)
+{
+    base::samples::LaserScan laser_scan;
+    laser_scan.reset();
+    laser_scan.minRange = 1000;
+    laser_scan.maxRange = (uint32_t)(1000 * (sonar_beam.beam.size()-1) * sonar_beam.getSpatialResolution());
+    laser_scan.angular_resolution = 0.0;
+    laser_scan.speed = 0.0;
+    laser_scan.start_angle = sonar_beam.bearing.rad;
+    laser_scan.time = sonar_beam.time;
+    
+    if(index >= 0)
+    {
+        laser_scan.ranges.push_back((uint32_t)(index * sonar_beam.getSpatialResolution() * 1000));
+        laser_scan.remission.push_back(sonar_beam.beam[index]);
+    }
+    else
+    {
+        laser_scan.ranges.push_back(base::samples::TOO_FAR);
+    }
+    
+    return laser_scan;
+}
+
 }
