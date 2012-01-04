@@ -1,5 +1,4 @@
 set(SOURCES 
-        SonarBeamProcessing.cpp
         WallEstimation.cpp
         DistanceEstimation.cpp
         SonarDetectorMath.cpp
@@ -9,7 +8,6 @@ set(SOURCES
 )
 
 set(HEADERS
-        SonarBeamProcessing.hpp
         WallEstimation.hpp
         SonarEstimation.hpp
         SonarDetectorTypes.hpp
