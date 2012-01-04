@@ -25,11 +25,15 @@ SonarEnvironmentModel::SonarEnvironmentModel() :
                         speed_of_sound(0)
 {
     // abstract plain model of avalon
+    /*
     avalon_model.push_back(base::Vector2d(0, 0.4));
     avalon_model.push_back(base::Vector2d(M_PI_4, 0.35));
     avalon_model.push_back(base::Vector2d(M_PI_2, 0.15));
     avalon_model.push_back(base::Vector2d(7 * M_PI_8, 1.05));
     avalon_model.push_back(base::Vector2d(M_PI, 1.10));
+    */
+    avalon_model.push_back(base::Vector2d(0, 1.2));
+    avalon_model.push_back(base::Vector2d(M_PI, 1.2));
     
     // noise distributions variables
     device_noise_first_local_min_pos = 0;
