@@ -38,18 +38,11 @@ namespace sonar_detectors
         {
             this->settings = settings;
         };
-         
-        void setPose(const base::Orientation* orientation, const base::Position* position)
-        {
-            this->orientation = orientation;
-            this->position = position;
-        };
+        
     protected:
         virtual void updateFeatureIntern(const base::samples::LaserScan &feature) = 0;
         
     protected:
-        const base::Orientation* orientation;
-        const base::Position* position;
         sonar_detectors::estimationSettings settings;
     };
 }

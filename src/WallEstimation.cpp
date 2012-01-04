@@ -59,12 +59,12 @@ void WallEstimation::computeVirtualPoint()
 {
     if (walls.size() == 1)
     {
-        virtualpoint = computIntersection(walls[0], *position);
+        virtualpoint = computIntersection(walls[0], base::Vector3d(0,0,0));
     }
     else if (walls.size() == 2)
     {
-        base::Vector3d vp1 = computIntersection(walls[0], *position);
-        base::Vector3d vp2 = computIntersection(walls[1], *position);
+        base::Vector3d vp1 = computIntersection(walls[0], base::Vector3d(0,0,0));
+        base::Vector3d vp2 = computIntersection(walls[1], base::Vector3d(0,0,0));
         virtualpoint = vp1 + 0.5 * (vp2 - vp1);
     }
     else
@@ -89,22 +89,6 @@ const base::Vector3d WallEstimation::getVirtualPoint()
     computeVirtualPoint();
     return virtualpoint;
 }
-
-const base::Vector3d WallEstimation::getRelativeVirtualPoint()
-{
-    computeVirtualPoint();
-    if (virtualpoint.x() == 0 && virtualpoint.y() == 0 && virtualpoint.z() == 0)
-    {
-        return virtualpoint;
-    }
-    else
-    {
-        base::Vector3d vpos(virtualpoint);
-        vpos -= *position;
-        vpos = orientation->conjugate() * vpos;
-        return vpos;
-    }
-}   
 
 std::list<base::Vector3d> WallEstimation::getPointCloud()
 {

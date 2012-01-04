@@ -21,7 +21,6 @@ namespace sonar_detectors
         ~WallEstimation();
         const std::vector< std::pair<base::Vector3d, base::Vector3d> > getWalls() const;
         const base::Vector3d getVirtualPoint();
-        const base::Vector3d getRelativeVirtualPoint();
         std::list<base::Vector3d> getPointCloud();
         void setRansacParameters(double threshold, double fit_rate);
         
