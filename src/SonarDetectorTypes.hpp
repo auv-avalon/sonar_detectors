@@ -26,23 +26,6 @@ struct obstaclePoint
     obstaclePoint()
     : position(0,0,0), value(0), time(base::Time::now()), distance(0){}
 };
-
-/**
- * Settings for estimators.
- * Relevant angle range and update mode.
- */
-struct estimationSettings
-{
-    base::Angle startAngle;
-    base::Angle endAngle;
-    bool boundedInput;
-    estimationSettings()
-    : boundedInput(0)
-    {
-        startAngle = base::Angle::fromRad(-M_PI);
-        endAngle = base::Angle::fromRad(M_PI);
-    }
-};
     
 }
 
