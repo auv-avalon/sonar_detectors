@@ -1,5 +1,6 @@
 set(SOURCES 
         RansacWallEstimation.cpp
+        CenterWallEstimation.cpp
         DistanceEstimation.cpp
         SonarDetectorMath.cpp
         FeatureExtraction.cpp
@@ -11,6 +12,7 @@ set(HEADERS
         SonarEstimation.hpp
         SonarDetectorTypes.hpp
         RansacWallEstimation.hpp
+        CenterWallEstimation.hpp
         DistanceEstimation.hpp
         SonarDetectorMath.hpp
         SonarMap.hpp
