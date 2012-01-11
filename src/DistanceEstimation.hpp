@@ -17,7 +17,6 @@ namespace sonar_detectors
      * 
      * estimationSettings should be:
      * - angle range less than PI, lesser is better
-     * - SegmentMode: forEachBeam
      */
     class DistanceEstimation : public SonarEstimation
     {

@@ -96,9 +96,6 @@ public:
      */
     static base::samples::LaserScan computeLaserScan(const int& index, const base::samples::SonarBeam& sonar_beam);
     
-    
-    std::vector<float> convertBeam(const std::vector<uint8_t>& beam);
-    
 protected:
     void addToDerivativeHistory(const std::vector<float>& beam, const unsigned int &history_length);
 

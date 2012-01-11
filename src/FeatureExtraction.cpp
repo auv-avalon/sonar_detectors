@@ -331,16 +331,6 @@ void FeatureExtraction::addToDerivativeHistory(const std::vector< float >& beam,
     }
 }
 
-std::vector< float > FeatureExtraction::convertBeam(const std::vector< uint8_t >& beam)
-{
-    std::vector<float> converted_beam;
-    for(unsigned int i = 1; i < beam.size(); i++)
-    {
-        converted_beam.push_back((float)beam[i]);
-    }
-    return converted_beam;
-}
-
 void FeatureExtraction::setBoundingBox(const double radius, const double sampling_interval, const int speed_of_sound)
 {
     if (sampling_interval != 0.0 && speed_of_sound != 0)

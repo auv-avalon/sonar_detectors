@@ -7,7 +7,7 @@ namespace sonar_detectors
 
 DistanceEstimation::DistanceEstimation()
 {
-    actualFeature.ranges.front() = base::samples::MEASUREMENT_ERROR;
+    actualFeature.ranges.push_back(base::samples::MEASUREMENT_ERROR);
 }
 
 DistanceEstimation::~DistanceEstimation()
