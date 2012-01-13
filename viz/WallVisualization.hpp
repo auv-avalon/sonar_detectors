@@ -24,6 +24,7 @@ private:
     std::vector<base::Vector3d> wall;
     osg::ref_ptr<osg::Geometry> wallGeom;
     osg::ref_ptr<osg::Vec3Array> wallOSG;
+    double wall_length;
 };
    
 }
