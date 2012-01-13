@@ -1,6 +1,6 @@
 #include "SonarBeamVisualization.hpp"
 #include <osg/Geode>
-#include <sonar_detectors/SonarBeamProcessing.hpp>
+#include <sonar_detectors/FeatureExtraction.hpp>
 
 namespace vizkit
 {
