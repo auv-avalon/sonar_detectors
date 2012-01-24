@@ -14,7 +14,17 @@ namespace sonar_detectors
 {
 
 class FeatureExtraction
-{
+{   
+public:
+    struct FeatureCandidates
+    {
+        int beam_index;
+        float mean_value;
+        float plain_value;
+        FeatureCandidates() : 
+            beam_index(-1), mean_value(0.0f), plain_value(0.0f) {};
+    };
+    
 public:
     FeatureExtraction();
     ~FeatureExtraction();
@@ -73,8 +83,7 @@ public:
     /**
      * Provides intermediate results of getFeatureDerivativeHistory for debugging purposes.
      */
-    void getFDHDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold, 
-                         std::vector<int> &candidates, std::vector<float> &candidate_mean_value, std::vector<float> &candidate_plain_value);
+    void getFDHDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold, std::vector<FeatureCandidates> &candidates);
     
     
     /**
@@ -95,6 +104,7 @@ public:
      * @returns a base::samples::LaserScan
      */
     static base::samples::LaserScan computeLaserScan(const int& index, const base::samples::SonarBeam& sonar_beam);
+    
     
 protected:
     void addToDerivativeHistory(const std::vector<float>& beam, const unsigned int &history_length);
@@ -119,11 +129,9 @@ protected:
     unsigned int minimumIndex;
     double minimumValue;
     
-    // debug data
+private:
     std::vector<float> min_derivative;
-    std::vector<int> possible_positions;
-    std::vector<float> mean_values;
-    std::vector<float> plain_values;
+    std::vector<FeatureCandidates> feature_candidates;
 };
 
 }
