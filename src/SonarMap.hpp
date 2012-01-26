@@ -2,6 +2,7 @@
 #define SONAR_MAP_HPP_
 
 #include <list>
+#include <vector>
 #include <base/time.h>
 #include <stdint.h>
 
@@ -102,6 +103,24 @@ public:
     std::list<T> getFeatureList() const
     {
         return features;
+    };
+    
+    void getSubFeatureVector(std::vector<T>& subvector, double start_angle = M_PI, double end_angle = -M_PI) const
+    {
+        subvector.clear();
+        bool range_switch = false;
+        if(end_angle - start_angle > M_PI)
+            range_switch = true;
+        
+        typename std::list<T>::const_iterator f_it = features.begin();
+        for(std::list< std::pair< double, base::Time > >::const_iterator a_it = angles.begin(); a_it != angles.end(); a_it++, f_it++)
+        {
+            if((range_switch && (a_it->first <= start_angle || a_it->first >= end_angle)) ||
+               (!range_switch && (a_it->first <= start_angle && a_it->first >= end_angle)))
+            {
+                subvector.push_back(*f_it);
+            }
+        }
     };
     
     std::list<T> *getFeatureListPtr()
