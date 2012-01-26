@@ -18,7 +18,7 @@ class PointClustering
         PointClustering();
         ~PointClustering();
         
-        std::vector< std::set<base::Vector3d*> > clusterPointCloud(std::list<base::Vector3d*> *pointCloud, 
+        static std::vector< std::set<base::Vector3d*> > clusterPointCloud(std::list<base::Vector3d*> *pointCloud, 
                                                                 unsigned int min_pts, 
                                                                 double epsilon, 
                                                                 bool use_z = false);
