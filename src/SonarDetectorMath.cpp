@@ -15,7 +15,7 @@ namespace sonar_detectors
  * @param best_model - best model that could be found
  * @return best_error, outlier in percent. if returns 1.0, no valid model could be found
  */
-double wallRansac(const std::vector< base::Vector3d >& pointCloud, int iterations, double threshold, double fit_rate, std::vector< std::pair< base::Vector3d, base::Vector3d > >& best_models)
+double wallRansac(const std::vector< base::Vector3d >& pointCloud, unsigned iterations, double threshold, double fit_rate, std::vector< std::pair< base::Vector3d, base::Vector3d > >& best_models)
 {
     best_models.clear();
     double best_error = 1.0;
@@ -73,14 +73,26 @@ double wallRansac(const std::vector< base::Vector3d >& pointCloud, int iteration
  * @param best_model - best model that could be found
  * @return fit_rate - count inliers of the best model in percent
  */
-double ransac(const std::vector< base::Vector3d >& pointCloud, int iterations, double threshold, std::vector< base::Vector3d >& outlier_best_model, std::pair< base::Vector3d, base::Vector3d >& best_model)
+double ransac(const std::vector< base::Vector3d >& pointCloud, unsigned iterations, double threshold, std::vector< base::Vector3d >& outlier_best_model, std::pair< base::Vector3d, base::Vector3d >& best_model)
 {
     srand(time(NULL));
     double best_fit_rate = 0.0;
     
-    if (pointCloud.size() >= 2)
+    // check for diverse points
+    bool diverse_points = false;
+    for(unsigned i = 1; i < pointCloud.size(); i++)
     {
-        for(int i = 0; i < iterations; i++)
+        if(pointCloud[0] != pointCloud[i])
+        {
+            diverse_points = true;
+            break;
+        }
+    }
+    
+    if (diverse_points)
+    {
+        // ransac algorithm
+        for(unsigned i = 0; i < iterations; i++)
         {
             base::Vector3d model_p1 = pointCloud[rand() % pointCloud.size()];
             base::Vector3d model_p2;
@@ -202,7 +214,7 @@ double length(const base::Vector3d& vec)
  * Uses openCV to approximate a line in a given point cloud.
  *
  * @param pointCloud the point cloud
- * @param model the approximated line
+ * @param model the approximated line in hesse normal form
  */
 void computeModel(const std::vector< base::Vector3d >& pointCloud, std::pair< base::Vector3d, base::Vector3d >& model)
 {
@@ -219,6 +231,7 @@ void computeModel(const std::vector< base::Vector3d >& pointCloud, std::pair< ba
         cv::fitLine(mat, line, CV_DIST_L2, 0, 0.01, 0.01);
         model.first = base::Vector3d(line[3], line[4], line[5]);
         model.second = base::Vector3d(line[0], line[1], line[2]);
+        model.first = computIntersection(model, base::Vector3d(0,0,0));
     }
 }
 
