@@ -19,6 +19,7 @@ set(HEADERS
         FeatureExtraction.hpp
         SonarEnvironmentModel.hpp
         PointClustering.hpp
+        SonarWallMap.hpp
 )
 
 rock_library(sonar_detectors
@@ -26,7 +27,3 @@ rock_library(sonar_detectors
     HEADERS ${HEADERS}
     DEPS_PKGCONFIG opencv base-types avalontools eigen3 dsp_acoustics machine_learning
     )
-
-#rock_executable(dummyproject_bin main.cpp
-#    DEPS dummyproject)
-
