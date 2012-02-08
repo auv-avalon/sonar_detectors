@@ -1,6 +1,6 @@
 #include "RansacWallEstimation.hpp"
 #include "SonarDetectorMath.hpp"
-#include <map>
+#include "PointClustering.hpp"
 
 namespace sonar_detectors
 {
@@ -10,7 +10,8 @@ RansacWallEstimation::RansacWallEstimation()
     min_count_pointcloud = 6;
     ransac_threshold = 0.5;
     ransac_fit_rate = 0.7;
-    featureList = sonarMap.getFeatureListPtr();
+    dbscan_epsilon = 1.0;
+    sonarMap.setFeatureTimeout(8000);
     wall.first = base::Vector3d(0.0,0.0,0.0);
     wall.second = base::Vector3d(0.0,0.0,0.0);
 }
@@ -27,13 +28,43 @@ void RansacWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
     
     if(featureVector.size() > 0)
     {
+        // add new feature
         sonarMap.addFeature(featureVector.front(), feature.start_angle, feature.time);
 
-        pointCloud.clear();
-        for(std::list< base::Vector3d >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
+        // get sub features in estimation zone
+        std::vector<base::Vector3d> featureCloud;
+        sonarMap.getSubFeatureVector(featureCloud, global_start_angle.rad, global_end_angle.rad);
+        
+        // cluster features
+        std::list<base::Vector3d*> pointCloudList;
+        for(std::vector<base::Vector3d>::iterator it = featureCloud.begin(); it != featureCloud.end(); it++)
         {
-            // TODO: filter out points which are not between global_start_angle and global_end_angle
-            pointCloud.push_back(*l_it);
+            pointCloudList.push_back(&*it);
+        }
+        std::vector< std::set<base::Vector3d*> > clusters = sonar_detectors::PointClustering::clusterPointCloud(&pointCloudList, min_count_pointcloud, 1.0, dbscan_epsilon);
+        unsigned cluster_count = 0;
+        std::vector< std::set<base::Vector3d*> >::const_iterator best_cluster = clusters.end();
+        for(std::vector< std::set<base::Vector3d*> >::const_iterator it = clusters.begin(); it != clusters.end(); it++)
+        {
+            if(it->size() > cluster_count)
+            {
+                best_cluster = it;
+                cluster_count = it->size();
+            }
+        }
+        
+        // check if a cluster is available
+        if (best_cluster == clusters.end())
+        {
+            wall.first = base::Vector3d(0.0,0.0,0.0);
+            wall.second = base::Vector3d(0.0,0.0,0.0);
+            return;
+        }
+        
+        pointCloud.clear();
+        for(std::set<base::Vector3d*>::const_iterator it = best_cluster->begin(); it != best_cluster->end(); it++)
+        {
+            pointCloud.push_back(**it);
         }
         
         // check if enough points are available
@@ -45,7 +76,7 @@ void RansacWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         }
         
         std::vector< std::pair<base::Vector3d, base::Vector3d> > new_walls;
-        int iterations = pointCloud.size() * 3;
+        unsigned int iterations = pointCloud.size() * 3;
         if (iterations > 200) iterations = 200;
         double error = sonar_detectors::wallRansac(pointCloud, iterations, ransac_threshold, ransac_fit_rate, new_walls);
         
@@ -56,24 +87,25 @@ void RansacWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         }
         else
         {
-            wall.first = base::Vector3d();
-            wall.second = base::Vector3d();
+            wall.first = base::Vector3d(0.0,0.0,0.0);
+            wall.second = base::Vector3d(0.0,0.0,0.0);
         }
     }
 }
 
-void RansacWallEstimation::setRansacParameters(double threshold, double fit_rate)
+void RansacWallEstimation::setRansacParameters(double ransac_threshold, double ransac_fit_rate, double dbscan_epsilon)
 {
-    ransac_fit_rate = fit_rate;
-    ransac_threshold = threshold;
+    this->ransac_fit_rate = ransac_fit_rate;
+    this->ransac_threshold = ransac_threshold;
+    this->dbscan_epsilon = dbscan_epsilon;
 }
 
-const std::pair< base::Vector3d, base::Vector3d > RansacWallEstimation::getWall() const
+const std::pair< base::Vector3d, base::Vector3d >& RansacWallEstimation::getWall() const
 {
     return wall;
 }
 
-std::vector<base::Vector3d> RansacWallEstimation::getPointCloud()
+const std::vector<base::Vector3d>& RansacWallEstimation::getPointCloud()
 {
     return pointCloud;
 }
