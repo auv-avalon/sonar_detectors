@@ -1,5 +1,6 @@
 #include "CenterWallEstimation.hpp"
 #include "SonarDetectorMath.hpp"
+#include <iostream>
 
 namespace sonar_detectors
 {
@@ -22,9 +23,15 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
 {
     std::vector<Eigen::Vector3d> featureVector;
     feature.convertScanToPointCloud(featureVector);
+    base::Angle range = global_start_angle - global_end_angle;
+    if(range.rad == 0)
+    {
+        std::cerr << "CenterWallEstimation: estimation angle is zero!" << std::endl;
+        return;
+    }
     
     // fading out points
-    double fading_out_factor = this->fading_out_factor * (M_PI_2 / (global_start_angle - global_end_angle).getRad());
+    double fading_out_factor = this->fading_out_factor * (M_PI_2 / range.getRad());
     for(std::multimap<base::Angle, base::Vector3d>::iterator it = feature_map.begin(); it != feature_map.end(); it++)
     {
         it->second.z() -= fading_out_factor;
@@ -46,8 +53,9 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         std::vector<base::Vector3d> left_points;
         std::vector<base::Vector3d> right_points;
         
-        getSubPointsFromMap(left_points, global_start_angle, global_heading);
-        getSubPointsFromMap(right_points, global_heading, global_end_angle);
+        base::Angle global_mid_angle = global_start_angle - (range * 0.5);
+        getSubPointsFromMap(left_points, global_start_angle, global_mid_angle);
+        getSubPointsFromMap(right_points, global_mid_angle, global_end_angle);
         
         // compute wall position
         if(left_points.size() < MIN_SCAN_POINTS || right_points.size() < MIN_SCAN_POINTS)
