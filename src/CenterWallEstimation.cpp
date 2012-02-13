@@ -98,7 +98,7 @@ void CenterWallEstimation::getSubPointsFromMap(std::vector< base::Vector3d >& po
 base::Vector3d CenterWallEstimation::calcCenterOfGeometry(const std::vector<base::Vector3d> &points)
 {
     if(points.empty())
-        return base::Vector3d();
+        return base::Vector3d(0.0,0.0,0.0);
 
     float value_x = 0;
     float value_y = 0;
@@ -110,7 +110,7 @@ base::Vector3d CenterWallEstimation::calcCenterOfGeometry(const std::vector<base
         total_strength += iter->z();
     }
     if(total_strength == 0)
-        return base::Vector3d();
+        return base::Vector3d(0.0,0.0,0.0);
 
     return base::Vector3d(value_x/total_strength,value_y/total_strength,total_strength/points.size());
 }

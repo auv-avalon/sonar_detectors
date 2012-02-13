@@ -53,6 +53,7 @@ void RansacWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
                 cluster_count = it->size();
             }
         }
+        pointCloud.clear();
         
         // check if a cluster is available
         if (best_cluster == clusters.end())
@@ -62,7 +63,6 @@ void RansacWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
             return;
         }
         
-        pointCloud.clear();
         for(std::set<base::Vector3d*>::const_iterator it = best_cluster->begin(); it != best_cluster->end(); it++)
         {
             pointCloud.push_back(**it);

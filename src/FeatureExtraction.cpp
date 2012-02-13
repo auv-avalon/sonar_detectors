@@ -36,7 +36,7 @@ FeatureExtraction::~FeatureExtraction()
 {
     for(std::list< std::vector<float>* >::iterator it = derivativeHistory.begin(); it != derivativeHistory.end(); it++)
     {
-        derivativeHistory.erase(it);
+        delete *it;
     }
 }
     
