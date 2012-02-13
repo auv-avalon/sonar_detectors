@@ -19,10 +19,12 @@ PointClustering::~PointClustering()
 std::vector< std::set<base::Vector3d*> > PointClustering::clusterPointCloud(std::list<base::Vector3d*> *pointCloud, 
                                                                         unsigned int min_pts, 
                                                                         double epsilon, 
-                                                                        bool use_z)
+                                                                        bool use_z,
+                                                                        bool use_dynamic_epsilon,
+                                                                        double dynamic_epsilon_weight)
 {
     /* Get cluster result */
-    machine_learning::DBScan dbs(pointCloud, min_pts, epsilon, use_z);
+    machine_learning::DBScan dbs(pointCloud, min_pts, epsilon, use_z, use_dynamic_epsilon, dynamic_epsilon_weight);
     std::map<base::Vector3d*, int> scan_result = dbs.scan();
     
     /* Convert result map to set vector */

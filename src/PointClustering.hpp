@@ -21,7 +21,9 @@ class PointClustering
         static std::vector< std::set<base::Vector3d*> > clusterPointCloud(std::list<base::Vector3d*> *pointCloud, 
                                                                 unsigned int min_pts, 
                                                                 double epsilon, 
-                                                                bool use_z = false);
+                                                                bool use_z = false,
+                                                                bool use_dynamic_epsilon = false,
+                                                                double dynamic_epsilon_weight = 1.0);
         
     private:
         
