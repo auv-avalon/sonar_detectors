@@ -104,35 +104,37 @@ double ransac(const std::vector< base::Vector3d >& pointCloud, unsigned iteratio
             
             std::pair< base::Vector3d, base::Vector3d > model(model_p1, model_p1 - model_p2);
             std::vector< base::Vector3d > consensus_set;
-            consensus_set.push_back(model_p1);
-            consensus_set.push_back(model_p2);
             std::vector< base::Vector3d > outlier;
 
-            for(std::vector< base::Vector3d >::const_iterator it = pointCloud.begin(); it != pointCloud.end(); it++)
-            {
-                if (*it == model_p1 || *it == model_p2)
-                    continue;
-                
-                if (computeDistance(model, *it) <= threshold)
-                {
-                    consensus_set.push_back(*it);
-                }
-                else 
-                {
-                    outlier.push_back(*it);
-                }
-            }
+            double fit = lineFitEvaluation(pointCloud, model, threshold, consensus_set, outlier);
             
-            double fit = (double)consensus_set.size() / (double)pointCloud.size();
             if (fit > best_fit_rate)
             {
-                computeModel(consensus_set, best_model);
+                computeLine(consensus_set, best_model);
                 outlier_best_model = outlier;
                 best_fit_rate = fit;
             }
         }
     }
     return best_fit_rate;
+}
+
+double lineFitEvaluation(const std::vector< base::Vector3d >& pointCloud, const std::pair< base::Vector3d, base::Vector3d >& line, const double threshold, 
+                         std::vector< base::Vector3d >& inlier, std::vector< base::Vector3d >& outlier)
+{
+    for(std::vector< base::Vector3d >::const_iterator it = pointCloud.begin(); it != pointCloud.end(); it++)
+    {
+        if (computeDistance(line, *it) <= threshold)
+        {
+            inlier.push_back(*it);
+        }
+        else 
+        {
+            outlier.push_back(*it);
+        }
+    }
+
+    return (double)inlier.size() / (double)pointCloud.size();
 }
 
 /**
@@ -211,12 +213,23 @@ double length(const base::Vector3d& vec)
 }
 
 /**
+ * Compute the length of a vector.
+ *
+ * @param vec the vector
+ * @return the lenght in m
+ */
+double length(const base::Vector2d& vec)
+{
+    return sqrt(pow(vec.x(),2) + pow(vec.y(),2));
+}
+
+/**
  * Uses openCV to approximate a line in a given point cloud.
  *
  * @param pointCloud the point cloud
  * @param model the approximated line in hesse normal form
  */
-void computeModel(const std::vector< base::Vector3d >& pointCloud, std::pair< base::Vector3d, base::Vector3d >& model)
+void computeLine(const std::vector< base::Vector3d >& pointCloud, std::pair< base::Vector3d, base::Vector3d >& model)
 {
     std::vector<cv::Point3f> cvPoints;
     for(std::vector< base::Vector3d >::const_iterator it = pointCloud.begin(); it != pointCloud.end(); it++)
