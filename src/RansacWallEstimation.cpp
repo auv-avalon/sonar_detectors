@@ -41,7 +41,8 @@ void RansacWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         {
             pointCloudList.push_back(&*it);
         }
-        std::vector< std::set<base::Vector3d*> > clusters = sonar_detectors::PointClustering::clusterPointCloud(&pointCloudList, min_count_pointcloud, 1.0, dbscan_epsilon);
+        std::vector< std::set<base::Vector3d*> > clusters;
+        sonar_detectors::PointClustering::clusterPointCloud(&pointCloudList, clusters, min_count_pointcloud, 1.0, dbscan_epsilon);
         unsigned cluster_count = 0;
         std::vector< std::set<base::Vector3d*> >::const_iterator best_cluster = clusters.end();
         for(std::vector< std::set<base::Vector3d*> >::const_iterator it = clusters.begin(); it != clusters.end(); it++)
