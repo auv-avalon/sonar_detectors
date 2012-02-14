@@ -6,6 +6,7 @@ set(SOURCES
         FeatureExtraction.cpp
         SonarEnvironmentModel.cpp
         PointClustering.cpp
+        MWallEstimation.cpp
 )
 
 set(HEADERS
@@ -20,6 +21,7 @@ set(HEADERS
         SonarEnvironmentModel.hpp
         PointClustering.hpp
         SonarWallMap.hpp
+        MWallEstimation.hpp
 )
 
 rock_library(sonar_detectors
