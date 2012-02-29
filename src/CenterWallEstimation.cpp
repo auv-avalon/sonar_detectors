@@ -84,7 +84,7 @@ void CenterWallEstimation::getSubPointsFromMap(std::vector< base::Vector3d >& po
 {
     bool range_switch = false;
     
-    if(end_angle.rad - start_angle.rad > M_PI)
+    if(end_angle.rad - start_angle.rad > 0.0)
         range_switch = true;
     
     for(std::multimap<base::Angle, base::Vector3d>::iterator it = feature_map.begin(); it != feature_map.end(); it++)

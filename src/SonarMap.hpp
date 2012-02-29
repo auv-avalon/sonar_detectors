@@ -109,7 +109,7 @@ public:
     {
         subvector.clear();
         bool range_switch = false;
-        if(end_angle - start_angle > M_PI)
+        if(end_angle - start_angle >= 0)
             range_switch = true;
         
         typename std::list<T>::const_iterator f_it = features.begin();
