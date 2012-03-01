@@ -12,6 +12,7 @@ CenterWallEstimation::CenterWallEstimation() :
 {
     wall.first = base::Vector3d(0.0,0.0,0.0);
     wall.second = base::Vector3d(0.0,0.0,0.0);
+    supposed_wall_angle.rad = 0.0;
 }
 
 CenterWallEstimation::~CenterWallEstimation()
@@ -53,7 +54,7 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         std::vector<base::Vector3d> left_points;
         std::vector<base::Vector3d> right_points;
         
-        base::Angle global_mid_angle = global_start_angle - (range * 0.5);
+        base::Angle global_mid_angle = global_heading + supposed_wall_angle;
         getSubPointsFromMap(left_points, global_start_angle, global_mid_angle);
         getSubPointsFromMap(right_points, global_mid_angle, global_end_angle);
         
@@ -118,6 +119,11 @@ base::Vector3d CenterWallEstimation::calcCenterOfGeometry(const std::vector<base
 void CenterWallEstimation::setFadingOutFactor(double factor)
 {
     fading_out_factor = factor;
+}
+
+void CenterWallEstimation::setSupposedWallAngle(base::Angle supposed_wall_angle)
+{
+    this->supposed_wall_angle = supposed_wall_angle;
 }
 
 const std::pair< base::Vector3d, base::Vector3d > CenterWallEstimation::getWall() const
