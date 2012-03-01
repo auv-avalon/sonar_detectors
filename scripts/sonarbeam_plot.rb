@@ -20,7 +20,7 @@ curve.show
 
 log = Orocos::Log::Replay.open(ARGV)
 
-log.sonar.BaseScan :type => :buffer, :size => 100  do |sample|
+log.sonar.BaseScan do |sample|
     b = Array.new(sample.beam.length)
     a = Array.new(sample.beam.length)
     for i in 0..sample.beam.length-1 do

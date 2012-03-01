@@ -14,12 +14,12 @@ sonarbeamviz = view3d.createPlugin("sonarbeam","SonarBeamVisualization")
 
 log = Orocos::Log::Replay.open(ARGV)
 
-log.sonar.BaseScan :type => :buffer, :size => 100  do |sample|
+log.sonar.BaseScan  do |sample|
     sonarbeamviz.updateSonarBeam(sample)
     sample
 end
 
-#log.orientation_estimator.orientation_samples :type => :buffer, :size => 100  do |sample|
+#log.orientation_estimator.orientation_samples  do |sample|
 #    sonarbeamviz.updateBodyState(sample)
 #    sample
 #end 
