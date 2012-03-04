@@ -5,12 +5,11 @@
 namespace sonar_detectors
 {
     
-const unsigned int MIN_SCAN_POINTS = 7;    //Min number of valid scan points for valid wall 
-    
 CenterWallEstimation::CenterWallEstimation() : 
                       fading_out_factor(0.02),
                       applied_variance(0.0),
-                      angular_range_variance(0.0)
+                      angular_range_variance(0.0),
+                      min_scan_points(7)
 {
     wall.first = base::Vector3d(0.0,0.0,0.0);
     wall.second = base::Vector3d(0.0,0.0,0.0);
@@ -102,7 +101,7 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         getSubPointsFromMap(right_points, global_mid_angle, global_end_angle);
         
         // compute wall position
-        if(left_points.size() < MIN_SCAN_POINTS || right_points.size() < MIN_SCAN_POINTS)
+        if(left_points.size() < min_scan_points || right_points.size() < min_scan_points)
         {
             wall.first = base::Vector3d(0.0,0.0,0.0);
             wall.second = base::Vector3d(0.0,0.0,0.0);
@@ -180,7 +179,7 @@ void CenterWallEstimation::setFadingOutFactor(double factor)
     fading_out_factor = factor;
 }
 
-void CenterWallEstimation::setSupposedWallAngle(base::Angle supposed_wall_angle)
+void CenterWallEstimation::setSupposedWallAngle(const base::Angle &supposed_wall_angle)
 {
     this->supposed_wall_angle = supposed_wall_angle;
 }
@@ -188,6 +187,11 @@ void CenterWallEstimation::setSupposedWallAngle(base::Angle supposed_wall_angle)
 void CenterWallEstimation::setWallAngleVariance(double angular_range)
 {
     this->angular_range_variance = angular_range;
+}
+
+void CenterWallEstimation::setMinScanPoints(unsigned int min_scan_points)
+{
+    this->min_scan_points = min_scan_points;
 }
 
 const std::pair< base::Vector3d, base::Vector3d > CenterWallEstimation::getWall() const

@@ -18,8 +18,9 @@ namespace sonar_detectors
         CenterWallEstimation();
         ~CenterWallEstimation();
         
+        void setMinScanPoints(unsigned int min_scan_points);
         void setFadingOutFactor(double factor);
-        void setSupposedWallAngle(base::Angle supposed_wall_angle);
+        void setSupposedWallAngle(const base::Angle &supposed_wall_angle);
         void setWallAngleVariance(double angular_range);
         const std::pair<base::Vector3d, base::Vector3d> getWall() const;
         std::vector<base::Vector3d> getPointCloud() const;
@@ -32,6 +33,7 @@ namespace sonar_detectors
         
     protected:
         std::multimap<base::Angle, base::Vector3d> feature_map;
+        unsigned int min_scan_points; //Min number of valid scan points for valid wall 
         double fading_out_factor;
         base::Vector3d left_center;
         base::Vector3d right_center;
