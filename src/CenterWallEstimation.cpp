@@ -8,7 +8,9 @@ namespace sonar_detectors
 const unsigned int MIN_SCAN_POINTS = 7;    //Min number of valid scan points for valid wall 
     
 CenterWallEstimation::CenterWallEstimation() : 
-                      fading_out_factor(0.02)
+                      fading_out_factor(0.02),
+                      applied_variance(0.0),
+                      angular_range_variance(0.0)
 {
     wall.first = base::Vector3d(0.0,0.0,0.0);
     wall.second = base::Vector3d(0.0,0.0,0.0);
@@ -54,7 +56,48 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         std::vector<base::Vector3d> left_points;
         std::vector<base::Vector3d> right_points;
         
-        base::Angle global_mid_angle = global_heading + supposed_wall_angle;
+        base::Angle global_mid_angle = global_heading + supposed_wall_angle + base::Angle::fromRad(applied_variance);
+        // use a angular range variance to better detect corners 
+        if(angular_range_variance != 0.0)
+        {
+            unsigned int count_left, count_right;
+            getSubPointCount(count_left, global_start_angle, global_mid_angle);
+            getSubPointCount(count_right, global_mid_angle, global_end_angle);
+            if(angular_range_variance > 0.0)
+            {
+                // left variance
+                if(count_left > count_right * 2.0 && applied_variance < angular_range_variance)
+                {
+                    applied_variance += angular_range_variance * 0.05;
+                    if(applied_variance > angular_range_variance)
+                        applied_variance = angular_range_variance;
+                }
+                else if(applied_variance > 0.0 && count_left < count_right * 1.5)
+                {
+                    applied_variance -= angular_range_variance * 0.05;
+                    if(applied_variance < 0.0)
+                        applied_variance = 0.0;
+                }
+            }
+            else
+            {
+                // right variance
+               if(count_right > count_left * 2.0 && applied_variance > angular_range_variance)
+                {
+                    applied_variance += angular_range_variance * 0.05;
+                    if(applied_variance < angular_range_variance)
+                        applied_variance = angular_range_variance;
+                }
+                else if(applied_variance < 0.0 && count_right < count_left * 1.5)
+                {
+                    applied_variance -= angular_range_variance * 0.05;
+                    if(applied_variance > 0.0)
+                        applied_variance = 0.0;
+                }
+            }
+            global_mid_angle = global_heading + supposed_wall_angle + base::Angle::fromRad(applied_variance);
+        }
+        
         getSubPointsFromMap(left_points, global_start_angle, global_mid_angle);
         getSubPointsFromMap(right_points, global_mid_angle, global_end_angle);
         
@@ -96,6 +139,22 @@ void CenterWallEstimation::getSubPointsFromMap(std::vector< base::Vector3d >& po
     }
 }
 
+void CenterWallEstimation::getSubPointCount(unsigned int& count, const base::Angle& start_angle, const base::Angle& end_angle)
+{
+    bool range_switch = false;
+    count = 0;
+    
+    if(end_angle.rad - start_angle.rad > 0.0)
+        range_switch = true;
+    
+    for(std::multimap<base::Angle, base::Vector3d>::iterator it = feature_map.begin(); it != feature_map.end(); it++)
+    {
+        if((range_switch && (it->first < start_angle || it->first > end_angle)) ||
+           (!range_switch && ( it->first < start_angle && it->first > end_angle)))
+            count++;
+    }
+}
+
 base::Vector3d CenterWallEstimation::calcCenterOfGeometry(const std::vector<base::Vector3d> &points)
 {
     if(points.empty())
@@ -124,6 +183,11 @@ void CenterWallEstimation::setFadingOutFactor(double factor)
 void CenterWallEstimation::setSupposedWallAngle(base::Angle supposed_wall_angle)
 {
     this->supposed_wall_angle = supposed_wall_angle;
+}
+
+void CenterWallEstimation::setWallAngleVariance(double angular_range)
+{
+    this->angular_range_variance = angular_range;
 }
 
 const std::pair< base::Vector3d, base::Vector3d > CenterWallEstimation::getWall() const
