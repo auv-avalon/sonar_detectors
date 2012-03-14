@@ -4,6 +4,11 @@
 #include <vector>
 #include <base/eigen.h>
 
+namespace base
+{
+    class Angle;
+}
+
 namespace sonar_detectors
 {  
     const static double right_angle_variance = M_PI / 18.0; // ~10°
@@ -18,6 +23,7 @@ namespace sonar_detectors
     double length(const base::Vector3d& vec);
     double length(const base::Vector2d& vec);
     base::Vector3d computIntersection(const std::pair<base::Vector3d, base::Vector3d>& line, const base::Vector3d& point);
+    bool isInAngularRange(const base::Angle& angle, const base::Angle& left_limit, const base::Angle& right_limit);
 }
 
 #endif

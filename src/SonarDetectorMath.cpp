@@ -1,5 +1,6 @@
 #include "SonarDetectorMath.hpp"
 #include <opencv/cv.h>
+#include <base/angle.h>
 
 namespace sonar_detectors
 {
@@ -246,6 +247,19 @@ void computeLine(const std::vector< base::Vector3d >& pointCloud, std::pair< bas
         model.second = base::Vector3d(line[0], line[1], line[2]);
         model.first = computIntersection(model, base::Vector3d(0,0,0));
     }
+}
+
+bool isInAngularRange(const base::Angle& angle, const base::Angle& left_limit, const base::Angle& right_limit)
+{
+    bool range_switch = false;
+    if(right_limit.rad - left_limit.rad > 0.0)
+        range_switch = true;
+    
+    if((range_switch && (angle < left_limit || angle > right_limit)) ||
+        (!range_switch && (angle < left_limit && angle > right_limit)))
+        return true;
+    else
+        return false;
 }
 
 }
