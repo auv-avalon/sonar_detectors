@@ -19,8 +19,15 @@ namespace vizkit
 class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< base::samples::Pointcloud >,
                                   public vizkit::VizPluginAddType< std::vector< base::Vector3d > >
 {    
+    Q_OBJECT
+    Q_PROPERTY(QColor defaultFeatureColor READ getDefaultFeatureColor WRITE setDefaultFeatureColor)
+    
     public:
         SonarFeatureVisualization();
+        
+    public slots:
+        QColor getDefaultFeatureColor();
+        void setDefaultFeatureColor(QColor color);
         
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
@@ -30,6 +37,7 @@ class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< base::samples::
         
     private:
         base::samples::Pointcloud pointCloud;
+        osg::Vec4f default_feature_color;
         std::vector< base::Vector3d > channelInfos;
         osg::ref_ptr<osg::Vec3Array> pointsOSG;
         osg::ref_ptr<osg::DrawArrays> drawArrays;

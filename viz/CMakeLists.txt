@@ -6,7 +6,8 @@ rock_vizkit_plugin(sonarbeam-viz
 rock_vizkit_plugin(sonarfeature-viz
     SonarFeatureVisualization.cpp
     DEPS sonar_detectors
-    HEADERS SonarFeatureVisualization.hpp)
+    HEADERS SonarFeatureVisualization.hpp
+    MOC SonarFeatureVisualization.hpp)
 
 rock_vizkit_plugin(wall-viz
     WallVisualization.cpp

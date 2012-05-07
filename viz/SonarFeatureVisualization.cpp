@@ -9,6 +9,7 @@ SonarFeatureVisualization::SonarFeatureVisualization()
     VizPluginRubyAdapter(SonarFeatureVisualization, base::samples::Pointcloud, PointCloud)
     VizPluginRubyAdapter(SonarFeatureVisualization, std::vector< base::Vector3d >, ChannelData)
     newPoints = false;
+    default_feature_color = osg::Vec4f(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 /**
@@ -36,6 +37,22 @@ osg::ref_ptr< osg::Node > SonarFeatureVisualization::createMainNode()
     mainNode->addChild(geode);
     
     return mainNode;
+}
+
+QColor SonarFeatureVisualization::getDefaultFeatureColor()
+{
+    QColor color;
+    color.setRgbF(default_feature_color.x(), default_feature_color.y(), default_feature_color.z(), default_feature_color.w());
+    return color;
+}
+
+void SonarFeatureVisualization::setDefaultFeatureColor(QColor color)
+{
+    default_feature_color.x() = color.redF();
+    default_feature_color.y() = color.greenF();
+    default_feature_color.z() = color.blueF();
+    default_feature_color.w() = color.alphaF();
+    emit propertyChanged("defaultFeatureColor");
 }
 
 /**
@@ -84,7 +101,7 @@ void SonarFeatureVisualization::updateMainNode(osg::Node* node)
             }
             else
             {
-                color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+                color->push_back(default_feature_color);
             }
         }
         drawArrays->setCount(pointsOSG->size());
