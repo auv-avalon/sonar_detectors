@@ -25,7 +25,7 @@ osg::ref_ptr< osg::Node > WallVisualization::createMainNode()
     wallOSG = new osg::Vec3Array;
     wallGeom->setVertexArray(wallOSG);
     osg::Vec4Array* wallcolor = new osg::Vec4Array;
-    wallcolor->push_back(osg::Vec4(0.0f, 0.8f, 0.8f, 1.0f));
+    wallcolor->push_back(osg::Vec4(0.0f, 0.8f, 0.8f, 0.8f));
     wallGeom->setColorArray(wallcolor);
     wallGeom->setColorBinding(osg::Geometry::BIND_OVERALL);
     
@@ -45,20 +45,25 @@ void WallVisualization::updateDataIntern(const std::vector<base::Vector3d>& data
 void WallVisualization::updateMainNode(osg::Node* node)
 {
     wallOSG->clear();
-    if (wall.size() == 2 && wall.front() != wall.back())
+    wallGeom->removePrimitiveSet(0, wallGeom->getNumPrimitiveSets());
+    if (!wall.empty() && wall.size() % 2 == 0)
     {
-        base::Vector3d direction_vector = wall.back() * ((wall_length * 0.5) / sonar_detectors::length(wall.back()));
-        base::Vector3d pos1 = wall.front() - direction_vector;
-        base::Vector3d pos2 = wall.front() + direction_vector;
-        osg::Vec3d vec1(pos1.x(), pos1.y(), pos1.z());
-        osg::Vec3d vec2(pos2.x(), pos2.y(), pos2.z());
-        wallOSG->push_back(vec1 + osg::Vec3d(0,0,1));
-        wallOSG->push_back(vec1 + osg::Vec3d(0,0,-1));
-        wallOSG->push_back(vec2 + osg::Vec3d(0,0,1));
-        wallOSG->push_back(vec2 + osg::Vec3d(0,0,-1));
+        for(unsigned int i = 0; i + 1 < wall.size(); i+=2)
+        {
+            if(wall[i] == wall[i+1] || wall[i+1] == base::Vector3d(0,0,0))
+                continue;
+            base::Vector3d direction_vector = wall[i+1] * ((wall_length * 0.5) / sonar_detectors::length(wall[i+1]));
+            base::Vector3d pos1 = wall[i] - direction_vector;
+            base::Vector3d pos2 = wall[i] + direction_vector;
+            osg::Vec3d vec1(pos1.x(), pos1.y(), pos1.z());
+            osg::Vec3d vec2(pos2.x(), pos2.y(), pos2.z());
+            wallOSG->push_back(vec1 + osg::Vec3d(0,0,1));
+            wallOSG->push_back(vec1 + osg::Vec3d(0,0,-1));
+            wallOSG->push_back(vec2 + osg::Vec3d(0,0,1));
+            wallOSG->push_back(vec2 + osg::Vec3d(0,0,-1));
+        }
         
-        wallGeom->removePrimitiveSet(0, wallGeom->getNumPrimitiveSets());
-        if(wallOSG->size() >= 4) 
+        if(wallOSG->size() >= 4)
         {
             wallGeom->setVertexArray(wallOSG);
             for(unsigned int i = 0; i < wallOSG->size() - 3; i += 4)
@@ -71,10 +76,6 @@ void WallVisualization::updateMainNode(osg::Node* node)
                 wallGeom->addPrimitiveSet(drawWall);
             }
         }
-    }
-    else
-    {
-        wallGeom->removePrimitiveSet(0, wallGeom->getNumPrimitiveSets());
     }
 }
 
