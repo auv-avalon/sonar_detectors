@@ -12,19 +12,20 @@
 
 namespace sonar_detectors
 {
+    
+struct FeatureCandidate
+{
+    int beam_index;
+    float mean_value;
+    float plain_value;
+    double probability;
+    FeatureCandidate() : 
+        beam_index(-1), mean_value(0.0f), plain_value(0.0f), probability(1.0) {};
+    bool operator<(const FeatureCandidate &fc) const { return (probability < fc.probability); }
+};
 
 class FeatureExtraction
 {   
-public:
-    struct FeatureCandidates
-    {
-        int beam_index;
-        float mean_value;
-        float plain_value;
-        FeatureCandidates() : 
-            beam_index(-1), mean_value(0.0f), plain_value(0.0f) {};
-    };
-    
 public:
     FeatureExtraction();
     ~FeatureExtraction();
@@ -66,9 +67,9 @@ public:
      * Returns the spot of the maximum accumulation in the history-derivative. 
      * The history-derivative is the minimum of the last |derivative_history_length| derivatives.
      * @param beam the sonar signal
-     * @return index of the peak
+     * @return sorted feature candidates
      */
-    int getFeatureDerivativeHistory(const std::vector<float>& beam);
+    std::vector<FeatureCandidate> computeDerivativeFeatureCandidates(const std::vector<float>& beam);
     /**
      * Configuration for the featureDerivativeHistory.
      * @param derivative_history_length num of the derivatives to build the history
@@ -78,12 +79,12 @@ public:
      * @param plain_length the length of the plain in percent of signal length, if it is 0 the plain will be ignored
      * @param plain_threshold the threshold to be a acceptable plain in percent of the mean signal strength
      */
-    void featureDerivativeHistoryConfiguration(const unsigned int &derivative_history_length, const float &feature_threshold, const unsigned int &best_values_size, 
+    void setDerivativeFeatureConfiguration(const unsigned int &derivative_history_length, const float &feature_threshold, const unsigned int &best_values_size, 
         const float &signal_balancing, const float &plain_length, const float &plain_threshold);
     /**
      * Provides intermediate results of getFeatureDerivativeHistory for debugging purposes.
      */
-    void getFDHDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold, std::vector<FeatureCandidates> &candidates);
+    void getDerivativeFeatureDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold);
     
     
     /**
@@ -131,7 +132,6 @@ protected:
     
 private:
     std::vector<float> min_derivative;
-    std::vector<FeatureCandidates> feature_candidates;
 };
 
 }

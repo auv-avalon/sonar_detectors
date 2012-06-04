@@ -138,8 +138,9 @@ int FeatureExtraction::getFeatureMaximalLevelDifference(const std::vector< float
         return -1;
 }
 
-int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& beam)
+std::vector<FeatureCandidate> FeatureExtraction::computeDerivativeFeatureCandidates(const std::vector< float >& beam)
 {
+    std::vector<FeatureCandidate> candidates;
     // campute and add derivative
     try
     {
@@ -148,7 +149,7 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     catch (std::runtime_error e)
     {
         std::cerr << "Can't compute the derivative of this beam. " << e.what() << std::endl;
-        return -1;
+        return candidates;
     }
 
     // get the minimum signal of |history_length| derivatives
@@ -172,11 +173,10 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
     }
     
     if(min_derivative.size() == 0)
-        return -1;
+        return candidates;
     
     // find the most likely obstacle position
     std::vector<float>::const_iterator it = min_derivative.end();
-    feature_candidates.clear();
     do
     {
         it--;
@@ -220,26 +220,25 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
             if(count > 0)
             {
                 mean_value = mean_value / (float)count;
-                FeatureCandidates candidate;
+                FeatureCandidate candidate;
                 candidate.beam_index = position;
                 candidate.mean_value = mean_value;
                 candidate.plain_value = plain_window_value;
-                feature_candidates.push_back(candidate);
+                candidates.push_back(candidate);
             }
         }
     }
     while(it > min_derivative.begin());
     
-    for(unsigned int i = 0; i < feature_candidates.size(); i++)
+    for(unsigned int i = 0; i < candidates.size(); i++)
     {
         // correct signal moderation
-        feature_candidates[i].mean_value = feature_candidates[i].mean_value * ((1.0f - signal_balancing) + ((signal_balancing * (float)feature_candidates[i].beam_index) / (float)min_derivative.size()));
+        candidates[i].mean_value = candidates[i].mean_value * ((1.0f - signal_balancing) + ((signal_balancing * (float)candidates[i].beam_index) / (float)min_derivative.size()));
         // reduce signal weight in device noise area
-        feature_candidates[i].mean_value = feature_candidates[i].mean_value * (1 + ( pow((SonarEnvironmentModel::device_noise_distribution((float)feature_candidates[i].beam_index) / 255.0f), 0.5) * -1.0f ));
+        candidates[i].mean_value = candidates[i].mean_value * (1 + ( pow((SonarEnvironmentModel::device_noise_distribution((float)candidates[i].beam_index) / 255.0f), 0.5) * -1.0f ));
     }
     
     // compute plain threshold
-    plain_window_threshold = 100.0f;
     if(force_plain)
     {
         plain_window_threshold = 0.0f;
@@ -253,21 +252,43 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
             }
         }
         plain_window_threshold = (plain_window_threshold / (float)index_counter) * plain_threshold;
+        
+        // remove candidates if plain value is to high
+        for(std::vector<FeatureCandidate>::iterator it = candidates.begin(); it != candidates.end();)
+        {
+            if(it->plain_value > plain_window_threshold)
+                it = candidates.erase(it);
+            else
+                it++;
+        }
     }
     
     // find the best value
     int best_pos = -1;
     float best_value = value_threshold;
     float best_peak = 0.0f;
-    for(unsigned int i = 0; i < feature_candidates.size(); i++)
+    for(unsigned int i = 0; i < candidates.size(); i++)
     {
-        if(feature_candidates[i].mean_value > best_value && feature_candidates[i].plain_value < plain_window_threshold)
+        if(candidates[i].mean_value > best_value)
         {
-            best_value = feature_candidates[i].mean_value;
-            best_pos = feature_candidates[i].beam_index;
-            best_peak = min_derivative[feature_candidates[i].beam_index];
+            best_value = candidates[i].mean_value;
+            best_pos = candidates[i].beam_index;
+            best_peak = min_derivative[candidates[i].beam_index];
         }
     }
+    
+    // compute possibilities for the canditates
+    for(unsigned int i = 0; i < candidates.size(); i++)
+    {
+        if(candidates[i].mean_value > value_threshold)
+            candidates[i].probability = candidates[i].mean_value / best_value;
+        else
+            candidates[i].probability = 0.0;
+    }
+    
+    // sort candidates
+    std::sort(candidates.begin(), candidates.end());
+    std::reverse(candidates.begin(), candidates.end());
     
     // update value threshold
     cooldown_threshold++;
@@ -285,10 +306,10 @@ int FeatureExtraction::getFeatureDerivativeHistory(const std::vector< float >& b
         value_threshold = (sum_best_values / (float)best_values.size()) * feature_threshold;
     }
     
-    return best_pos;
+    return candidates;
 }
 
-void FeatureExtraction::featureDerivativeHistoryConfiguration(const unsigned int& derivative_history_length, const float& feature_threshold, 
+void FeatureExtraction::setDerivativeFeatureConfiguration(const unsigned int& derivative_history_length, const float& feature_threshold, 
                                                               const unsigned int& best_values_size, const float& signal_balancing, 
                                                               const float& plain_length, const float& plain_threshold)
 {
@@ -308,12 +329,11 @@ void FeatureExtraction::featureDerivativeHistoryConfiguration(const unsigned int
     }
 }
 
-void FeatureExtraction::getFDHDebugData(std::vector< float >& minimum_derivative, float& value_threshold, float& plain_window_threshold, std::vector<FeatureCandidates> &candidates)
+void FeatureExtraction::getDerivativeFeatureDebugData(std::vector< float >& minimum_derivative, float& value_threshold, float& plain_window_threshold)
 {
     minimum_derivative = this->min_derivative;
     value_threshold = this->value_threshold;
     plain_window_threshold = this->plain_window_threshold;
-    candidates = this->feature_candidates;
 }
 
 void FeatureExtraction::addToDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length)
