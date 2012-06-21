@@ -12,7 +12,11 @@ FeatureExtraction::FeatureExtraction() :
                     value_threshold(0.0f),
                     plain_window_threshold(0.0f),
                     minimumIndex(0),
-                    minimumValue(20.0)
+                    minimumValue(20.0),
+                    hough_group_id(0),
+                    probability_history_treshold(-1.0),
+                    probability_treshold_sum(0.0),
+                    probability_treshold_cooldown(0)
 {
     // feature extraction config
     /* history length of the derivatives */
@@ -30,6 +34,17 @@ FeatureExtraction::FeatureExtraction() :
     best_values_size = 100;
     /* threshold for new features in percent of the mean of the last |best_values_size| best features */
     feature_threshold = 0.6f; //[0..1]
+    
+    
+    hough_covariance << 0.628318531, 0.0, 0.0, 0.628318531; //0.1 * 2PI -- |
+    
+    beam_covariance << 2.0; // in m
+    
+    enforce_line_pos_rate = 0.5;
+    
+    max_hough_history = 5;
+    
+    max_candidates_per_beam = 4;
 }
 
 FeatureExtraction::~FeatureExtraction()
@@ -292,7 +307,7 @@ std::vector<FeatureCandidate> FeatureExtraction::computeDerivativeFeatureCandida
     
     // update value threshold
     cooldown_threshold++;
-    if(best_pos >= 0 || (cooldown_threshold%2) == 2)
+    if(best_pos >= 0 || cooldown_threshold > 3)
     {
         cooldown_threshold = 0;
         best_values.push_back(best_value);
@@ -334,6 +349,274 @@ void FeatureExtraction::getDerivativeFeatureDebugData(std::vector< float >& mini
     minimum_derivative = this->min_derivative;
     value_threshold = this->value_threshold;
     plain_window_threshold = this->plain_window_threshold;
+}
+
+void FeatureExtraction::enforceLines(std::vector<FeatureCandidate> &feature_candidates, const base::Angle& bearing, double spatial_resolution, unsigned beam_size)
+{
+    hough_group_id = hough_group_id % max_hough_history;
+    
+    // delete old entries of the same id
+    for(std::list<HoughEntry>::iterator hough_entry_it = hough_entries.begin(); hough_entry_it != hough_entries.end() && hough_entry_it->beam_id == hough_group_id; hough_entry_it = hough_entries.erase(hough_entry_it));
+    
+    // calculate feature coordnates and intersections in hough space
+    unsigned int candidate_count = 0;
+    for(unsigned int i = 0; i < feature_candidates.size() && candidate_count < max_candidates_per_beam; i++)
+    {
+        if(feature_candidates[i].probability > 0.0)
+        {
+            candidate_count++;
+            HoughEntry hough_entry;
+            hough_entry.beam_id = hough_group_id;
+            hough_entry.feature2d.x() = (double)feature_candidates[i].beam_index * spatial_resolution * cos(bearing.rad);
+            hough_entry.feature2d.y() = (double)feature_candidates[i].beam_index * spatial_resolution * sin(bearing.rad);
+            hough_entry.probability = feature_candidates[i].probability;
+            hough_entries.push_back(hough_entry);
+            
+            // calculate intersections with the existent entries in hough space
+            for(std::list<HoughEntry>::iterator hough_entry_it = hough_entries.begin(); hough_entry_it != hough_entries.end(); hough_entry_it++)
+            {
+                if(hough_entry.feature2d.x() != hough_entry_it->feature2d.x() && hough_entry.beam_id != hough_entry_it->beam_id)
+                {
+                    // note: intersection is in hough space (Theta,r)
+                    base::Vector2d intersection = computeHoughSpaceIntersection(hough_entry.feature2d, hough_entry_it->feature2d);
+                    assert(intersection.x() > -M_PI && intersection.x() <= M_PI);
+                    assert(intersection.y() >= 0.0);
+                    hough_entry_it->intersection_points.push_back(base::Vector3d(intersection.x(), intersection.y(), (hough_entry.probability + hough_entry_it->probability) * 0.5));
+                }
+            }
+        }
+    }
+    hough_group_id++;
+    
+    // calculate the probability of each intersection using a guassian distribution
+    const static base::Angle PI_3 = base::Angle::fromRad(M_PI / 3.0);
+    std::list<base::Vector3d> best_lines;
+    for(std::list<HoughEntry>::iterator hough_entry_it = hough_entries.begin(); hough_entry_it != hough_entries.end(); hough_entry_it++)
+    {
+        for(std::vector<base::Vector3d>::iterator intersection_it = hough_entry_it->intersection_points.begin(); intersection_it != hough_entry_it->intersection_points.end(); intersection_it++)
+        {
+            // skip intersections outside of +/-60° around the actual bearing
+            base::Angle theta = base::Angle::fromRad(intersection_it->x());
+            if(theta.isInRange(bearing + PI_3, bearing - PI_3))
+                continue;
+            
+            double probability_of_intersection = 0.0;
+            for(std::list<HoughEntry>::const_iterator hough_entry_it_2 = hough_entries.begin(); hough_entry_it_2 != hough_entries.end(); hough_entry_it_2++)
+            {
+                // skip intersections having their origin in the same beam
+                if(hough_entry_it_2->beam_id == hough_entry_it->beam_id)
+                    continue;
+                
+                for(std::vector<base::Vector3d>::const_iterator intersection_it_2 = hough_entry_it_2->intersection_points.begin(); intersection_it_2 != hough_entry_it_2->intersection_points.end(); intersection_it_2++)
+                {
+                    // skip intersections if they are to near (maybe use a e-function here)
+                    if(intersection_it_2->y() < 1.5)
+                        continue;
+                    // increase probability of this intersection
+                    else if(std::abs(intersection_it->x() - intersection_it_2->x()) > M_PI)
+                    {
+                        double shifted_theta = 0.0;
+                        if(intersection_it_2->x() < 0.0)
+                            shifted_theta = intersection_it_2->x() + M_PI * 2.0;
+                        else
+                            shifted_theta = intersection_it_2->x() - M_PI * 2.0;
+                        probability_of_intersection += machine_learning::calc_gaussian<2>(VECTOR_XD(2)(intersection_it->x(), intersection_it->y()), hough_covariance, VECTOR_XD(2)(shifted_theta, intersection_it_2->y()));
+                    }
+                    else
+                    {
+                        probability_of_intersection += machine_learning::calc_gaussian<2>(VECTOR_XD(2)(intersection_it->x(), intersection_it->y()), hough_covariance, VECTOR_XD(2)(intersection_it_2->x(), intersection_it_2->y()));
+                    }
+                }
+            }
+            //TODO maybe us the candidate probability (intersection_it->z()) here in some rate to weight the probability_of_intersection
+            intersection_it->z() = probability_of_intersection;
+            // add to sorted list
+            if(intersection_it->z() > 0.01)
+            {
+                std::list<base::Vector3d>::iterator lines_it = best_lines.begin();
+                for(;lines_it != best_lines.end() && lines_it->z() <= intersection_it->z(); lines_it++);
+                best_lines.insert(lines_it, *intersection_it);
+            }
+        }
+    }
+    
+    // create debug data
+    force_wall_pos.clear();
+    for(std::list<base::Vector3d>::const_iterator it = best_lines.begin(); it != best_lines.end(); it++)
+    {
+        double theta = it->x();
+        double r = it->y();
+        base::Vector2d p1;
+        p1.x() = r * cos(theta);
+        p1.y() = r * sin(theta);
+        double theta_2 = bearing.rad;
+        double r_2 = r / cos(theta_2-theta);
+        base::Vector2d p2;
+        p2.x() = r_2 * cos(theta_2);
+        p2.y() = r_2 * sin(theta_2);
+        
+        p2 = p2 - p1;
+        force_wall_pos.push_back(base::Vector3d(p1.x(), p1.y(), it->z()));
+        force_wall_pos.push_back(base::Vector3d(p2.x(), p2.y(), it->z()));
+    }
+    
+    if(!best_lines.empty())
+    {   
+        double max_probability = best_lines.back().z() > 1.0 ? best_lines.back().z() : 1.0;
+        // get index offsets
+        std::vector<unsigned> beam_index_offsets;
+        std::vector<double> index_probabilities;
+        for(std::list<base::Vector3d>::reverse_iterator it = best_lines.rbegin(); it != best_lines.rend(); it++)
+        {
+            double theta = it->x();
+            double r = it->y();
+            double dist_on_beam = r / cos(bearing.rad - theta);
+            int index_offset = (int)((dist_on_beam / spatial_resolution) + 0.5);
+            if(index_offset >= beam_size || index_offset < 0.0)
+                continue;
+            beam_index_offsets.push_back((unsigned)index_offset);
+            assert((it->z() / max_probability) <= 1.0);
+            index_probabilities.push_back(it->z() / max_probability);
+        }
+        
+        // create a probability mask of all estimated lines
+        std::vector<double> line_probability_mask(beam_size);
+        for(unsigned j = 0; j < beam_index_offsets.size(); j++)
+        {
+            VECTOR_XD(1) mean;
+            mean << beam_index_offsets[j];
+            for(unsigned i = beam_index_offsets[j]; i < line_probability_mask.size(); i++)
+            {
+                VECTOR_XD(1) index;
+                index << i;
+                double weight = machine_learning::calc_gaussian<1>(mean, beam_covariance / spatial_resolution, index);
+                if(weight < 0.01)
+                    break;
+                line_probability_mask[i] += weight * index_probabilities[j]; 
+            }
+            
+            for(int i = ((int)beam_index_offsets[j]) - 1; i >= 0; i--)
+            {
+                VECTOR_XD(1) index;
+                index << i;
+                double weight = machine_learning::calc_gaussian<1>(mean, beam_covariance / spatial_resolution, index);
+                if(weight < 0.01)
+                    break;
+                line_probability_mask[i] += weight * index_probabilities[j]; 
+            }
+        }
+        
+        // find highest probability
+        double highest_value = 0.0;
+        unsigned best_enforce_line_index = 0;
+        for(unsigned i = 0; i < line_probability_mask.size(); i++)
+        {
+            if(line_probability_mask[i] > highest_value)
+            {
+                highest_value = line_probability_mask[i];
+                best_enforce_line_index = i;
+            }
+        }
+        
+        // normalize mask
+        for(unsigned i = 0; i < line_probability_mask.size(); i++)
+        {
+            line_probability_mask[i] /= highest_value;
+        }
+        
+        // apply new weighting to feature candidates
+        for(unsigned i = 0; i < feature_candidates.size(); i++)
+        {
+            feature_candidates[i].probability = feature_candidates[i].probability * (1.0 - enforce_line_pos_rate) + line_probability_mask[feature_candidates[i].beam_index] * enforce_line_pos_rate;
+        }
+        
+        // add new candidate with best enforce line weight
+        if(best_enforce_line_index > 0)
+        {
+            FeatureCandidate best_enforce_line_candidate;
+            best_enforce_line_candidate.beam_index = best_enforce_line_index;
+            best_enforce_line_candidate.probability = line_probability_mask[best_enforce_line_index] * enforce_line_pos_rate;
+            feature_candidates.push_back(best_enforce_line_candidate);
+        }
+        
+        // sort features
+        std::sort(feature_candidates.begin(), feature_candidates.end());
+        std::reverse(feature_candidates.begin(), feature_candidates.end());
+    }
+}
+
+void FeatureExtraction::setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate)
+{
+    this->max_hough_history = max_hough_history;
+    this->max_candidates_per_beam = max_candidates_per_beam;
+    this->enforce_line_pos_rate = enforce_line_pos_rate;
+}
+
+void FeatureExtraction::getEnforceLinesDebugData(std::list< HoughEntry >& hough_entries, std::vector< base::Vector3d >& force_wall_pos)
+{
+    hough_entries = this->hough_entries;
+    force_wall_pos = this->force_wall_pos;
+}
+
+void FeatureExtraction::filterCandidates(std::vector< FeatureCandidate >& feature_candidates, double probability_threshold, unsigned int average_length)
+{
+    // find the best value
+    float best_probability = probability_history_treshold;
+    for(unsigned int i = 0; i < feature_candidates.size(); i++)
+    {
+        if(feature_candidates[i].probability > best_probability)
+        {
+            best_probability = feature_candidates[i].probability;
+            
+        }
+    }
+    
+    // update probability threshold
+    probability_treshold_cooldown++;
+    if(best_probability > probability_history_treshold || probability_treshold_cooldown > 5)
+    {
+        probability_treshold_cooldown = 0;
+        probability_treshold_history.push_back(best_probability);
+        probability_treshold_sum += best_probability;
+        if(probability_treshold_history.size() >= average_length)
+        {
+            probability_treshold_sum -= *probability_treshold_history.begin();
+            probability_treshold_history.erase(probability_treshold_history.begin());
+        }
+        if(probability_treshold_history.size() > average_length / 5)
+            probability_history_treshold = (probability_treshold_sum / (float)probability_treshold_history.size()) * probability_threshold;
+    }
+    
+    // filter candidates
+    if(probability_history_treshold > 0.0)
+    {
+        for(std::vector<FeatureCandidate>::iterator it = feature_candidates.begin(); it != feature_candidates.end();)
+        {
+            if(it->probability < probability_history_treshold)
+            {
+                it = feature_candidates.erase(it);
+            }
+            else
+            {
+                it++;
+            }
+        }
+    }
+}
+
+base::Vector2d FeatureExtraction::computeHoughSpaceIntersection(base::Vector2d& feature1, base::Vector2d& feature2)
+{
+    double theta = atan((feature2.x() - feature1.x())/(feature1.y() - feature2.y()));
+    double r = feature1.x() * cos(theta) + feature1.y() * sin(theta);
+    if(r < 0.0)
+    {
+        if(theta <= 0.0)
+            theta = theta + M_PI;
+        else
+            theta = theta - M_PI;
+        r = feature1.x() * cos(theta) + feature1.y() * sin(theta);
+    }
+    return base::Vector2d(theta, r);
 }
 
 void FeatureExtraction::addToDerivativeHistory(const std::vector< float >& beam, const unsigned int &history_length)

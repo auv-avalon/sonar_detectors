@@ -9,6 +9,7 @@
 #include <base/samples/laser_scan.h>
 #include <base/samples/sonar_beam.h>
 #include <base/pose.h>
+#include <machine_learning/GaussianParameters.hpp>
 
 namespace sonar_detectors
 {
@@ -22,6 +23,15 @@ struct FeatureCandidate
     FeatureCandidate() : 
         beam_index(-1), mean_value(0.0f), plain_value(0.0f), probability(1.0) {};
     bool operator<(const FeatureCandidate &fc) const { return (probability < fc.probability); }
+};
+
+struct HoughEntry
+{
+    unsigned beam_id;
+    base::Vector2d feature2d;
+    float probability;
+    std::vector<base::Vector3d> intersection_points;
+    HoughEntry() : beam_id(0), feature2d(Eigen::Vector2d::Zero()), probability(1.0) {};
 };
 
 class FeatureExtraction
@@ -86,6 +96,23 @@ public:
      */
     void getDerivativeFeatureDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold);
     
+    /**
+     * Reinforces candidates on a line.
+     * @param feature_candidates feature candidates sorted
+     * @param bearing current bearing of the sonar
+     * @param spatial_resolution spatial resolution in the current sonar beam
+     * @param beam_size size of the current sonar beam
+     */
+    void enforceLines(std::vector<FeatureCandidate> &feature_candidates, const base::Angle &bearing, double spatial_resolution, unsigned beam_size);
+    
+    void setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate);
+    
+    void getEnforceLinesDebugData(std::list<HoughEntry> &hough_entries, std::vector<base::Vector3d> &force_wall_pos);
+    
+    
+    void filterCandidates(std::vector<FeatureCandidate> &feature_candidates, double probability_threshold = 0.5, unsigned average_length = 100);
+    
+    
     
     /**
      * Computes an obstaclePoint from a given SonarBeam and index.
@@ -106,9 +133,9 @@ public:
      */
     static base::samples::LaserScan computeLaserScan(const int& index, const base::samples::SonarBeam& sonar_beam);
     
-    
 protected:
     void addToDerivativeHistory(const std::vector<float>& beam, const unsigned int &history_length);
+    base::Vector2d computeHoughSpaceIntersection(base::Vector2d &feature1, base::Vector2d &feature2);
 
 protected:
     std::list< std::vector<float>* > derivativeHistory;
@@ -127,11 +154,27 @@ protected:
     float value_threshold;
     float plain_window_threshold;
     
+    // enforce lines config
+    MATRIX_XD(2) hough_covariance;
+    MATRIX_XD(1) beam_covariance;
+    double enforce_line_pos_rate;
+    unsigned int max_hough_history;
+    unsigned int max_candidates_per_beam;
+    
     unsigned int minimumIndex;
     double minimumValue;
     
 private:
     std::vector<float> min_derivative;
+    
+    unsigned hough_group_id;
+    std::list<HoughEntry> hough_entries;
+    std::vector<base::Vector3d> force_wall_pos;
+    
+    std::vector<double> probability_treshold_history;
+    double probability_treshold_sum;
+    unsigned probability_treshold_cooldown;
+    double probability_history_treshold;
 };
 
 }
