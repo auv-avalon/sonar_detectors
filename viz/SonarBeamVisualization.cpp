@@ -1,14 +1,13 @@
 #include "SonarBeamVisualization.hpp"
 #include <osg/Geode>
 #include <sonar_detectors/FeatureExtraction.hpp>
+#include <base/eigen.h>
 
 namespace vizkit
 {
 
 SonarBeamVisualization::SonarBeamVisualization()
 {
-    VizPluginRubyAdapter(SonarBeamVisualization, base::samples::SonarBeam, SonarBeam);
-    VizPluginRubyAdapter(SonarBeamVisualization, base::samples::RigidBodyState, BodyState);
     bodyState.invalidate();
     newSonarScan = false;
     currentAngle = 0;
@@ -23,7 +22,6 @@ SonarBeamVisualization::SonarBeamVisualization()
 osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
 {
     osg::ref_ptr<osg::Group> mainNode = new osg::Group();
-    
     // set up point cloud
     pointGeom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
@@ -63,7 +61,6 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
     geode->addDrawable(pointGeom.get());
     geode->addDrawable(beamGeom.get());
     mainNode->addChild(geode);
-    
     return mainNode;
 }
 
@@ -141,5 +138,4 @@ void SonarBeamVisualization::updateMainNode(osg::Node* node)
     }
 }
 
-VizkitQtPlugin(SonarBeamVisualization)
 }

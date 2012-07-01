@@ -8,13 +8,13 @@ if ARGV[0] == nil
 	exit
 end
 
-view3d = Vizkit.default_loader.create_widget('vizkit::QVizkitMainWindow')
+view3d = Vizkit.vizkit3d_widget
 view3d.show
-sonarbeamviz = view3d.createPlugin("sonarbeam","SonarBeamVisualization")
+sonarbeamviz = Vizkit.default_loader.SonarBeamVisualization
 
 log = Orocos::Log::Replay.open(ARGV)
 
-log.sonar.BaseScan  do |sample|
+log.sonar.BaseScan do |sample|
     sonarbeamviz.updateSonarBeam(sample)
     sample
 end

@@ -7,7 +7,6 @@ namespace vizkit
     
 WallVisualization::WallVisualization()
 {
-    VizPluginRubyAdapter(WallVisualization, std::vector<base::Vector3d>, WallData)
     wall_length = 20.0;
 }
 
@@ -79,5 +78,4 @@ void WallVisualization::updateMainNode(osg::Node* node)
     }
 }
 
-VizkitQtPlugin(WallVisualization)
 }

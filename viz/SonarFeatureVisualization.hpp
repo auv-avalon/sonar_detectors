@@ -25,6 +25,11 @@ class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< base::samples::
     public:
         SonarFeatureVisualization();
         
+        Q_INVOKABLE void updatePointCloud( const base::samples::Pointcloud& sample )
+        { return updateData(sample); }
+        Q_INVOKABLE void updateChannelData( const std::vector< base::Vector3d >& channel_data )
+        { return updateData(channel_data); }
+        
     public slots:
         QColor getDefaultFeatureColor();
         void setDefaultFeatureColor(QColor color);

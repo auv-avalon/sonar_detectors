@@ -21,6 +21,11 @@ class AUVAvalonVisualization : public vizkit::Vizkit3DPlugin<base::samples::Rigi
 public:
     AUVAvalonVisualization();
     
+    Q_INVOKABLE void updateRigidBodyState( const base::samples::RigidBodyState& state )
+    { return updateData(state); }
+    Q_INVOKABLE void updateDesiredPosition( const base::AUVPositionCommand& command )
+    { return updateData(command); }
+    
 protected:
     virtual osg::ref_ptr<osg::Node> createMainNode();
     virtual void updateMainNode( osg::Node* node );

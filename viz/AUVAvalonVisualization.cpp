@@ -8,8 +8,6 @@ namespace vizkit
 
 AUVAvalonVisualization::AUVAvalonVisualization()
 {
-    VizPluginRubyAdapter(AUVAvalonVisualization, base::samples::RigidBodyState, RigidBodyState)
-    VizPluginRubyAdapter(AUVAvalonVisualization, base::AUVPositionCommand, DesiredPosition)
     VizPluginRubyMethod(AUVAvalonVisualization, bool, showDesiredModelPosition)
     VizPluginRubyMethod(AUVAvalonVisualization, bool, desiredModelPositionRelZ)
     VizPluginRubyMethod(AUVAvalonVisualization, bool, desiredModelPositionRelHeading)
@@ -159,5 +157,4 @@ void AUVAvalonVisualization::updateMainNode(osg::Node* node)
     }
 }
 
-VizkitQtPlugin(AUVAvalonVisualization)
 }

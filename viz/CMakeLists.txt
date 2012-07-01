@@ -1,24 +1,11 @@
-rock_vizkit_plugin(sonarbeam-viz
-    SonarBeamVisualization.cpp
+rock_export_includedir(${PROJECT_SOURCE_DIR}/viz vizkit)
+    
+rock_vizkit_plugin(sonar-viz
+    MOC SonarBeamVisualization.cpp SonarFeatureVisualization.cpp WallVisualization.cpp AUVAvalonVisualization.cpp PluginLoader.cpp
     DEPS sonar_detectors
-    HEADERS SonarBeamVisualization.hpp)
-
-rock_vizkit_plugin(sonarfeature-viz
-    SonarFeatureVisualization.cpp
-    DEPS sonar_detectors
-    HEADERS SonarFeatureVisualization.hpp
-    MOC SonarFeatureVisualization.hpp)
-
-rock_vizkit_plugin(wall-viz
-    WallVisualization.cpp
-    DEPS sonar_detectors
-    HEADERS WallVisualization.hpp)
-
-rock_vizkit_plugin(auv_avalon-viz
-    AUVAvalonVisualization.cpp
-    DEPS sonar_detectors
-    HEADERS AUVAvalonVisualization.hpp
-    MOC AUVAvalonVisualization.hpp)
+    DEPS_PKGCONFIG vizkit-base-viz
+    HEADERS SonarBeamVisualization.hpp SonarFeatureVisualization.hpp WallVisualization.hpp AUVAvalonVisualization.hpp
+    )
 
 # install osg file
 install(FILES

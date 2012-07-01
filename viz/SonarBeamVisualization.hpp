@@ -2,7 +2,6 @@
 #define SonarBeamVisualization_H
 
 #include <vizkit/Vizkit3DPlugin.hpp>
-#include <base/eigen.h>
 #include <base/samples/sonar_beam.h>
 #include <base/samples/rigid_body_state.h>
 #include <sonar_detectors/SonarDetectorTypes.hpp>
@@ -23,8 +22,15 @@ namespace vizkit
 class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::SonarBeam >,
                                public vizkit::VizPluginAddType< base::samples::RigidBodyState >
 {    
+    Q_OBJECT
+    
     public:
         SonarBeamVisualization();
+    
+        Q_INVOKABLE void updateSonarBeam( const base::samples::SonarBeam& sample )
+        { return updateData(sample); }
+        Q_INVOKABLE void updateOrientation( const base::samples::RigidBodyState& orientation )
+        { return updateData(orientation); }
         
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();

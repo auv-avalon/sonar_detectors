@@ -12,8 +12,14 @@ namespace vizkit
     
 class WallVisualization : public vizkit::Vizkit3DPlugin< std::vector<base::Vector3d> >
 {
+Q_OBJECT
+    
 public:
+    
     WallVisualization();
+        
+    Q_INVOKABLE void updateWallData( const std::vector<base::Vector3d>& wall_data )
+    { return updateData(wall_data); }
     
 protected:
     virtual osg::ref_ptr<osg::Node> createMainNode();

@@ -6,8 +6,6 @@ namespace vizkit
 
 SonarFeatureVisualization::SonarFeatureVisualization()
 {
-    VizPluginRubyAdapter(SonarFeatureVisualization, base::samples::Pointcloud, PointCloud)
-    VizPluginRubyAdapter(SonarFeatureVisualization, std::vector< base::Vector3d >, ChannelData)
     newPoints = false;
     default_feature_color = osg::Vec4f(0.0f, 1.0f, 0.0f, 1.0f);
 }
@@ -110,5 +108,4 @@ void SonarFeatureVisualization::updateMainNode(osg::Node* node)
     }
 }
 
-VizkitQtPlugin(SonarFeatureVisualization)
 }
