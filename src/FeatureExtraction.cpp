@@ -527,7 +527,14 @@ void FeatureExtraction::enforceLines(std::vector<FeatureCandidate> &feature_cand
         // apply new weighting to feature candidates
         for(unsigned i = 0; i < feature_candidates.size(); i++)
         {
-            feature_candidates[i].probability = feature_candidates[i].probability * (1.0 - enforce_line_pos_rate) + line_probability_mask[feature_candidates[i].beam_index] * enforce_line_pos_rate;
+            if((line_probability_mask[feature_candidates[i].beam_index] * highest_value) < minimum_enforce_line_value)
+            {
+                feature_candidates[i].probability = 0.0;
+            }
+            else
+            {
+                feature_candidates[i].probability = feature_candidates[i].probability * (1.0 - enforce_line_pos_rate) + line_probability_mask[feature_candidates[i].beam_index] * enforce_line_pos_rate;
+            }
         }
         
         // add new candidate with best enforce line weight
@@ -545,11 +552,12 @@ void FeatureExtraction::enforceLines(std::vector<FeatureCandidate> &feature_cand
     }
 }
 
-void FeatureExtraction::setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate)
+void FeatureExtraction::setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate, double minimum_enforce_line_value)
 {
     this->max_hough_history = max_hough_history;
     this->max_candidates_per_beam = max_candidates_per_beam;
     this->enforce_line_pos_rate = enforce_line_pos_rate;
+    this->minimum_enforce_line_value = minimum_enforce_line_value;
 }
 
 void FeatureExtraction::getEnforceLinesDebugData(std::list< HoughEntry >& hough_entries, std::vector< base::Vector3d >& force_wall_pos)

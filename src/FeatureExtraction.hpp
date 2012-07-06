@@ -105,7 +105,7 @@ public:
      */
     void enforceLines(std::vector<FeatureCandidate> &feature_candidates, const base::Angle &bearing, double spatial_resolution, unsigned beam_size);
     
-    void setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate);
+    void setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate, double minimum_enforce_line_value);
     
     void getEnforceLinesDebugData(std::list<HoughEntry> &hough_entries, std::vector<base::Vector3d> &force_wall_pos);
     
@@ -158,6 +158,7 @@ protected:
     MATRIX_XD(2) hough_covariance;
     MATRIX_XD(1) beam_covariance;
     double enforce_line_pos_rate;
+    double minimum_enforce_line_value;
     unsigned int max_hough_history;
     unsigned int max_candidates_per_beam;
     
