@@ -214,11 +214,6 @@ float SonarEnvironmentModel::device_noise_distribution(float x)
     return 255.0f * exp(-x/device_noise_sigma);
 }
 
-float SonarEnvironmentModel::gaussian_distribution(const float &x, const float &sigma, const float &mu, const float &k)
-{
-    return (k*100.0f/(sigma * sqrt_2_PI)) * exp(-0.5f*(pow((x-mu) / sigma, 2)));
-}
-
 float SonarEnvironmentModel::gaussian_distribution_ground(float x)
 {
     return gaussian_distribution(x, gaussian_ground_sigma, gaussian_ground_u, gaussian_ground_k);
@@ -227,6 +222,18 @@ float SonarEnvironmentModel::gaussian_distribution_ground(float x)
 float SonarEnvironmentModel::gaussian_distribution_surface(float x)
 {
     return gaussian_distribution(x, gaussian_surface_sigma, gaussian_surface_u, gaussian_surface_k);
+}
+
+float SonarEnvironmentModel::gaussian_distribution(const float &x, const float &sigma, const float &mu, const float &k)
+{
+    return (k*100.0f/(sigma * sqrt_2_PI)) * exp(-0.5f*(pow((x-mu) / sigma, 2)));
+}
+
+void SonarEnvironmentModel::setSimpleAUVModelBoundary(double max_dist)
+{
+    avalon_model.clear();
+    avalon_model.push_back(base::Vector2d(0.0, max_dist));
+    avalon_model.push_back(base::Vector2d(M_PI, max_dist));
 }
     
 }

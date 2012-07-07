@@ -22,6 +22,7 @@ public:
     void updateDistanceToGround(const double distance);
     void updateDistanceToSurface(const double distance);
     void updateSonarBeamProperties(const double sampling_interval, const float beamwidth_vertical = (35.0/180.0)*M_PI, const float speed_of_sound = 1500.0);
+    void setSimpleAUVModelBoundary(double max_dist);
     
     //noise distributions
     static float gaussian_distribution_ground(float x);
