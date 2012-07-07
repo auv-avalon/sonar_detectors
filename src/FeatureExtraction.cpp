@@ -38,13 +38,15 @@ FeatureExtraction::FeatureExtraction() :
     
     hough_covariance << 0.628318531, 0.0, 0.0, 0.628318531; //0.1 * 2PI -- |
     
-    beam_covariance << 2.0; // in m
+    beam_covariance << 0.5; // in m
     
     enforce_line_pos_rate = 0.5;
     
     max_hough_history = 5;
     
     max_candidates_per_beam = 4;
+    
+    last_angle.rad = 2 * M_PI;
 }
 
 FeatureExtraction::~FeatureExtraction()
@@ -353,6 +355,12 @@ void FeatureExtraction::getDerivativeFeatureDebugData(std::vector< float >& mini
 
 void FeatureExtraction::enforceLines(std::vector<FeatureCandidate> &feature_candidates, const base::Angle& bearing, double spatial_resolution, unsigned beam_size)
 {
+    double angular_resolution = 0.0;
+    if(last_angle.rad < M_PI)
+    {
+        angular_resolution = std::abs((bearing - last_angle).getRad());
+    }
+    last_angle = bearing;
     hough_group_id = hough_group_id % max_hough_history;
     
     // delete old entries of the same id
@@ -489,7 +497,7 @@ void FeatureExtraction::enforceLines(std::vector<FeatureCandidate> &feature_cand
             {
                 VECTOR_XD(1) index;
                 index << i;
-                double weight = machine_learning::calc_gaussian<1>(mean, beam_covariance / spatial_resolution, index);
+                double weight = machine_learning::calc_gaussian<1>(mean, beam_covariance * (angular_resolution * (double)i), index);
                 if(weight < 0.01)
                     break;
                 line_probability_mask[i] += weight * index_probabilities[j]; 
@@ -499,7 +507,7 @@ void FeatureExtraction::enforceLines(std::vector<FeatureCandidate> &feature_cand
             {
                 VECTOR_XD(1) index;
                 index << i;
-                double weight = machine_learning::calc_gaussian<1>(mean, beam_covariance / spatial_resolution, index);
+                double weight = machine_learning::calc_gaussian<1>(mean, beam_covariance * (angular_resolution * (double)i), index);
                 if(weight < 0.01)
                     break;
                 line_probability_mask[i] += weight * index_probabilities[j]; 
@@ -552,12 +560,13 @@ void FeatureExtraction::enforceLines(std::vector<FeatureCandidate> &feature_cand
     }
 }
 
-void FeatureExtraction::setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate, double minimum_enforce_line_value)
+void FeatureExtraction::setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate, double minimum_enforce_line_value, double enforce_line_beam_covariance)
 {
     this->max_hough_history = max_hough_history;
     this->max_candidates_per_beam = max_candidates_per_beam;
     this->enforce_line_pos_rate = enforce_line_pos_rate;
     this->minimum_enforce_line_value = minimum_enforce_line_value;
+    this->beam_covariance << enforce_line_beam_covariance;
 }
 
 void FeatureExtraction::getEnforceLinesDebugData(std::list< HoughEntry >& hough_entries, std::vector< base::Vector3d >& force_wall_pos)
@@ -616,6 +625,10 @@ base::Vector2d FeatureExtraction::computeHoughSpaceIntersection(base::Vector2d& 
 {
     double theta = atan((feature2.x() - feature1.x())/(feature1.y() - feature2.y()));
     double r = feature1.x() * cos(theta) + feature1.y() * sin(theta);
+    if(std::abs(r) < 0.01)
+    {
+        r = 0.0;
+    }
     if(r < 0.0)
     {
         if(theta <= 0.0)

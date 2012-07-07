@@ -105,7 +105,7 @@ public:
      */
     void enforceLines(std::vector<FeatureCandidate> &feature_candidates, const base::Angle &bearing, double spatial_resolution, unsigned beam_size);
     
-    void setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate, double minimum_enforce_line_value);
+    void setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate, double minimum_enforce_line_value, double enforce_line_beam_covariance);
     
     void getEnforceLinesDebugData(std::list<HoughEntry> &hough_entries, std::vector<base::Vector3d> &force_wall_pos);
     
@@ -176,6 +176,7 @@ private:
     double probability_treshold_sum;
     unsigned probability_treshold_cooldown;
     double probability_history_treshold;
+    base::Angle last_angle;
 };
 
 }
