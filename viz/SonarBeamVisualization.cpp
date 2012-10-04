@@ -107,6 +107,10 @@ void SonarBeamVisualization::updateMainNode(osg::Node* node)
     {
         newSonarScan = false;
         // draw sonar data
+        /**
+         * TODO: this is actually very dirty, at each update all lines will be removed and drawn again.
+         * One solution would be to create one osg::DrawArrays per sonar beam and emit the updates by the SonarMap.
+         */ 
         pointsOSG->clear();
         color->clear();
         for(std::list< std::vector<sonar_detectors::obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)

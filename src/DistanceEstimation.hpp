@@ -13,10 +13,7 @@ namespace sonar_detectors
     const static int64_t timeout = 1000; //timeout in milliseconds
     
     /**
-     * This class trys to estimate the current distance to an object.
-     * 
-     * estimationSettings should be:
-     * - angle range less than PI, lesser is better
+     * This class tries to estimate the current distance to an object.
      */
     class DistanceEstimation : public SonarEstimation
     {

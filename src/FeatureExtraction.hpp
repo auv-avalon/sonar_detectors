@@ -97,22 +97,38 @@ public:
     void getDerivativeFeatureDebugData(std::vector<float> &minimum_derivative, float &value_threshold, float &plain_window_threshold);
     
     /**
-     * Reinforces candidates on a line.
+     * Reinforces candidates on a line. Uses the hough transformation to reweight the candidates 
+     * being on a line.
      * @param feature_candidates feature candidates sorted
      * @param bearing current bearing of the sonar
      * @param spatial_resolution spatial resolution in the current sonar beam
      * @param beam_size size of the current sonar beam
      */
     void enforceLines(std::vector<FeatureCandidate> &feature_candidates, const base::Angle &bearing, double spatial_resolution, unsigned beam_size);
-    
+    /**
+     * Sets the configuration for enforceLines.
+     * @param max_hough_history count of the last beams of which the candidates will be used
+     * @param max_candidates_per_beam count of how many candidates per beam will be used
+     * @param enforce_line_pos_rate weight of the impact of the line enforcement in percent
+     * @param minimum_enforce_line_value probability threshold to be still a possible candidates
+     * @param enforce_line_beam_covariance covariance for the 1d gaussian function which applies each estimated line on the actual sonarbeam
+     */
     void setEnforceLinesConfiguration(unsigned int max_hough_history, unsigned int max_candidates_per_beam, double enforce_line_pos_rate, double minimum_enforce_line_value, double enforce_line_beam_covariance);
-    
+    /**
+     * Debug data of the line enforcement process.
+     */
     void getEnforceLinesDebugData(std::list<HoughEntry> &hough_entries, std::vector<base::Vector3d> &force_wall_pos);
     
-    
+    /**
+     * Filters the candidates by a threshold over the last |average_length| candidates.
+     * @param feature_candidates the feature candidates
+     * @param probability_threshold times the center of the last |average_length| candidates is the threshold
+     * @param average_length count of the candidates of which the center will be computed
+     */
     void filterCandidates(std::vector<FeatureCandidate> &feature_candidates, double probability_threshold = 0.5, unsigned average_length = 100);
     
     
+    /** ## Methods to create an obstaclePoint or a LaserScan of a given index in a beam ## **/
     
     /**
      * Computes an obstaclePoint from a given SonarBeam and index.

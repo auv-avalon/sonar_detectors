@@ -7,10 +7,9 @@
 namespace sonar_detectors
 {
     /**
-     * This class trys to estimate a line on a given pointcloud.
-     * 
-     * estimationSettings should be:
-     * - angle range less than PI
+     * This class tries to estimate a line on a given pointcloud.
+     * Builds the center point of the left and the right range of the sonar range.
+     * The line between those points is the most likely wall.
      */
     class CenterWallEstimation : public SonarEstimation
     {

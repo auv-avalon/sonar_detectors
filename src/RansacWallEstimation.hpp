@@ -7,10 +7,8 @@
 namespace sonar_detectors
 {
     /**
-     * This class trys to estimate a line on a given pointcloud.
-     * 
-     * estimationSettings should be:
-     * - angle range less than PI
+     * This class tries to estimate a line on a given pointcloud.
+     * Uses the RANSAC algorithm to estimate a line in a pointcloud.
      */
     class RansacWallEstimation : public SonarEstimation
     {

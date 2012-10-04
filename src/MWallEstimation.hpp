@@ -7,10 +7,9 @@
 namespace sonar_detectors
 {
     /**
-     * This class trys to estimate a line on a given pointcloud.
-     * 
-     * estimationSettings should be:
-     * - angle range less than PI
+     * This class tries to estimate a line on a given pointcloud.
+     * Tries to find only a wall under strong requirements with 
+     * the goal to provide only true wall positions.
      */
     class MWallEstimation : public SonarEstimation
     {
