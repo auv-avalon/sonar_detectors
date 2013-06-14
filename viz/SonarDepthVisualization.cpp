@@ -58,9 +58,9 @@ void SonarDepthVisualization::setDefaultFeatureColor(QColor color)
  * 
  * @param data new sonar data
  */
-void SonarDepthVisualization::updateDataIntern(const base::samples::Pointcloud& data)
+void SonarDepthVisualization::updateDataIntern(const sonar_detectors::SonarDepthMap& data)
 {
-    pointCloud = data;
+    depthMap = data;
     newPoints = true;
 }
 
@@ -80,7 +80,7 @@ void SonarDepthVisualization::updateDataIntern(const std::vector< base::Vector3d
  */
 
 void SonarDepthVisualization::updateMainNode(osg::Node* node)
-{
+{/*
     if(newPoints)
     {
         newPoints = false;
@@ -113,7 +113,7 @@ void SonarDepthVisualization::updateMainNode(osg::Node* node)
         drawArrays->setCount(pointsOSG->size());
         pointGeom->setVertexArray(pointsOSG);
         pointGeom->setColorArray(color);
-    }
+    }*/
 }
 
 

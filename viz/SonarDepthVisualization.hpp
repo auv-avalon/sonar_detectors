@@ -3,6 +3,7 @@
 
 #include <vizkit/Vizkit3DPlugin.hpp>
 #include <base/samples/pointcloud.h>
+#include <sonar_detectors/SonarDepthMap.hpp>
 
 #include <osg/Node>
 #include <osg/Geometry>
@@ -16,7 +17,7 @@ namespace vizkit
  * If the class gets updated with a body state the sonar 
  * data is absolute, otherwise relative.
  */
-class SonarDepthVisualization : public vizkit::Vizkit3DPlugin< base::samples::Pointcloud >,
+class SonarDepthVisualization : public vizkit::Vizkit3DPlugin< sonar_detectors::SonarDepthMap >,
                                   public vizkit::VizPluginAddType< std::vector< base::Vector3d > >
 {    
     Q_OBJECT
@@ -37,11 +38,11 @@ class SonarDepthVisualization : public vizkit::Vizkit3DPlugin< base::samples::Po
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode( osg::Node* node );
-        void updateDataIntern ( const base::samples::Pointcloud& data );
+        void updateDataIntern ( const sonar_detectors::SonarDepthMap& data );
         void updateDataIntern ( const std::vector< base::Vector3d >& data );
         
     private:
-        base::samples::Pointcloud pointCloud;
+        sonar_detectors::SonarDepthMap depthMap;
         osg::Vec4f default_feature_color;
         std::vector< base::Vector3d > channelInfos;
         osg::ref_ptr<osg::Vec3Array> pointsOSG;

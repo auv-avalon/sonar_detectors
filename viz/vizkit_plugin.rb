@@ -8,7 +8,7 @@ Vizkit::UiLoader.register_3d_plugin('SonarFeatureVisualization', 'sonar', 'Sonar
 Vizkit::UiLoader.register_3d_plugin_for('SonarFeatureVisualization', "/base/samples/Pointcloud", :updatePointCloud )
 
 Vizkit::UiLoader.register_3d_plugin('SonarDepthVisualization', 'sonar', 'SonarDepthVisualization')
-Vizkit::UiLoader.register_3d_plugin_for('SonarDepthVisualization', "/base/samples/Pointcloud", :updatePointCloud )
+Vizkit::UiLoader.register_3d_plugin_for('SonarDepthVisualization', "/sonar_detectors/SonarDepthMap", :updatePointCloud )
 
 Vizkit::UiLoader.register_3d_plugin('WallVisualization', 'sonar', 'WallVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('WallVisualization', " /std/vector</base/Vector3d>", :updateWallData )
