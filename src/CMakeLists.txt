@@ -22,6 +22,7 @@ set(HEADERS
         PointClustering.hpp
         SonarWallMap.hpp
         MWallEstimation.hpp
+        SonarDepthMap.hpp
 )
 
 rock_library(sonar_detectors
