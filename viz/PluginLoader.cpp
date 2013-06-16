@@ -2,7 +2,7 @@
 #include "AUVAvalonVisualization.hpp"
 #include "SonarBeamVisualization.hpp"
 #include "SonarFeatureVisualization.hpp"
-#include "SonarDepthVisualization.hpp"
+#include "SonarDepthMapVisualization.hpp"
 #include "WallVisualization.hpp"
 
 namespace eslam {
@@ -23,8 +23,9 @@ namespace eslam {
 	    pluginNames->push_back("AUVAvalonVisualization");
 	    pluginNames->push_back("SonarBeamVisualization");
             pluginNames->push_back("SonarFeatureVisualization");
-	    pluginNames->push_back("SonarDepthVisualization");
+	    pluginNames->push_back("SonarDepthMapVisualization");
             pluginNames->push_back("WallVisualization");
+
 	    return pluginNames;
 	}
 	
@@ -43,14 +44,15 @@ namespace eslam {
             {
                 plugin = new vizkit::SonarFeatureVisualization();
             }
+            else if (pluginName == "SonarDepthMapVisualization")
+            {
+                plugin = new vizkit::SonarDepthMapVisualization();
+            }
              else if (pluginName == "WallVisualization")
             {
                 plugin = new vizkit::WallVisualization();
-            }else if( pluginName == "SonarDepthVisualization")
-	    {
-		 plugin = new vizkit::SonarDepthVisualization();
-	    }
-
+            }
+	      
 	    if (plugin) 
 	    {
 		return plugin;
