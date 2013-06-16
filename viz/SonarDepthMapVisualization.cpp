@@ -78,6 +78,7 @@ void SonarDepthMapVisualization::updateDataIntern(const std::vector< base::Vecto
  * 
  * @param node osg main node
  */
+/*
 void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
 {
     if(newPoints)
@@ -88,13 +89,13 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
         std::vector<base::Vector3d>::const_iterator chan_pos = channelInfos.begin();
         for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
         {
-            osg::Vec3d vec(pos->x()-0.1, pos->y(), pos->z());
+            osg::Vec3d vec((pos->x()-0.1) * 0.1, pos->y() * 0.1, pos->z() * 0.1);
             pointsOSG->push_back(vec);
-            pointsOSG->push_back(osg::Vec3d(pos->x()+0.1, pos->y(), pos->z()));
+            pointsOSG->push_back(osg::Vec3d((pos->x()+0.1)* 0.1, pos->y() * 0.1, pos->z() * 0.1));
 	    
-	    osg::Vec3d vec2(pos->x(), pos->y()-0.1, pos->z());
+	    osg::Vec3d vec2(pos->x() * 0.1, (pos->y()-0.1) * 0.1, pos->z() * 0.1);
             pointsOSG->push_back(vec2);
-            pointsOSG->push_back(osg::Vec3d(pos->x(), pos->y()+0.1, pos->z()));
+            pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, (pos->y()+0.1) * 0.1, pos->z() * 0.1));
             
 	    //color->push_back(default_feature_color);
 	    //color->push_back(default_feature_color);	
@@ -108,6 +109,72 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
         pointGeom->setVertexArray(pointsOSG);
         pointGeom->setColorArray(color);
     }
+}*/
+
+void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
+{
+    if(newPoints)
+    {
+      
+       newPoints = false;
+        pointsOSG->clear();
+        color->clear();
+
+	for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
+        {
+	  
+	  base::Vector3d right,up;
+	  double foundRight = false, foundUp = false;
+	  
+	  for(std::vector<base::Vector3d>::const_iterator n = pointCloud.points.begin(); n != pointCloud.points.end(); n++){
+	    
+	    if(*n!=*pos &&  n->y() == pos->y() && n->x() > pos->x() && ( (!foundRight) || (foundRight && n->x() < right.x()))){
+	     right = *n;
+	     foundRight = true;
+	    }
+	    
+	    if(*n!=*pos &&  n->x() == pos->x() && n->y() > pos->y() && ( (!foundUp) || (foundUp && n->y() < up.y()))){
+	     up = *n;
+	     foundUp = true;
+	    } 
+	    
+	  }
+	  
+	  if(foundRight){
+	    pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, pos->y() * 0.1, pos->z() * 0.1));
+	    pointsOSG->push_back(osg::Vec3d(right.x() * 0.1, right.y() * 0.1, right.z() * 0.1));
+	    color->push_back(default_feature_color);
+	    
+	  }
+	  
+	  if(foundUp){
+	    pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, pos->y() * 0.1, pos->z() * 0.1));
+	    pointsOSG->push_back(osg::Vec3d(up.x() * 0.1, up.y() * 0.1, up.z() * 0.1));
+	    color->push_back(default_feature_color);
+	    
+	  }
+	  
+	  if(!foundRight && !foundUp){
+	    osg::Vec3d vec((pos->x()-0.1) * 0.1, pos->y() * 0.1, pos->z() * 0.1);
+            pointsOSG->push_back(vec);
+            pointsOSG->push_back(osg::Vec3d((pos->x()+0.1)* 0.1, pos->y() * 0.1, pos->z() * 0.1));
+	    
+	    osg::Vec3d vec2(pos->x() * 0.1, (pos->y()-0.1) * 0.1, pos->z() * 0.1);
+            pointsOSG->push_back(vec2);
+            pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, (pos->y()+0.1) * 0.1, pos->z() * 0.1));
+
+	    color->push_back(default_feature_color);
+	    color->push_back(default_feature_color);
+	    
+	  }  
+	  
+	}	
+	
+	drawArrays->setCount(pointsOSG->size());
+	pointGeom->setVertexArray(pointsOSG);
+	pointGeom->setColorArray(color);
+    }
+   
 }
 
 }
