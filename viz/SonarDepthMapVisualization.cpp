@@ -140,8 +140,9 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
 	  
 	  //osg::Vec4f newColor( (pos->z() - min) * 255.0 / max, default_feature_color.y(), default_feature_color.z(), (pos->z() - min)  / max  );
 	  //osg::Vec4f newColor( 0, 255, 0, 255);
-	  double c = std::fabs((pos->z() - min) * 255.0 / max);
-	  osg::Vec4f newColor( c * 0.9, 255 - c , 0, 255);
+	  double c = std::fabs((pos->z() - min) * 255.0 / (max-min) );
+	  //osg::Vec4f newColor( c * 0.9, 255 - c , 0, 255);
+	  osg::Vec4f newColor( hsv2rgb(c, 1,1));
 	  
 	  for(std::vector<base::Vector3d>::const_iterator n = pointCloud.points.begin(); n != pointCloud.points.end(); n++){
 	    
@@ -193,5 +194,77 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
     }
    
 }
+
+// http://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb
+osg::Vec4f SonarDepthMapVisualization::hsv2rgb(double h, double s, double v){
+    
+    osg::Vec4f newColor;
+    newColor.w() = 255;
+    double      hh, p, q, t, ff;
+    long        i;
+
+    if(s <= 0.0) {       // < is bogus, just shuts up warnings
+        if(isnan(h)) {   // in.h == NAN
+            newColor.x() = v;
+            newColor.y() = v;
+            newColor.z() = v;
+            return newColor;
+        }
+        // error - should never happen
+        newColor.x() = 0.0;
+        newColor.y() = 0.0;
+        newColor.z() = 0.0;
+        return newColor;
+    }
+    hh = h;
+    if(hh >= 360.0) hh = 0.0;
+    hh /= 60.0;
+    i = (long)hh;
+    ff = hh - i;
+    p = v * (1.0 - s);
+    q = v * (1.0 - (s * ff));
+    t = v * (1.0 - (s * (1.0 - ff)));
+
+    switch(i) {
+    case 0:
+        newColor.x() = v;
+        newColor.y() = t;
+        newColor.z() = p;
+        break;
+    case 1:
+        newColor.x() = q;
+        newColor.y() = v;
+        newColor.z() = p;
+        break;
+    case 2:
+        newColor.x() = p;
+        newColor.y() = v;
+        newColor.z() = t;
+        break;
+
+    case 3:
+        newColor.x() = p;
+        newColor.y() = q;
+        newColor.z() = v;
+        break;
+    case 4:
+        newColor.x() = t;
+        newColor.y() = p;
+        newColor.z() = v;
+        break;
+    case 5:
+    default:
+        newColor.x() = v;
+        newColor.y() = p;
+        newColor.z() = q;
+        break;
+    }
+    newColor.x() *= 255;
+    newColor.y() *= 255;
+    newColor.z() *= 255;
+    return newColor; 
+  
+  
+}  
 
 }

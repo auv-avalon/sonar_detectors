@@ -41,6 +41,7 @@ class SonarDepthMapVisualization : public vizkit::Vizkit3DPlugin< base::samples:
         void updateDataIntern ( const std::vector< base::Vector3d >& data );
         
     private:
+	osg::Vec4f hsv2rgb(double h, double s, double v);
         base::samples::Pointcloud pointCloud;
         osg::Vec4f default_feature_color;
         std::vector< base::Vector3d > channelInfos;
