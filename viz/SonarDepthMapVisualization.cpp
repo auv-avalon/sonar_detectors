@@ -120,11 +120,28 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
         pointsOSG->clear();
         color->clear();
 
+	double min = NAN,max = NAN;
+	
+	for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++){
+	  
+	  if(pos->z() < min || min != min)
+	    min = pos->z();
+	    
+	 if(pos->z() > max || max != max)
+	   max = pos->z();
+	}
+		
+	
 	for(std::vector<base::Vector3d>::const_iterator pos = pointCloud.points.begin(); pos != pointCloud.points.end(); pos++)
         {
 	  
 	  base::Vector3d right,up;
 	  double foundRight = false, foundUp = false;
+	  
+	  //osg::Vec4f newColor( (pos->z() - min) * 255.0 / max, default_feature_color.y(), default_feature_color.z(), (pos->z() - min)  / max  );
+	  //osg::Vec4f newColor( 0, 255, 0, 255);
+	  double c = std::fabs((pos->z() - min) * 255.0 / max);
+	  osg::Vec4f newColor( c * 0.9, 255 - c , 0, 255);
 	  
 	  for(std::vector<base::Vector3d>::const_iterator n = pointCloud.points.begin(); n != pointCloud.points.end(); n++){
 	    
@@ -143,14 +160,14 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
 	  if(foundRight){
 	    pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, pos->y() * 0.1, pos->z() * 0.1));
 	    pointsOSG->push_back(osg::Vec3d(right.x() * 0.1, right.y() * 0.1, right.z() * 0.1));
-	    color->push_back(default_feature_color);
+	    color->push_back(newColor);
 	    
 	  }
 	  
 	  if(foundUp){
 	    pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, pos->y() * 0.1, pos->z() * 0.1));
 	    pointsOSG->push_back(osg::Vec3d(up.x() * 0.1, up.y() * 0.1, up.z() * 0.1));
-	    color->push_back(default_feature_color);
+	    color->push_back(newColor);
 	    
 	  }
 	  
@@ -163,8 +180,8 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
             pointsOSG->push_back(vec2);
             pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, (pos->y()+0.1) * 0.1, pos->z() * 0.1));
 
-	    color->push_back(default_feature_color);
-	    color->push_back(default_feature_color);
+	    color->push_back(newColor);
+	    color->push_back(newColor);
 	    
 	  }  
 	  
