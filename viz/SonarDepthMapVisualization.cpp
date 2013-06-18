@@ -138,12 +138,6 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
 	  base::Vector3d right,up;
 	  double foundRight = false, foundUp = false;
 	  
-	  //osg::Vec4f newColor( (pos->z() - min) * 255.0 / max, default_feature_color.y(), default_feature_color.z(), (pos->z() - min)  / max  );
-	  //osg::Vec4f newColor( 0, 255, 0, 255);
-	  double c = std::fabs((pos->z() - min) * 255.0 / (max-min) );
-	  //osg::Vec4f newColor( c * 0.9, 255 - c , 0, 255);
-	  osg::Vec4f newColor( hsv2rgb(c, 1,1));
-	  
 	  for(std::vector<base::Vector3d>::const_iterator n = pointCloud.points.begin(); n != pointCloud.points.end(); n++){
 	    
 	    if(*n!=*pos &&  n->y() == pos->y() && n->x() > pos->x() && ( (!foundRight) || (foundRight && n->x() < right.x()))){
@@ -161,6 +155,8 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
 	  if(foundRight){
 	    pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, pos->y() * 0.1, pos->z() * 0.1));
 	    pointsOSG->push_back(osg::Vec3d(right.x() * 0.1, right.y() * 0.1, right.z() * 0.1));
+	    double c = std::fabs( (((pos->z() + right.z())*0.5) - min) * 255.0 / (max-min) );
+	    osg::Vec4f newColor( hsv2rgb(c, 1,1));
 	    color->push_back(newColor);
 	    
 	  }
@@ -168,6 +164,8 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
 	  if(foundUp){
 	    pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, pos->y() * 0.1, pos->z() * 0.1));
 	    pointsOSG->push_back(osg::Vec3d(up.x() * 0.1, up.y() * 0.1, up.z() * 0.1));
+	    double c = std::fabs( (((pos->z() + up.z())*0.5) - min) * 255.0 / (max-min) );
+	    osg::Vec4f newColor( hsv2rgb(c, 1,1));
 	    color->push_back(newColor);
 	    
 	  }
@@ -180,7 +178,10 @@ void SonarDepthMapVisualization::updateMainNode(osg::Node* node)
 	    osg::Vec3d vec2(pos->x() * 0.1, (pos->y()-0.1) * 0.1, pos->z() * 0.1);
             pointsOSG->push_back(vec2);
             pointsOSG->push_back(osg::Vec3d(pos->x() * 0.1, (pos->y()+0.1) * 0.1, pos->z() * 0.1));
-
+	    
+	    double c = std::fabs((pos->z() - min) * 255.0 / (max-min) );
+	    osg::Vec4f newColor( hsv2rgb(c, 1,1));
+	    
 	    color->push_back(newColor);
 	    color->push_back(newColor);
 	    
