@@ -1,16 +1,16 @@
 #ifndef WallVisualization_H
 #define WallVisualization_H
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/eigen.h>
 
 #include <osg/Node>
 #include <osg/Geometry>
 
-namespace vizkit
+namespace vizkit3d
 {
     
-class WallVisualization : public vizkit::Vizkit3DPlugin< std::vector<base::Vector3d> >
+class WallVisualization : public vizkit3d::Vizkit3DPlugin< std::vector<base::Vector3d> >
 {
 Q_OBJECT
     

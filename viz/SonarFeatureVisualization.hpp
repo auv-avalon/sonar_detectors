@@ -1,13 +1,13 @@
 #ifndef SonarFeatureVisualization_H
 #define SonarFeatureVisualization_H
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/samples/pointcloud.h>
 
 #include <osg/Node>
 #include <osg/Geometry>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 /**
@@ -16,8 +16,8 @@ namespace vizkit
  * If the class gets updated with a body state the sonar 
  * data is absolute, otherwise relative.
  */
-class SonarFeatureVisualization : public vizkit::Vizkit3DPlugin< base::samples::Pointcloud >,
-                                  public vizkit::VizPluginAddType< std::vector< base::Vector3d > >
+class SonarFeatureVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::Pointcloud >,
+                                  public vizkit3d::VizPluginAddType< std::vector< base::Vector3d > >
 {    
     Q_OBJECT
     Q_PROPERTY(QColor defaultFeatureColor READ getDefaultFeatureColor WRITE setDefaultFeatureColor)

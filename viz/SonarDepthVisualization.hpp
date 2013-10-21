@@ -1,14 +1,14 @@
 #ifndef SonarDepthVisualization_H
 #define SonarDepthVisualization_H
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/samples/pointcloud.h>
 #include <sonar_detectors/SonarDepthMap.hpp>
 
 #include <osg/Node>
 #include <osg/Geometry>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 /**
@@ -17,8 +17,8 @@ namespace vizkit
  * If the class gets updated with a body state the sonar 
  * data is absolute, otherwise relative.
  */
-class SonarDepthVisualization : public vizkit::Vizkit3DPlugin< sonar_detectors::SonarDepthMap >,
-                                  public vizkit::VizPluginAddType< std::vector< base::Vector3d > >
+class SonarDepthVisualization : public vizkit3d::Vizkit3DPlugin< sonar_detectors::SonarDepthMap >,
+                                  public vizkit3d::VizPluginAddType< std::vector< base::Vector3d > >
 {    
     Q_OBJECT
     Q_PROPERTY(QColor defaultFeatureColor READ getDefaultFeatureColor WRITE setDefaultFeatureColor)

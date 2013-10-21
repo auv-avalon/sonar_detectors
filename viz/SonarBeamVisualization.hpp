@@ -1,7 +1,7 @@
 #ifndef SonarBeamVisualization_H
 #define SonarBeamVisualization_H
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/samples/sonar_beam.h>
 #include <base/samples/rigid_body_state.h>
 #include <sonar_detectors/SonarDetectorTypes.hpp>
@@ -10,7 +10,7 @@
 #include <osg/Node>
 #include <osg/Geometry>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 /**
@@ -19,8 +19,8 @@ namespace vizkit
  * If the class gets updated with a body state the sonar 
  * data is absolute, otherwise relative.
  */
-class SonarBeamVisualization : public vizkit::Vizkit3DPlugin< base::samples::SonarBeam >,
-                               public vizkit::VizPluginAddType< base::samples::RigidBodyState >
+class SonarBeamVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::SonarBeam >,
+                               public vizkit3d::VizPluginAddType< base::samples::RigidBodyState >
 {    
     Q_OBJECT
     

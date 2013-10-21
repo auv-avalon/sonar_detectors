@@ -1,4 +1,4 @@
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include "AUVAvalonVisualization.hpp"
 #include "SonarBeamVisualization.hpp"
 #include "SonarFeatureVisualization.hpp"
@@ -6,7 +6,7 @@
 #include "WallVisualization.hpp"
 
 namespace eslam {
-    class QtPluginVizkit : public vizkit::VizkitPluginFactory {
+    class QtPluginVizkit : public vizkit3d::VizkitPluginFactory {
     private:
     public:
 	
@@ -31,26 +31,26 @@ namespace eslam {
 	
         virtual QObject* createPlugin(QString const& pluginName)
         {
-	    vizkit::VizPluginBase* plugin = 0;
+	    vizkit3d::VizPluginBase* plugin = 0;
 	    if (pluginName == "AUVAvalonVisualization")
 	    {
-		plugin = new vizkit::AUVAvalonVisualization();
+		plugin = new vizkit3d::AUVAvalonVisualization();
 	    }
 	    else if (pluginName == "SonarBeamVisualization")
 	    {
-		plugin = new vizkit::SonarBeamVisualization();
+		plugin = new vizkit3d::SonarBeamVisualization();
 	    }
 	    else if (pluginName == "SonarFeatureVisualization")
             {
-                plugin = new vizkit::SonarFeatureVisualization();
+                plugin = new vizkit3d::SonarFeatureVisualization();
             }
             else if (pluginName == "SonarDepthMapVisualization")
             {
-                plugin = new vizkit::SonarDepthMapVisualization();
+                plugin = new vizkit3d::SonarDepthMapVisualization();
             }
              else if (pluginName == "WallVisualization")
             {
-                plugin = new vizkit::WallVisualization();
+                plugin = new vizkit3d::WallVisualization();
             }
 	      
 	    if (plugin) 

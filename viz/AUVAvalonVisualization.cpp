@@ -3,7 +3,7 @@
 #include <avalonmath.h>
 #include <osg/ShapeDrawable>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 AUVAvalonVisualization::AUVAvalonVisualization()

@@ -1,7 +1,7 @@
 #ifndef AUVAvalonVisualization_H
 #define AUVAvalonVisualization_H
 
-#include <vizkit/Vizkit3DPlugin.hpp>
+#include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/samples/rigid_body_state.h>
 #include <base/motion_command.h>
 #include <QObject>
@@ -9,11 +9,11 @@
 #include <osg/Node>
 #include <osg/PositionAttitudeTransform>
 
-namespace vizkit
+namespace vizkit3d
 {
     
-class AUVAvalonVisualization : public vizkit::Vizkit3DPlugin<base::samples::RigidBodyState>,
-                               public vizkit::VizPluginAddType<base::AUVPositionCommand>
+class AUVAvalonVisualization : public vizkit3d::Vizkit3DPlugin<base::samples::RigidBodyState>,
+                               public vizkit3d::VizPluginAddType<base::AUVPositionCommand>
 {
     Q_OBJECT
     Q_PROPERTY(double current_depth READ getCurrentDepth)

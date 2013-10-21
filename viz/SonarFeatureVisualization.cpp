@@ -1,7 +1,7 @@
 #include "SonarFeatureVisualization.hpp"
 #include <osg/Geode>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 SonarFeatureVisualization::SonarFeatureVisualization()

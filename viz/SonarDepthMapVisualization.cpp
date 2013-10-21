@@ -1,7 +1,7 @@
 #include "SonarDepthMapVisualization.hpp"
 #include <osg/Geode>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 SonarDepthMapVisualization::SonarDepthMapVisualization()

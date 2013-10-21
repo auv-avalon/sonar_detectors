@@ -2,7 +2,7 @@
 #include <osg/Geode>
 #include <sonar_detectors/SonarDetectorMath.hpp>
 
-namespace vizkit
+namespace vizkit3d
 {
     
 WallVisualization::WallVisualization()

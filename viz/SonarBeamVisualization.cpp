@@ -3,7 +3,7 @@
 #include <sonar_detectors/FeatureExtraction.hpp>
 #include <base/eigen.h>
 
-namespace vizkit
+namespace vizkit3d
 {
 
 SonarBeamVisualization::SonarBeamVisualization()
