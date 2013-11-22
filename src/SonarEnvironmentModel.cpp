@@ -1,5 +1,6 @@
 #include "SonarEnvironmentModel.hpp"
 #include <dsp_acoustics/FIRFilter.h>
+#include <base/Pose.hpp>
 
 namespace sonar_detectors
 {
@@ -122,7 +123,7 @@ void SonarEnvironmentModel::getExpectedObstaclePositions(const double beam_angle
         linearized_beam_angle = linearized_beam_angle * -1.0;
     linearized_beam_angle = ((linearized_beam_angle / M_PI_2) - 1.0) * -1.0;
     
-    double auv_pitch_angle = orientation.toRotationMatrix().eulerAngles(2,1,0)[1];
+    double auv_pitch_angle = base::getEuler(orientation)[1];
     double beamwidth_vertical_up = (beamwidth_vertical * 0.5) - auv_pitch_angle * linearized_beam_angle;
     double beamwidth_vertical_down = (beamwidth_vertical * 0.5) + auv_pitch_angle * linearized_beam_angle;
     
