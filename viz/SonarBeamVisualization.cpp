@@ -29,7 +29,7 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
     color = new osg::Vec4Array;
     color->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
     pointGeom->setColorArray(color);
-    pointGeom->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE);
+    pointGeom->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE_SET);
     pointGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, pointsOSG->size() );
     pointGeom->addPrimitiveSet(drawArrays.get());
