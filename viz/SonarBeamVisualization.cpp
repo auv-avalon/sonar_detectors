@@ -10,56 +10,24 @@ SonarBeamVisualization::SonarBeamVisualization()
 {
     bodyState.invalidate();
     newSonarScan = false;
-    currentAngle = 0;
-    featureList = sonarMap.getFeatureListPtr();
 }
 
-/**
- * Creates the main node and attachs the point cloud.
- * 
- * @return main node
- */
 osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
 {
     osg::ref_ptr<osg::Group> mainNode = new osg::Group();
-    // set up point cloud
     pointGeom = new osg::Geometry;
     pointsOSG = new osg::Vec3Array;
     pointGeom->setVertexArray(pointsOSG);
     color = new osg::Vec4Array;
-    color->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    //color->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
     pointGeom->setColorArray(color);
-    pointGeom->setColorBinding(osg::Geometry::BIND_PER_PRIMITIVE_SET);
+    pointGeom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
     pointGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
-    drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, pointsOSG->size() );
+    drawArrays = new osg::DrawArrays( osg::PrimitiveSet::TRIANGLES, 0, pointsOSG->size() );
     pointGeom->addPrimitiveSet(drawArrays.get());
     
-    // create color mapping
-    for(unsigned int i = 0; i < 256; i++)
-    {
-        colorMap[i] = osg::Vec4((i < 80) ? (float)i / 80.0 : 1.0f, 
-                                           (i > 80) ? ((float)i - 80.0) / 80.0 : 0.0f, 
-                                           (i > 160) ? ((float)i - 160.0) / 80.0 : 0.0f,
-                                           1.0f);
-    }
-    
-    // set up beam line
-    beamGeom = new osg::Geometry;
-    beamPos = new osg::Vec3Array;
-    beamPos->push_back(osg::Vec3d(0.0,0.0,0.0));
-    beamPos->push_back(osg::Vec3d(0.0,0.0,0.0));
-    beamGeom->setVertexArray(beamPos);
-    osg::Vec4Array* beam_color = new osg::Vec4Array;
-    beam_color->push_back(osg::Vec4(1.0f, 1.0f, 0.0f, 1.0f));
-    beamGeom->setColorArray(beam_color);
-    beamGeom->setColorBinding(osg::Geometry::BIND_OVERALL);
-    beamGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    beamDrawArray = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, beamPos->size() );
-    beamGeom->addPrimitiveSet(beamDrawArray.get());
-
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(pointGeom.get());
-    geode->addDrawable(beamGeom.get());
     mainNode->addChild(geode);
     return mainNode;
 }
@@ -71,74 +39,90 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
  */
 void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& data)
 {
-    std::vector<sonar_detectors::obstaclePoint> features;
-    for(unsigned int i = 0; i < data.beam.size(); i++)
-    {
-        if(data.beam[i] > 0)
-            features.push_back(sonar_detectors::FeatureExtraction::computeObstaclePoint(i, data, bodyState.orientation));
+    double curStep = fmodf(fabs(lastBeam.bearing.rad - data.bearing.rad),M_PI*2.0);
+    double curNumSteps = (2.0*M_PI)/curStep;
+    if(curStep < 1){
+        if(curNumSteps != numSteps){
+            lastStepsize = curStep;
+            numSteps = curNumSteps;
+            this->data.resize(numSteps+1);
+        }
+        //Make sure we got valid data, and are able to calculate them
+        if(this->data.size() > 40){
+            double currentPos = ((data.bearing.rad+M_PI)/(2.0*M_PI))*numSteps;
+            BeamHelper bm;
+            bm.beam = data;
+            bm.orientation = bodyState;
+            this->data[currentPos] = bm;
+            newSonarScan = true;
+        }
     }
-    sonarMap.addFeature(features, data.bearing.rad, data.time);
-    currentAngle = data.bearing.rad;
-    newSonarScan = true;
+    lastBeam = data;
 }
 
-/**
- * Updates the class with the new sonar data of type SonarScan.
- * 
- * @param data new sonar data
- */
 void SonarBeamVisualization::updateDataIntern(const base::samples::RigidBodyState& data)
 {
     bodyState = data;
 }
 
-/**
- * Main callback method of osg to update all drawings.
- * The method updates the position if there is a new one and
- * adds new sonar beams if there are new ones. If a wall 
- * estimatior is connected the position of the wall will 
- * be updated too.
- * 
- * @param node osg main node
- */
 void SonarBeamVisualization::updateMainNode(osg::Node* node)
 {
     if (newSonarScan)
     {
         newSonarScan = false;
-        // draw sonar data
-        /**
-         * TODO: this is actually very dirty, at each update all lines will be removed and drawn again.
-         * One solution would be to create one osg::DrawArrays per sonar beam and emit the updates by the SonarMap.
-         */ 
+
+        //Trivial check if we have data
+        if(data.size() == 0) return;
+
+        //Cleaning up internal structures
         pointsOSG->clear();
         color->clear();
-        for(std::list< std::vector<sonar_detectors::obstaclePoint> >::const_iterator l_it = featureList->begin(); l_it != featureList->end(); l_it++)
+       
+        //Pre-initialize old heading to prevent artefacts
+        osg::Quat lastBeamOrientation;
+        lastBeamOrientation.makeRotate(data[0].orientation.getYaw() + data[0].beam.bearing.rad+M_PI - lastStepsize/2.0, osg::Vec3d(0,0,1));
+
+        for(std::vector<BeamHelper>::const_iterator it = data.begin(); it != data.end(); it++)
         {
-            for(std::vector<sonar_detectors::obstaclePoint>::const_iterator v_it = l_it->begin(); v_it != l_it->end(); v_it++)
+            osg::Quat currrentBeamOrientation;
+            currrentBeamOrientation.makeRotate(it->orientation.getYaw() + it->beam.bearing.rad+M_PI - lastStepsize/2.0, osg::Vec3d(0,0,1));
+            for(size_t i =0;i<it->beam.beam.size();i++)
             {
-                osg::Vec3d vec(v_it->position.x(), v_it->position.y(), v_it->position.z());
-                pointsOSG->push_back(vec);
-                pointsOSG->push_back(vec + osg::Vec3d(0,0,v_it->value)/51.0);
-                color->push_back(colorMap[v_it->value]);
+                osg::Vec3d currentPoint(it->beam.getSpatialResolution() * i, 0,0);
+                osg::Vec3d nextPoint(it->beam.getSpatialResolution() * (i+1),0,0);
+
+                double v = it->beam.beam[i]/255.0;
+                if(v!= 0.0){
+                    color->push_back(osg::Vec4f(v,0,0,1.0));
+                    color->push_back(osg::Vec4f(v,0,0,1.0));
+                    color->push_back(osg::Vec4f(v,0,0,1.0));
+                    color->push_back(osg::Vec4f(v,0,0,1.0));
+                    color->push_back(osg::Vec4f(v,0,0,1.0));
+                    color->push_back(osg::Vec4f(v,0,0,1.0));
+                }else{
+                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+                    color->push_back(osg::Vec4f(0.0,0.0,0.0,0.0));
+                }
+                
+                //First triangle
+                pointsOSG->push_back(currrentBeamOrientation*currentPoint);
+                pointsOSG->push_back(currrentBeamOrientation*nextPoint);
+                pointsOSG->push_back(lastBeamOrientation*currentPoint);
+                //Second Triangle                
+                pointsOSG->push_back(lastBeamOrientation*currentPoint);
+                pointsOSG->push_back(lastBeamOrientation*nextPoint);
+                pointsOSG->push_back(currrentBeamOrientation*nextPoint);
             }
-            
+            lastBeamOrientation = currrentBeamOrientation;
         }
+            
         drawArrays->setCount(pointsOSG->size());
         pointGeom->setVertexArray(pointsOSG);
         pointGeom->setColorArray(color);
-        
-        // draw current beam position
-        Eigen::Vector3d beam_range(24,0,0);
-        Eigen::Vector3d topPoint(0,0,1);
-        beam_range = bodyState.orientation * beam_range;
-        topPoint = bodyState.orientation * topPoint;
-        Eigen::AngleAxisd rotate(currentAngle,topPoint);
-        beam_range = rotate * beam_range;
-        beamPos->begin()->x() = beam_range.x();
-        beamPos->begin()->y() = beam_range.y();
-        beamPos->begin()->z() = beam_range.z();
-        beamGeom->setVertexArray(beamPos);
     }
 }
 

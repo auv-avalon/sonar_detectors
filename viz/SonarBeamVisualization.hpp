@@ -13,6 +13,12 @@
 namespace vizkit3d
 {
 
+
+struct BeamHelper{
+    base::samples::SonarBeam beam;
+    base::samples::RigidBodyState orientation;
+};
+
 /**
  * Vizkit plugin to visualize sonar data.
  * 
@@ -39,19 +45,17 @@ class SonarBeamVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::S
         void updateDataIntern ( const base::samples::RigidBodyState& data );
         
     private:
+        base::samples::SonarBeam lastBeam;
         base::samples::RigidBodyState bodyState;
+        double lastStepsize;
+        double numSteps;
+        std::vector<BeamHelper> data;
+
         bool newSonarScan;
-        double currentAngle;
-        sonar_detectors::SonarMap< std::vector<sonar_detectors::obstaclePoint> > sonarMap;
-        std::list< std::vector<sonar_detectors::obstaclePoint> > *featureList;
         osg::ref_ptr<osg::Vec3Array> pointsOSG;
         osg::ref_ptr<osg::DrawArrays> drawArrays;
         osg::ref_ptr<osg::Geometry> pointGeom;
-        osg::ref_ptr<osg::Geometry> beamGeom;
-        osg::ref_ptr<osg::Vec3Array> beamPos;
-        osg::ref_ptr<osg::DrawArrays> beamDrawArray;
         osg::ref_ptr<osg::Vec4Array> color;
-        std::map<uint8_t, osg::Vec4> colorMap;
 };
 
 }
