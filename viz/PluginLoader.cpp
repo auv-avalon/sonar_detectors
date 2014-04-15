@@ -21,7 +21,7 @@ namespace eslam {
 	{
 	    QStringList *pluginNames = new QStringList();
 	    pluginNames->push_back("AUVAvalonVisualization");
-	    pluginNames->push_back("SonarBeamVisualization");
+	    pluginNames->push_back("AvalonSonarBeamVisualization");
             pluginNames->push_back("SonarFeatureVisualization");
 	    pluginNames->push_back("SonarDepthMapVisualization");
             pluginNames->push_back("WallVisualization");
@@ -36,9 +36,9 @@ namespace eslam {
 	    {
 		plugin = new vizkit3d::AUVAvalonVisualization();
 	    }
-	    else if (pluginName == "SonarBeamVisualization")
+	    else if (pluginName == "AvalonSonarBeamVisualization")
 	    {
-		plugin = new vizkit3d::SonarBeamVisualization();
+		plugin = new vizkit3d::AvalonSonarBeamVisualization();
 	    }
 	    else if (pluginName == "SonarFeatureVisualization")
             {

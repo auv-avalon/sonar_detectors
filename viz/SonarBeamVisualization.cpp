@@ -6,7 +6,7 @@
 namespace vizkit3d
 {
 
-SonarBeamVisualization::SonarBeamVisualization()
+AvalonSonarBeamVisualization::AvalonSonarBeamVisualization()
 {
     bodyState.invalidate();
     newSonarScan = false;
@@ -19,7 +19,7 @@ SonarBeamVisualization::SonarBeamVisualization()
  * 
  * @return main node
  */
-osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
+osg::ref_ptr< osg::Node > AvalonSonarBeamVisualization::createMainNode()
 {
     osg::ref_ptr<osg::Group> mainNode = new osg::Group();
     // set up point cloud
@@ -69,7 +69,7 @@ osg::ref_ptr< osg::Node > SonarBeamVisualization::createMainNode()
  * 
  * @param data new sonar data
  */
-void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& data)
+void AvalonSonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& data)
 {
     std::vector<sonar_detectors::obstaclePoint> features;
     for(unsigned int i = 0; i < data.beam.size(); i++)
@@ -87,7 +87,7 @@ void SonarBeamVisualization::updateDataIntern(const base::samples::SonarBeam& da
  * 
  * @param data new sonar data
  */
-void SonarBeamVisualization::updateDataIntern(const base::samples::RigidBodyState& data)
+void AvalonSonarBeamVisualization::updateDataIntern(const base::samples::RigidBodyState& data)
 {
     bodyState = data;
 }
@@ -101,7 +101,7 @@ void SonarBeamVisualization::updateDataIntern(const base::samples::RigidBodyStat
  * 
  * @param node osg main node
  */
-void SonarBeamVisualization::updateMainNode(osg::Node* node)
+void AvalonSonarBeamVisualization::updateMainNode(osg::Node* node)
 {
     if (newSonarScan)
     {

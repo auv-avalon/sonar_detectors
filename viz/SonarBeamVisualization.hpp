@@ -1,5 +1,5 @@
-#ifndef SonarBeamVisualization_H
-#define SonarBeamVisualization_H
+#ifndef AvalonSonarBeamVisualization_H
+#define AvalonSonarBeamVisualization_H
 
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <base/samples/sonar_beam.h>
@@ -19,13 +19,13 @@ namespace vizkit3d
  * If the class gets updated with a body state the sonar 
  * data is absolute, otherwise relative.
  */
-class SonarBeamVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::SonarBeam >,
+class AvalonSonarBeamVisualization : public vizkit3d::Vizkit3DPlugin< base::samples::SonarBeam >,
                                public vizkit3d::VizPluginAddType< base::samples::RigidBodyState >
 {    
     Q_OBJECT
     
     public:
-        SonarBeamVisualization();
+        AvalonSonarBeamVisualization();
     
         Q_INVOKABLE void updateSonarBeam( const base::samples::SonarBeam& sample )
         { return updateData(sample); }
