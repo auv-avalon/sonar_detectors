@@ -8,7 +8,6 @@
   <logo></logo>
 
   <depend package="base/types" />
-  <depend package="avalon/avalontools" />
   <depend package="avalon/dsp_acoustics" />
   <depend package="avalon/machine_learning" />
   <depend package="gui/vizkit" optional="1" />

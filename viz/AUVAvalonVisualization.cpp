@@ -1,6 +1,5 @@
 #include "AUVAvalonVisualization.hpp"
 #include <osgDB/ReadFile>
-#include <avalonmath.h>
 #include <osg/ShapeDrawable>
 
 namespace vizkit3d
@@ -42,7 +41,9 @@ osg::ref_ptr< osg::Node > AUVAvalonVisualization::createMainNode()
     
     // adjust position of the avalon model
     avalonPosAdjustment->addChild(avalonModel);
-    base::Quaterniond quat = Avalonmath::eulerToQuaternion(-M_PI / 2.0, 0.0, M_PI / 2.0);
+    base::Quaterniond quat = Eigen::AngleAxisd(-M_PI / 2.0, Eigen::Vector3d::Unit(2)) *
+        Eigen::AngleAxisd(M_PI / 2.0, Eigen::Vector3d::Unit(0)) *
+        Eigen::AngleAxisd(0.0, Eigen::Vector3d::Unit(1));
     osg::Quat orientation = osg::Quat(quat.x(), quat.y(), quat.z(), quat.w());
     avalonPosAdjustment->setAttitude(orientation);
     avalonPosAdjustment->setPosition(osg::Vec3d(0.7,0,0));

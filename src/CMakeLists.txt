@@ -28,5 +28,5 @@ set(HEADERS
 rock_library(sonar_detectors
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
-    DEPS_PKGCONFIG opencv base-types avalontools eigen3 dsp_acoustics machine_learning
+    DEPS_PKGCONFIG opencv base-types eigen3 dsp_acoustics machine_learning
     )
