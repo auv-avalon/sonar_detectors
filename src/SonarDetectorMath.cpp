@@ -189,11 +189,21 @@ double computeDistance(const std::pair< base::Vector3d, base::Vector3d >& line, 
  */
 double computeAngle(const std::pair< base::Vector3d, base::Vector3d >& line1, const std::pair< base::Vector3d, base::Vector3d >& line2)
 {
+    return computeAngle(line1.second, line2.second);
+}
+
+/**
+ * Compute the angle between two 3d vectors.
+ *
+ * @param vec1
+ * @param vec2
+ * @return the angle in rad
+ */
+double computeAngle(const base::Vector3d& vec1, const base::Vector3d& vec2)
+{
     double angle = 0;
-    base::Vector3d r1 = line1.second;
-    base::Vector3d r2 = line2.second;
-    double x = std::abs(r1.x() * r2.x() + r1.y() * r2.y() + r1.z() * r2.z());
-    double y = length(r1) * length(r2);
+    double x = std::abs(vec1.x() * vec2.x() + vec1.y() * vec2.y() + vec1.z() * vec2.z());
+    double y = length(vec1) * length(vec2);
     if (y > 0)
     {
         angle = acos(x/y);
