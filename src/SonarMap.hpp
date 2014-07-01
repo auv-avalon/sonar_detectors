@@ -68,7 +68,7 @@ public:
             {
                 angle_it--;
                 feature_it--;
-                while(angle_it != angles.end() && angle <= angle_it->first)
+                while(angle_it != angles.end() && angle_it != angles.begin() && angle <= angle_it->first)
                 {
                     removeCurrentEntry();
                     feature_it--;
