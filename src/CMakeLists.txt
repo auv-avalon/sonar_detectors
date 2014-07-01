@@ -7,6 +7,7 @@ set(SOURCES
         SonarEnvironmentModel.cpp
         PointClustering.cpp
         MWallEstimation.cpp
+        WallAngleEstimation.cpp
 )
 
 set(HEADERS
@@ -23,6 +24,7 @@ set(HEADERS
         SonarWallMap.hpp
         MWallEstimation.hpp
         SonarDepthMap.hpp
+        WallAngleEstimation.hpp
 )
 
 rock_library(sonar_detectors
