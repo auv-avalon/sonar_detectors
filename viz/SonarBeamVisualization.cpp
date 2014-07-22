@@ -8,7 +8,7 @@ namespace vizkit3d
 
 AvalonSonarBeamVisualization::AvalonSonarBeamVisualization()
 {
-    bodyState.invalidate();
+    bodyState.initUnknown();
     newSonarScan = false;
     currentAngle = 0;
     featureList = sonarMap.getFeatureListPtr();

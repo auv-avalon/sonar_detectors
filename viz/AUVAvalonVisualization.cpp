@@ -10,7 +10,7 @@ AUVAvalonVisualization::AUVAvalonVisualization()
     VizPluginRubyMethod(AUVAvalonVisualization, bool, showDesiredModelPosition)
     VizPluginRubyMethod(AUVAvalonVisualization, bool, desiredModelPositionRelZ)
     VizPluginRubyMethod(AUVAvalonVisualization, bool, desiredModelPositionRelHeading)
-    rbs.invalidate();
+    rbs.initUnknown();
     showDesiredModel = false;
     desiredModel_rel_z = false;
     desiredModel_rel_heading = true;
