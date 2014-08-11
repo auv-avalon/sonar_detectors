@@ -7,6 +7,9 @@ Vizkit::UiLoader.register_3d_plugin_for('AvalonSonarBeamVisualization', "/base/s
 Vizkit::UiLoader.register_3d_plugin('SonarFeatureVisualization', 'sonar', 'SonarFeatureVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('SonarFeatureVisualization', "/base/samples/Pointcloud", :updatePointCloud )
 
+Vizkit::UiLoader.register_3d_plugin('SonarObstaclesVisualization', 'sonar', 'SonarObstaclesVisualization')
+Vizkit::UiLoader.register_3d_plugin_for('SonarObstaclesVisualization', "sonar_detectors/ObstacleFeatures", :updateObstacles )
+
 Vizkit::UiLoader.register_3d_plugin('SonarDepthMapVisualization', 'sonar', 'SonarDepthMapVisualization')
 Vizkit::UiLoader.register_3d_plugin_for('SonarDepthMapVisualization', "/base/samples/Pointcloud", :updatePointCloud )
 

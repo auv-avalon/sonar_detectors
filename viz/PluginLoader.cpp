@@ -2,6 +2,7 @@
 #include "AUVAvalonVisualization.hpp"
 #include "SonarBeamVisualization.hpp"
 #include "SonarFeatureVisualization.hpp"
+#include "SonarObstaclesVisualization.hpp"
 #include "SonarDepthMapVisualization.hpp"
 #include "WallVisualization.hpp"
 
@@ -19,11 +20,12 @@ namespace eslam {
 	*/
         virtual QStringList* getAvailablePlugins() const
 	{
-	    QStringList *pluginNames = new QStringList();
-	    pluginNames->push_back("AUVAvalonVisualization");
-	    pluginNames->push_back("AvalonSonarBeamVisualization");
+            QStringList *pluginNames = new QStringList();
+            pluginNames->push_back("AUVAvalonVisualization");
+            pluginNames->push_back("AvalonSonarBeamVisualization");
             pluginNames->push_back("SonarFeatureVisualization");
-	    pluginNames->push_back("SonarDepthMapVisualization");
+            pluginNames->push_back("SonarObstaclesVisualization");
+            pluginNames->push_back("SonarDepthMapVisualization");
             pluginNames->push_back("WallVisualization");
 
 	    return pluginNames;
@@ -51,6 +53,10 @@ namespace eslam {
              else if (pluginName == "WallVisualization")
             {
                 plugin = new vizkit3d::WallVisualization();
+            }
+            else if (pluginName == "SonarObstaclesVisualization")
+            {
+              plugin = new vizkit3d::SonarObstaclesVisualization();
             }
 	      
 	    if (plugin) 

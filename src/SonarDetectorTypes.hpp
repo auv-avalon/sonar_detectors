@@ -26,7 +26,23 @@ struct obstaclePoint
     obstaclePoint()
     : position(0,0,0), value(0), time(base::Time::now()), distance(0){}
 };
-    
+  
+
+struct ObstacleFeature
+{
+  uint32_t range;
+  double confidence;  
+};
+
+struct ObstacleFeatures
+{
+  base::Time time;
+  double angle;
+  std::vector<ObstacleFeature> features;
+ 
+};
+
+
 }
 
 
