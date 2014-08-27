@@ -42,6 +42,32 @@ struct ObstacleFeatures
  
 };
 
+  struct SonarFeature{
+    base::Vector2d position;
+    base::Vector2d span;
+    double avg_confidence;
+    double sum_confidence;
+    double confidence;
+    int number_of_cells;
+    
+    /**
+     * < operator for sorting of features. ATTENTION: operator is reversed, to achive a reversed sorting
+     */
+    bool operator< ( SonarFeature const& rhs) const
+    { 
+      return ( confidence > rhs.confidence  ); 
+    }    
+    
+    
+  };
+  
+  struct SonarFeatures{
+    
+    base::Time time;
+    std::vector<SonarFeature> features;
+    
+  };
+
 
 }
 

@@ -4,6 +4,7 @@
 #include "SonarFeatureVisualization.hpp"
 #include "SonarObstaclesVisualization.hpp"
 #include "SonarDepthMapVisualization.hpp"
+#include "SonarDetectorVisualization.hpp"
 #include "WallVisualization.hpp"
 
 namespace eslam {
@@ -26,6 +27,7 @@ namespace eslam {
             pluginNames->push_back("SonarFeatureVisualization");
             pluginNames->push_back("SonarObstaclesVisualization");
             pluginNames->push_back("SonarDepthMapVisualization");
+            pluginNames->push_back("SonarDetectorVisualization");
             pluginNames->push_back("WallVisualization");
 
 	    return pluginNames;
@@ -57,6 +59,10 @@ namespace eslam {
             else if (pluginName == "SonarObstaclesVisualization")
             {
               plugin = new vizkit3d::SonarObstaclesVisualization();
+            }
+            else if (pluginName == "SonarDetectorVisualization")
+            {
+              plugin = new vizkit3d::SonarDetectorVisualization();
             }
 	      
 	    if (plugin) 
