@@ -23,6 +23,9 @@ class AvalonSonarBeamVisualization : public vizkit3d::Vizkit3DPlugin< base::samp
                                public vizkit3d::VizPluginAddType< base::samples::RigidBodyState >
 {    
     Q_OBJECT
+
+    Q_PROPERTY(bool colorize READ isColorized WRITE setColorize)
+    Q_PROPERTY(double gain READ getGain WRITE setGain)
     
     public:
         AvalonSonarBeamVisualization();
@@ -31,6 +34,12 @@ class AvalonSonarBeamVisualization : public vizkit3d::Vizkit3DPlugin< base::samp
         { return updateData(sample); }
         Q_INVOKABLE void updateOrientation( const base::samples::RigidBodyState& orientation )
         { return updateData(orientation); }
+        
+    public slots:
+        bool isColorized() const {return show_color;}
+	void setColorize(bool enabled) {show_color = enabled; emit propertyChanged("colorize");}
+        double getGain() const {return gain_value;}
+        void setGain(double value) {gain_value = value; emit propertyChanged("gain");}
         
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
@@ -51,7 +60,8 @@ class AvalonSonarBeamVisualization : public vizkit3d::Vizkit3DPlugin< base::samp
         osg::ref_ptr<osg::Vec3Array> beamPos;
         osg::ref_ptr<osg::DrawArrays> beamDrawArray;
         osg::ref_ptr<osg::Vec4Array> color;
-        std::map<uint8_t, osg::Vec4> colorMap;
+	double gain_value;
+	bool show_color;
 };
 
 }

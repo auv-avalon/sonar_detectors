@@ -13,6 +13,7 @@ AvalonSonarBeamVisualization::AvalonSonarBeamVisualization()
     newSonarScan = false;
     currentAngle = 0;
     featureList = sonarMap.getFeatureListPtr();
+    gain_value = 3.0;
 }
 
 /**
@@ -111,12 +112,22 @@ void AvalonSonarBeamVisualization::updateMainNode(osg::Node* node)
             {
                 osg::Vec3d vec(v_it->position.x(), v_it->position.y(), v_it->position.z());
                 pointsOSG->push_back(vec);
-                pointsOSG->push_back(vec + osg::Vec3d(0,0,v_it->value)/51.0);
+                pointsOSG->push_back(vec + osg::Vec3d(0.0,0.0,((double)v_it->value)/255.0)*gain_value);
+		
+		if(show_color)
+		{
 		    osg::Vec4 col(0,0,0,1);
 		    vizkit3d::hslToRgb(((float)v_it->value)/255.0f, 1.0, 0.6, col.x(), col.y(), col.z());
 		    color->push_back(col);
 		    color->push_back(col);
 		    pointGeom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+		}
+		else
+		{
+		    osg::Vec4 col(1,0,0,1);
+		    color->push_back(col);
+		    pointGeom->setColorBinding(osg::Geometry::BIND_OVERALL);
+		}
             }
             
         }
