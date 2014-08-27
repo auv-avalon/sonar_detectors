@@ -2,6 +2,7 @@
 #include <osg/Geode>
 #include <sonar_detectors/FeatureExtraction.hpp>
 #include <base/eigen.h>
+#include <vizkit3d/ColorConversionHelper.hpp>
 
 namespace vizkit3d
 {
@@ -33,15 +34,6 @@ osg::ref_ptr< osg::Node > AvalonSonarBeamVisualization::createMainNode()
     pointGeom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF); 
     drawArrays = new osg::DrawArrays( osg::PrimitiveSet::LINES, 0, pointsOSG->size() );
     pointGeom->addPrimitiveSet(drawArrays.get());
-    
-    // create color mapping
-    for(unsigned int i = 0; i < 256; i++)
-    {
-        colorMap[i] = osg::Vec4((i < 80) ? (float)i / 80.0 : 1.0f, 
-                                           (i > 80) ? ((float)i - 80.0) / 80.0 : 0.0f, 
-                                           (i > 160) ? ((float)i - 160.0) / 80.0 : 0.0f,
-                                           1.0f);
-    }
     
     // set up beam line
     beamGeom = new osg::Geometry;
@@ -120,7 +112,11 @@ void AvalonSonarBeamVisualization::updateMainNode(osg::Node* node)
                 osg::Vec3d vec(v_it->position.x(), v_it->position.y(), v_it->position.z());
                 pointsOSG->push_back(vec);
                 pointsOSG->push_back(vec + osg::Vec3d(0,0,v_it->value)/51.0);
-                color->push_back(colorMap[v_it->value]);
+		    osg::Vec4 col(0,0,0,1);
+		    vizkit3d::hslToRgb(((float)v_it->value)/255.0f, 1.0, 0.6, col.x(), col.y(), col.z());
+		    color->push_back(col);
+		    color->push_back(col);
+		    pointGeom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
             }
             
         }
