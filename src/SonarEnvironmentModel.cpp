@@ -59,7 +59,7 @@ void SonarEnvironmentModel::updateNoiseDistributionValues(const double beam_angl
     getExpectedObstaclePositions(beam_angle, pos_auv, pos_ground, pos_surface);
 
     // correct device noise sigma
-    if(pos_auv >= 0)
+    if(pos_auv >= 0 && pos_auv < beam.size())
     {
         std::vector<float>::const_iterator device_noise_new_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_auv, beam.end() - (beam.size() * 0.7), find_first_min_windowsize);
         if(device_noise_new_local_min != beam.begin())
@@ -85,7 +85,7 @@ void SonarEnvironmentModel::updateNoiseDistributionValues(const double beam_angl
     }
     
     // correct surface gaussian sigma
-    if(pos_surface >= 0)
+    if(pos_surface >= 0 && pos_surface < beam.size())
     {
         gaussian_surface_u = (float)pos_surface;
         std::vector<float>::const_iterator gaussian_surface_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_surface, beam.end(), find_first_min_windowsize);
@@ -101,7 +101,7 @@ void SonarEnvironmentModel::updateNoiseDistributionValues(const double beam_angl
     }
     
     // correct ground gaussian sigma
-    if(pos_ground >= 0)
+    if(pos_ground >= 0 && pos_ground < beam.size())
     {
         gaussian_ground_u = (float)pos_ground;
         std::vector<float>::const_iterator gaussian_ground_local_min = dsp::findFirstRightLocalMin<std::vector<float>::const_iterator>(beam.begin() + pos_ground, beam.end(), find_first_min_windowsize);
