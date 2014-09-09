@@ -23,7 +23,7 @@ namespace sonar_detectors
         double getActualDistance();
         
     protected:
-        virtual void updateFeatureIntern(const base::samples::LaserScan &feature);
+        virtual void updateFeatureIntern(const base::samples::LaserScan &feature, const Eigen::Affine3d &featureInOdometry);
         
     private:
         void checkTimeout();

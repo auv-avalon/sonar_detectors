@@ -51,15 +51,15 @@ bool WallAngleEstimation::getDistanceToWall(double& distance)
     return true;
 }
 
-void WallAngleEstimation::updateFeatureIntern(const base::samples::LaserScan& feature)
+void WallAngleEstimation::updateFeatureIntern(const base::samples::LaserScan& feature, const Eigen::Affine3d &featureInOdometry)
 {
     std::vector<Eigen::Vector3d> featureVector;
-    feature.convertScanToPointCloud(featureVector);
+    feature.convertScanToPointCloud(featureVector, featureInOdometry);
     
     if(featureVector.size() > 0)
     {
         // add new feature
-        sonarMap.addFeature(featureVector.front(), feature.start_angle, feature.time);
+        sonarMap.addFeature(featureVector.front(), feature.start_angle + global_heading.getRad(), feature.time);
 	
 	if(switched_scan_direction || switched_zone)
 	{

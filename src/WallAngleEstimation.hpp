@@ -26,7 +26,7 @@ protected:
     };
     
 protected:
-    virtual void updateFeatureIntern(const base::samples::LaserScan& feature);
+    virtual void updateFeatureIntern(const base::samples::LaserScan& feature, const Eigen::Affine3d &featureInOdometry);
     bool estimateLine(const std::vector<base::Vector3d>& point_cloud, std::pair<base::Vector3d, base::Vector3d>& line);
     bool computeMean(WallCandidate& mean);
     

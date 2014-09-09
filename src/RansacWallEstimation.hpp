@@ -20,7 +20,7 @@ namespace sonar_detectors
         void setRansacParameters(double ransac_threshold, double ransac_fit_rate, double dbscan_epsilon);
         
     protected:
-        virtual void updateFeatureIntern(const base::samples::LaserScan& feature);
+        virtual void updateFeatureIntern(const base::samples::LaserScan& feature, const Eigen::Affine3d &featureInOdometry);
         
     private:
         sonar_detectors::SonarMap< base::Vector3d > sonarMap;

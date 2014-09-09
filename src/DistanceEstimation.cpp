@@ -15,7 +15,7 @@ DistanceEstimation::~DistanceEstimation()
     
 }
 
-void DistanceEstimation::updateFeatureIntern(const base::samples::LaserScan &feature)
+void DistanceEstimation::updateFeatureIntern(const base::samples::LaserScan &feature, const Eigen::Affine3d &featureInOdometry)
 {
     checkTimeout();
     

@@ -12,7 +12,12 @@ namespace sonar_detectors
     class SonarEstimation
     {
     public:
-        void updateFeature(const base::samples::LaserScan &feature, const base::Angle &global_heading = base::Angle::fromRad(0.0))
+	void updateFeature(const base::samples::LaserScan &feature, const base::Angle &global_heading)
+	{
+	    updateFeature(feature, Eigen::Affine3d(Eigen::AngleAxisd(global_heading.getRad(), Eigen::Vector3d::UnitZ())));
+	}
+	
+        void updateFeature(const base::samples::LaserScan &feature, const Eigen::Affine3d &featureInOdometry = Eigen::Affine3d::Identity())
         {
             // check if vector is empty
             if(feature.ranges.empty())
@@ -66,9 +71,12 @@ namespace sonar_detectors
 	    }
 	    
             // set global angles
-            this->global_heading = global_heading;
+            this->global_heading = base::Angle::fromRad(base::getYaw(base::Orientation(featureInOdometry.linear())));
             this->global_start_angle = start_angle + global_heading;
             this->global_end_angle = end_angle + global_heading;
+	    
+	    updateFeatureIntern(feature, featureInOdometry);
+	    /*
             if(global_heading.rad != 0.0)
             {
                 base::samples::LaserScan global_feature;
@@ -86,6 +94,7 @@ namespace sonar_detectors
             {
                 updateFeatureIntern(feature);
             }
+            */
         };
         
         void setEstimationZone(const base::Angle &start_angle, const base::Angle &end_angle)
@@ -116,7 +125,7 @@ namespace sonar_detectors
 	    last_local_angle.rad = base::NaN<double>();
         };
         
-        virtual void updateFeatureIntern(const base::samples::LaserScan &feature) = 0;
+        virtual void updateFeatureIntern(const base::samples::LaserScan &feature, const Eigen::Affine3d &featureInOdometry) = 0;
         
     protected:
         base::Angle global_heading;

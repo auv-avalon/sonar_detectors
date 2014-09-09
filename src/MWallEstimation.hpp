@@ -22,7 +22,7 @@ namespace sonar_detectors
         void setParameters(double line_fit_threshold, double min_fit_rate, double dbscan_epsilon, double angular_resolution);
         
     protected:
-        virtual void updateFeatureIntern(const base::samples::LaserScan& feature);
+        virtual void updateFeatureIntern(const base::samples::LaserScan& feature, const Eigen::Affine3d &featureInOdometry);
         
     private:
         struct wallCandidate

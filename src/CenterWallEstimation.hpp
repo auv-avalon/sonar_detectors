@@ -25,7 +25,7 @@ namespace sonar_detectors
         std::vector<base::Vector3d> getPointCloud() const;
         
     protected:
-        virtual void updateFeatureIntern(const base::samples::LaserScan& feature);
+        virtual void updateFeatureIntern(const base::samples::LaserScan& feature, const Eigen::Affine3d &featureInOdometry);
         void getSubPointsFromMap(std::vector<base::Vector3d> &points, const base::Angle &start_angle, const base::Angle &end_angle);
         base::Vector3d calcCenterOfGeometry(const std::vector<base::Vector3d> &points);
         void getSubPointCount(unsigned int &count, const base::Angle &start_angle, const base::Angle &end_angle);

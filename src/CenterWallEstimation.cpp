@@ -21,10 +21,10 @@ CenterWallEstimation::~CenterWallEstimation()
 
 }
 
-void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& feature)
+void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& feature, const Eigen::Affine3d &featureInOdometry)
 {
     std::vector<Eigen::Vector3d> featureVector;
-    feature.convertScanToPointCloud(featureVector);
+    feature.convertScanToPointCloud(featureVector, featureInOdometry);
     base::Angle range = global_start_angle - global_end_angle;
     if(range.rad == 0)
     {
@@ -48,7 +48,7 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         {
             // TODO use the remission value here in some rate
             it->z() = 1.0;
-            feature_map.insert(std::make_pair<base::Angle, Eigen::Vector3d>(base::Angle::fromRad(feature.start_angle), *it));
+            feature_map.insert(std::make_pair<base::Angle, Eigen::Vector3d>(base::Angle::fromRad(feature.start_angle + global_heading.getRad()), *it));
         }
         
         // seperate scan points into left and right
