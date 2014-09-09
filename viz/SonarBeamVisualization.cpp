@@ -14,6 +14,7 @@ AvalonSonarBeamVisualization::AvalonSonarBeamVisualization()
     currentAngle = 0;
     featureList = sonarMap.getFeatureListPtr();
     gain_value = 3.0;
+    show_color = true;
 }
 
 /**
