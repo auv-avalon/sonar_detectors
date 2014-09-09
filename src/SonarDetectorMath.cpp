@@ -213,6 +213,21 @@ double computeAngle(const base::Vector3d& vec1, const base::Vector3d& vec2)
 }
 
 /**
+ * Compute the rotation of a 2d vector to the unit vector (1,0).
+ *
+ * @param vec
+ * @return the rotation in rad
+ */
+double computeRotation(const base::Vector2d& vec)
+{
+    base::Vector2d norm_vec = vec.normalized();
+    double angle = acos(norm_vec.x());
+    if(norm_vec.y() < 0.0)
+	angle *= -1.0;
+    return angle;
+}
+
+/**
  * Compute the length of a vector.
  *
  * @param vec the vector

@@ -21,6 +21,7 @@ namespace sonar_detectors
     double computeDistance(const std::pair<base::Vector3d, base::Vector3d>& line, const base::Vector3d& point);
     double computeAngle(const std::pair< base::Vector3d, base::Vector3d >& line1, const std::pair< base::Vector3d, base::Vector3d >& line2);
     double computeAngle(const base::Vector3d& vec1, const base::Vector3d& vec2);
+    double computeRotation(const base::Vector2d& vec);
     double length(const base::Vector3d& vec);
     double length(const base::Vector2d& vec);
     base::Vector3d computIntersection(const std::pair<base::Vector3d, base::Vector3d>& line, const base::Vector3d& point);
