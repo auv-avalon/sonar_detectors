@@ -8,6 +8,7 @@ set(SOURCES
         PointClustering.cpp
         MWallEstimation.cpp
         WallAngleEstimation.cpp
+        StructureEstimation.cpp
 )
 
 set(HEADERS
@@ -25,10 +26,12 @@ set(HEADERS
         MWallEstimation.hpp
         SonarDepthMap.hpp
         WallAngleEstimation.hpp
+        StructureEstimation.hpp
 )
 
 rock_library(sonar_detectors
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
     DEPS_PKGCONFIG opencv base-types eigen3 dsp_acoustics machine_learning
+    DEPS_CMAKE LAPACK
     )

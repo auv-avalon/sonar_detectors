@@ -10,6 +10,7 @@
   <depend package="base/types" />
   <depend package="auv_avalon/dsp_acoustics" />
   <depend package="auv_avalon/machine_learning" />
+  <depend package="slam/mtk" />
   <depend package="gui/vizkit" optional="1" />
 
   <versioncontrol type="git" url="" />
