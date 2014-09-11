@@ -33,6 +33,8 @@ class StructureEstimation : public SonarEstimation
 {
 public:
     StructureEstimation();
+    
+    void resetCandidateCounter() {candidate_update_count = 0;}
 
     void setAUVInOdometry(const Eigen::Affine3d &auvInOdometry) {this->auvInOdometry = auvInOdometry;}
     void setProcessNoiseCovariance(const Eigen::Matrix2d& noise_cov) {process_noise_cov = noise_cov;}
