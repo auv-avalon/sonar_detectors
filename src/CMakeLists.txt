@@ -27,6 +27,7 @@ set(HEADERS
         SonarDepthMap.hpp
         WallAngleEstimation.hpp
         StructureEstimation.hpp
+	WallAngleEstimationCandidate.hpp
 )
 
 rock_library(sonar_detectors

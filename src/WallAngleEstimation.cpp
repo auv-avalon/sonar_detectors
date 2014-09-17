@@ -66,6 +66,7 @@ void WallAngleEstimation::updateFeatureIntern(const base::samples::LaserScan& fe
 	    // get sub features in estimation zone
 	    std::vector<base::Vector3d> featureCloud;
 	    sonarMap.getSubFeatureVector(featureCloud, global_start_angle.rad, global_end_angle.rad);
+	    debug_feature_cloud = featureCloud;
 	    
 	    std::pair<base::Vector3d, base::Vector3d> line;
 	    if(estimateLine(featureCloud, line))
@@ -133,7 +134,7 @@ bool WallAngleEstimation::estimateLine(const std::vector< base::Vector3d >& poin
     return false;
 }
 
-bool WallAngleEstimation::computeMean(WallAngleEstimation::WallCandidate& mean)
+bool WallAngleEstimation::computeMean(WallCandidate& mean)
 {
     mean.angle_to_wall.rad = 0.0;
     mean.wall_angle.rad = 0.0;

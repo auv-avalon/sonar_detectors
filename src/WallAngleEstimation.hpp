@@ -3,6 +3,7 @@
 
 #include <sonar_detectors/SonarEstimation.hpp>
 #include <sonar_detectors/SonarMap.hpp>
+#include <sonar_detectors/WallAngleEstimationCandidate.hpp>
 
 namespace sonar_detectors
 {
@@ -16,14 +17,8 @@ public:
     bool getWallAngle(base::Angle& angle);
     bool getAngleToWall(base::Angle& angle);
     bool getDistanceToWall(double& distance);
-    
-protected:
-    struct WallCandidate
-    {
-	base::Angle angle_to_wall;
-	base::Angle wall_angle;
-	double wall_distance;
-    };
+    const std::vector< WallCandidate >& getCandidates() {return wall_candidates;}
+    const std::vector<base::Vector3d>& getFeatures() {return debug_feature_cloud;}
     
 protected:
     virtual void updateFeatureIntern(const base::samples::LaserScan& feature, const Eigen::Affine3d &featureInOdometry);
@@ -32,6 +27,7 @@ protected:
     
 protected:
     sonar_detectors::SonarMap< base::Vector3d > sonarMap;
+    std::vector<base::Vector3d> debug_feature_cloud;
     std::vector< WallCandidate > wall_candidates;
     unsigned wall_candidate_count;
     unsigned min_feature_count;
