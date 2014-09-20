@@ -2,7 +2,7 @@
 #define SonarFeatureVisualization_H
 
 #include <vizkit3d/Vizkit3DPlugin.hpp>
-#include <base/samples/pointcloud.h>
+#include <base/samples/Pointcloud.hpp>
 
 #include <osg/Node>
 #include <osg/Geometry>
