@@ -165,7 +165,7 @@ int SonarEnvironmentModel::getAUVModelConstrains(const double beam_angle, double
         double dist_diff = avalon_model[i+1].y() - avalon_model[i].y();
         distance = (dist_diff / angle_diff) * reduced_beam_angle;
         distance = distance + avalon_model[i].y();
-        angle_to_edge_distance.insert(std::make_pair<double, double>(positive_beam_angle, distance));
+        angle_to_edge_distance.insert(std::pair<double, double>(positive_beam_angle, distance));
     }
     else
     {

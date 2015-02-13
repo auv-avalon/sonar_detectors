@@ -48,7 +48,7 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
         {
             // TODO use the remission value here in some rate
             it->z() = 1.0;
-            feature_map.insert(std::make_pair<base::Angle, Eigen::Vector3d>(base::Angle::fromRad(feature.start_angle + global_heading.getRad()), *it));
+            feature_map.insert(std::pair<base::Angle, Eigen::Vector3d>(base::Angle::fromRad(feature.start_angle + global_heading.getRad()), *it));
         }
         
         // seperate scan points into left and right
@@ -117,7 +117,7 @@ void CenterWallEstimation::updateFeatureIntern(const base::samples::LaserScan& f
             if(direction_vector.x() == 0.0 && direction_vector.y() == 0.0)
                 direction_vector = right_center;
             direction_vector.z() = 0.0;
-            wall.first = computIntersection(std::make_pair<base::Vector3d, base::Vector3d>(support_vector, direction_vector), base::Vector3d(0,0,0));
+            wall.first = computIntersection(std::pair<base::Vector3d, base::Vector3d>(support_vector, direction_vector), base::Vector3d(0,0,0));
             wall.second = direction_vector;
         }
     }
