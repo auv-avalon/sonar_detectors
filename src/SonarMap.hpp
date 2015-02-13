@@ -31,7 +31,7 @@ public:
         else
         {
             // handle switch between -PI and PI
-            if (abs(angle_it->first - angle) > M_PI)
+            if (fabs(angle_it->first - angle) > M_PI)
             {
                 if (angle >= 0) 
                 {

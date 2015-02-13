@@ -74,7 +74,7 @@ void WallAngleEstimation::updateFeatureIntern(const base::samples::LaserScan& fe
 		WallCandidate candidate;
 		candidate.angle_to_wall = base::Angle::fromRad(computeRotation(line.first.block(0,0,2,1)));
 		base::Angle local_wall_angle = base::Angle::fromRad(computeRotation(line.second.block(0,0,2,1)));
-		if(abs(local_wall_angle.rad) > M_PI_2)
+		if(fabs(local_wall_angle.rad) > M_PI_2)
 		    local_wall_angle += base::Angle::fromRad(M_PI);
 		candidate.wall_angle = local_wall_angle;
 		candidate.wall_distance = length(line.first);
